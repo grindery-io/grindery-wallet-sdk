@@ -5,10 +5,10 @@ Grindery Wallet SDK is a library that provides a reliable, secure, and seamless 
 - [Installing SDK](#installing-sdk)
 - [Basic usage](#basic-usage)
 - [Injected Ethereum Provider](#injected-ethereum-provider)
-  - [eth_requestAccounts](#method_eth_requestAccounts)
+  - [eth_requestAccounts](#method_eth_requestaccounts)
   - [eth_accounts](#method_eth_accounts)
   - [wallet_pair](#method_wallet_pair)
-  - [eth_sendTransaction](#method_eth_sendTransaction)
+  - [eth_sendTransaction](#method_eth_sendtransaction)
   - [personal_sign](#method_personal_sign)
 - [Example](#example-implementation)
 
@@ -54,7 +54,7 @@ If the user has multiple wallet browser extensions installed that inject ethereu
 
 ---
 
-#### Method: <a id="method_eth_requestAccounts">`eth_requestAccounts`</a>
+#### Method: <a id="method_eth_requestaccounts">`eth_requestAccounts`</a>
 
 Connect a dApp to the Grindery Wallet.
 
@@ -103,7 +103,7 @@ Connect new dApp, or verify existing connection.
 
 ---
 
-#### Method: <a id="method_eth_sendTransaction">`eth_sendTransaction`</a>
+#### Method: <a id="method_eth_sendtransaction">`eth_sendTransaction`</a>
 
 **Request params:**
 
