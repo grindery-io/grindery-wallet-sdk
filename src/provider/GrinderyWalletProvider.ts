@@ -1,7 +1,6 @@
 import { ProviderError } from './ProviderError';
 import { ProviderLocalStorage } from './ProviderLocalStorage';
 import {
-  AppData,
   ProviderInterface,
   ProviderMethods,
   RequestArguments,
@@ -14,10 +13,6 @@ export class GrinderyWalletProvider extends ProviderLocalStorage
 
   constructor() {
     super();
-    this.appData = {
-      name: document.title,
-      uri: `gw:${btoa(window.location.origin)}`,
-    };
 
     this.injectProvider();
   }
@@ -45,41 +40,44 @@ export class GrinderyWalletProvider extends ProviderLocalStorage
     }
   }
 
-  private accessToken: string = '';
   private accounts: string[] = [];
-  private appData: AppData;
   private chainId: string = '';
 
   /* Avaialble `request` methods */
   private methods: ProviderMethods = {
     eth_accounts: async (_?: RequestArgumentsParams): Promise<string[]> => {
-      if (!this.accessToken || this.accounts.length === 0) {
+      if (!this.getStorageValue('accessToken') || this.accounts.length === 0) {
         throw new ProviderError('Unauthorized', 4900);
       }
       return this.accounts;
     },
     eth_requestAccounts: async (
-      params?: RequestArgumentsParams
+      params?: {
+        userId?: string;
+      } & RequestArgumentsParams
     ): Promise<string[]> => {
-      if (this.accessToken && this.accounts.length > 0) {
+      if (this.getStorageValue('accessToken') && this.accounts.length > 0) {
         return this.accounts;
       }
       try {
-        const result = await this.sendGrinderyRpcApiRequest<{
+        const result = await this.request<{
           success: boolean;
           address?: string;
-          sessionToken?: string;
-        }>('pair', {
-          ...params,
-          uri: this.appData.uri,
-          userId: this.getStorageValue('userId'),
+          accessToken?: string;
+          connectUrl?: string;
+        }>({
+          method: 'wallet_pair',
+          params: { userId: params?.userId || this.getStorageValue('userId') },
         });
+
         if (
           result.success &&
           result.address &&
-          new RegExp(/^0x[0-9a-fA-F]{40}$/).test(result.address)
+          new RegExp(/^0x[0-9a-fA-F]{40}$/).test(result.address) &&
+          result.accessToken
         ) {
           this.setStorageValue('address', result.address);
+          this.setStorageValue('accessToken', result.accessToken);
           this.accounts = [result.address];
           this.emit('accountsChanged', { accounts: this.accounts });
           return this.accounts;
@@ -89,14 +87,40 @@ export class GrinderyWalletProvider extends ProviderLocalStorage
         throw this.createProviderRpcError(error);
       }
     },
+    wallet_pair: async (
+      params?: {
+        userId?: string;
+      } & RequestArgumentsParams
+    ): Promise<{
+      success: boolean;
+      address?: string;
+      accessToken?: string;
+      connectUrl?: string;
+    }> => {
+      return await this.sendGrinderyRpcApiRequest<{
+        success: boolean;
+        address?: string;
+        accessToken?: string;
+        connectUrl?: string;
+      }>('wallet_pair', params);
+    },
     eth_sendTransaction: async (
       params?: RequestArgumentsParams
     ): Promise<string[]> => {
-      if (!this.accessToken || this.accounts.length === 0) {
+      if (!this.getStorageValue('accessToken') || this.accounts.length === 0) {
         throw new ProviderError('Unauthorized', 4900);
       }
       return await this.sendGrinderyRpcApiRequest<string[]>(
         'eth_sendTransaction',
+        params
+      );
+    },
+    personal_sign: async (params?: RequestArgumentsParams): Promise<string> => {
+      if (!this.getStorageValue('accessToken') || this.accounts.length === 0) {
+        throw new ProviderError('Unauthorized', 4900);
+      }
+      return await this.sendGrinderyRpcApiRequest<string>(
+        'personal_sign',
         params
       );
     },
@@ -159,6 +183,9 @@ export class GrinderyWalletProvider extends ProviderLocalStorage
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: this.getStorageValue('accessToken')
+            ? `Bearer ${this.getStorageValue('accessToken')}`
+            : '',
         },
         body: JSON.stringify({
           jsonrpc: '2.0',

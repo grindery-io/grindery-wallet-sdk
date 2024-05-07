@@ -5,6 +5,12 @@ Grindery Wallet SDK is a library that provides a reliable, secure, and seamless 
 - [Installing SDK](#installing-sdk)
 - [Basic usage](#basic-usage)
 - [Injected Ethereum Provider](#injected-ethereum-provider)
+  - [eth_requestAccounts](#method_eth_requestAccounts)
+  - [eth_accounts](#method_eth_accounts)
+  - [wallet_pair](#method_wallet_pair)
+  - [eth_sendTransaction](#method_eth_sendTransaction)
+  - [personal_sign](#method_personal_sign)
+- [Example](#example-implementation)
 
 ## Installing SDK
 
@@ -18,13 +24,21 @@ Place the script before the `</body>` tag, using this code:
 
 Once the script is loaded, a `window.Grindery.WalletSDK` object will become available.
 
-> More documentation coming soon.
+### Wallet SDK properties
+
+---
+
+#### WalletSDK.provider
+
+Provides access to [Grindery Wallet Injected Ethereum Provider](#injected-ethereum-provider) API as specified by [EIP-1193](https://eips.ethereum.org/EIPS/eip-1193).
+
+> More SDK documentation coming soon.
 
 ## Injected Ethereum Provider
 
-Grindery Wallet SDK automatically injects an Ethereum Provider, as specified by [EIP-1193](https://eips.ethereum.org/EIPS/eip-1193).
+Grindery Wallet SDK automatically injects an Ethereum Provider,
 
-Provider can be accessed via `window.ethereum`.
+Provider can be accessed via `window.ethereum` or `window.Grindery.WalletSDK.provider`.
 
 ### Multiple injected providers
 
@@ -115,3 +129,7 @@ Connect new dApp, or verify existing connection.
 **Response result:** String. The signature.
 
 ---
+
+## Example implementation
+
+See an example implementation in [example/index.html](example/index.html)

@@ -7,6 +7,10 @@ export interface ProviderConnectInfo {
 
 export type RequestArgumentsParams = readonly unknown[] | object;
 
+export type ProviderMethodEthRequestAccountsParams = {
+  userId?: string;
+} & RequestArgumentsParams;
+
 export interface RequestArguments {
   readonly method: string;
   readonly params?: RequestArgumentsParams;
