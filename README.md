@@ -16,16 +16,20 @@ Place the script before the `</body>` tag, using this code:
 
 Once the script is connected, a `window.Grindery.WalletSDK` object will become available.
 
-See avaialble SDK properties and methods [here](DOCUMENTATION.md).
+See available SDK properties and methods [here](DOCUMENTATION.md).
 
-### Injected provider
+### Injected ethereum provider
 
 Grindery Wallet SDK automatically injects Ethereum Provider, that can be accessed via `window.ethereum`.
 
 #### Multiple injected providers
 
-If the user has multiple wallet browser extensions installed that inject ethereum providers (e.g., MetaMask or Coinbase Wallet), Grindery Wallet's injected provider will construct a "multiprovider" array at `window.ethereum.providers` containing the injected provider from each wallet. Coinbase Wallet can be identified in this array by the `isGrinderyWallet` property.
+If the user has multiple wallet browser extensions installed that inject ethereum providers (e.g., MetaMask or Coinbase Wallet), Grindery Wallet's injected provider will construct a "multiprovider" array at `window.ethereum.providers` containing the injected provider from each wallet. Grindery Wallet can be identified in this array by the `isGrinderyWallet` property.
 
 ## Developing
 
 See (DEVELOPMENT.md)[DEVELOPMENT.md].
+
+## License
+
+MIT
