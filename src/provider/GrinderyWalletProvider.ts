@@ -88,12 +88,17 @@ export class GrinderyWalletProvider extends ProviderLocalStorage
             });
 
             this.setStorageValue('sessionId', pairResult.sessionId);
+            this.setStorageValue('pairingToken', '');
+            this.setStorageValue('connectUrl', '');
+            this.setStorageValue('connectUrlBrowser', '');
 
             if (!pairResult.sessionId) {
               throw new ProviderError('Pairing failed', 4900);
             }
+
             return [];
           } catch (error) {
+            this.setStorageValue('sessionId', '');
             this.setStorageValue('pairingToken', '');
             this.setStorageValue('connectUrl', '');
             this.setStorageValue('connectUrlBrowser', '');

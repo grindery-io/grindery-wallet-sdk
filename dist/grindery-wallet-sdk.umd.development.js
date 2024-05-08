@@ -531,7 +531,7 @@
                     // skip failed request and continue with pairing
                   case 10:
                     if (!_this.isWalletConnectionPending()) {
-                      _context.next = 27;
+                      _context.next = 31;
                       break;
                     }
                     _context.prev = 11;
@@ -549,37 +549,41 @@
                   case 15:
                     pairResult = _context.sent;
                     _this.setStorageValue('sessionId', pairResult.sessionId);
+                    _this.setStorageValue('pairingToken', '');
+                    _this.setStorageValue('connectUrl', '');
+                    _this.setStorageValue('connectUrlBrowser', '');
                     if (pairResult.sessionId) {
-                      _context.next = 19;
+                      _context.next = 22;
                       break;
                     }
                     throw new ProviderError('Pairing failed', 4900);
-                  case 19:
-                    return _context.abrupt("return", []);
                   case 22:
-                    _context.prev = 22;
+                    return _context.abrupt("return", []);
+                  case 25:
+                    _context.prev = 25;
                     _context.t1 = _context["catch"](11);
+                    _this.setStorageValue('sessionId', '');
                     _this.setStorageValue('pairingToken', '');
                     _this.setStorageValue('connectUrl', '');
                     _this.setStorageValue('connectUrlBrowser', '');
                     // skip failed request and continue with pairing
-                  case 27:
-                    _context.prev = 27;
-                    _context.next = 30;
+                  case 31:
+                    _context.prev = 31;
+                    _context.next = 34;
                     return _this.request({
                       method: 'checkout_requestPairing',
                       params: {
                         appId: _this.appId
                       }
                     });
-                  case 30:
+                  case 34:
                     result = _context.sent;
                     if (!(!result.pairingToken || !result.connectUrl)) {
-                      _context.next = 33;
+                      _context.next = 37;
                       break;
                     }
                     throw new ProviderError('Pairing failed', 4900);
-                  case 33:
+                  case 37:
                     _this.setStorageValue('pairingToken', result.pairingToken);
                     _this.setStorageValue('connectUrl', result.connectUrl);
                     _this.setStorageValue('connectUrlBrowser', result.connectUrlBrowser);
@@ -587,23 +591,23 @@
                       connectUrl: result.connectUrl,
                       connectUrlBrowser: result.connectUrlBrowser
                     });
-                    _context.next = 39;
+                    _context.next = 43;
                     return _this.request({
                       method: 'checkout_waitForPairingResult',
                       params: {
                         pairingToken: result.pairingToken
                       }
                     });
-                  case 39:
+                  case 43:
                     _pairResult = _context.sent;
                     _this.setStorageValue('sessionId', _pairResult.sessionId);
                     if (_pairResult.sessionId) {
-                      _context.next = 43;
+                      _context.next = 47;
                       break;
                     }
                     throw new ProviderError('Pairing failed', 4900);
-                  case 43:
-                    _context.next = 45;
+                  case 47:
+                    _context.next = 49;
                     return _this.sendGrinderyRpcApiRequest('checkout_request', {
                       sessionId: _pairResult.sessionId,
                       scope: _this.chainId,
@@ -612,17 +616,17 @@
                         params: params
                       }
                     });
-                  case 45:
+                  case 49:
                     return _context.abrupt("return", _context.sent);
-                  case 48:
-                    _context.prev = 48;
-                    _context.t2 = _context["catch"](27);
+                  case 52:
+                    _context.prev = 52;
+                    _context.t2 = _context["catch"](31);
                     throw _this.createProviderRpcError(_context.t2);
-                  case 51:
+                  case 55:
                   case "end":
                     return _context.stop();
                 }
-              }, _callee, null, [[1, 7], [11, 22], [27, 48]]);
+              }, _callee, null, [[1, 7], [11, 25], [31, 52]]);
             }));
             function execute(_x) {
               return _execute.apply(this, arguments);

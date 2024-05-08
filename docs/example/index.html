@@ -22,7 +22,14 @@
           target="_blank"
           >Telegram Mini App</a
         >
-        powered by <a href="#sdk" rel="noopener">Grindery Wallet SDK</a> and
+        powered by
+        <a
+          href="https://grindery-io.github.io/grindery-wallet-sdk"
+          rel="noopener"
+          target="_blank"
+          >Grindery Wallet SDK</a
+        >
+        and
         <a href="https://www.enso.finance/" rel="noopener" target="_blank"
           >Enso API</a
         >.&nbsp;
@@ -71,11 +78,18 @@
               if (
                 window.Telegram &&
                 window.Telegram.WebApp &&
-                window.Telegram.WebApp.openLink
+                window.Telegram.WebApp.openTelegramLink
               ) {
                 window.Telegram.WebApp.openLink(data.connectUrlBrowser);
+                if (
+                  window.Telegram &&
+                  window.Telegram.WebApp &&
+                  window.Telegram.WebApp.close
+                ) {
+                  window.Telegram.WebApp.close();
+                }
               } else {
-                window.open(data.connectUrl, '_self');
+                window.open(data.connectUrl, '_blank');
               }
             });
 
