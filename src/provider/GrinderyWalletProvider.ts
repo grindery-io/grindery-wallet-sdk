@@ -12,8 +12,16 @@ import {
   RequestArgumentsParams,
 } from './types';
 
+/**
+ * @summary The Grindery Wallet Ethereum Injected Provider Class.
+ * @extends ProviderLocalStorage
+ * @implements ProviderInterface
+ */
 export class GrinderyWalletProvider extends ProviderLocalStorage
   implements ProviderInterface {
+  /**
+   * @summary Indicates that the provider is a Grindery Wallet.
+   */
   public readonly isGrinderyWallet: boolean = true;
 
   constructor() {
@@ -21,14 +29,23 @@ export class GrinderyWalletProvider extends ProviderLocalStorage
     this.injectProvider();
   }
 
+  /**
+   * @returns {boolean} True if the provider is connected to the server.
+   */
   public isConnected(): boolean {
     return !!this.chainId;
   }
 
+  /**
+   * @returns {boolean} True if the provider is connected to the server and the Grindery Wallet.
+   */
   public isWalletConnected(): boolean {
     return this.isConnected() && !!this.getStorageValue('sessionId');
   }
 
+  /**
+   * @returns {boolean} True if the provider is connected to the server and the Grindery Wallet pairing is in progress (pending).
+   */
   public isWalletConnectionPending(): boolean {
     return this.isConnected() && !!this.getStorageValue('pairingToken');
   }
@@ -57,11 +74,25 @@ export class GrinderyWalletProvider extends ProviderLocalStorage
     }
   }
 
+  /**
+   * @summary The application ID.
+   */
   private appId: string = window.location.origin || 'localhost';
+
+  /**
+   * @summary The chain ID in CAIP-2 format; e.g. "eip155:1".
+   */
   private chainId: string = 'eip155:137';
 
-  /* Avaialble provider `request` methods */
+  /**
+   * @summary The list of supported provider methods.
+   */
   private methods: ProviderMethods = {
+    /**
+     * @summary Connect a dApp to the Grindery Wallet.
+     * @since 0.1.0
+     * @returns {Promise<string[]>} The list of user wallets' addresses.
+     */
     eth_requestAccounts: {
       sessionRequired: false,
       pairingTokenRequired: false,
@@ -150,6 +181,13 @@ export class GrinderyWalletProvider extends ProviderLocalStorage
         }
       },
     },
+
+    /**
+     * @summary Request pairing with the wallet.
+     * @since 0.1.0
+     * @param {string} appId Required. The application ID.
+     * @returns {Promise<ProviderRequestPairingResult>} The pairing request result.
+     */
     checkout_requestPairing: {
       sessionRequired: false,
       pairingTokenRequired: false,
@@ -161,6 +199,14 @@ export class GrinderyWalletProvider extends ProviderLocalStorage
         >('checkout_requestPairing', params);
       },
     },
+
+    /**
+     * @summary Wait for pairing requst to be approved by user and get the result.
+     * @since 0.1.0
+     * @param {string} pairingToken Required. The pairing token.
+     * @param {number} timeout Optional. Result polling timeout.
+     * @returns {Promise<ProviderPairingResult>} - The pairing result.
+     */
     checkout_waitForPairingResult: {
       sessionRequired: false,
       pairingTokenRequired: true,
