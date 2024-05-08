@@ -71,7 +71,6 @@ export interface ProviderInterface extends ProviderEventEmitter {
 export type ProviderStorageKey =
   | 'pairingToken'
   | 'sessionId'
-  | 'address'
   | 'connectUrl'
   | 'connectUrlBrowser';
 

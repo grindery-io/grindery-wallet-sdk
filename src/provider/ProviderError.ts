@@ -1,3 +1,8 @@
+/**
+ * @summary Error class for GrinderyWalletProvider
+ * @since 0.1.0
+ * @extends Error
+ */
 export class ProviderError extends Error {
   name: string = 'GrinderyWalletProviderError';
   code?: number;

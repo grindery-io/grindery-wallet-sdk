@@ -82,8 +82,10 @@
                   .request({ method: 'eth_requestAccounts' })
                   .then(res => {
                     console.log('eth_requestAccounts', res);
+                    const address = provider.getAddress();
                     el.innerHTML = `
                         <p class="text-center mb-4">Grindery Wallet Connected!</p>
+                        <p class="text-center mb-4">${address}</p>
                       `;
                   })
                   .catch(error => {

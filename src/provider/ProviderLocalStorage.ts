@@ -11,6 +11,7 @@ const LOCALSTORAGE_KEY = 'GrinderyWalletProvider';
 export class ProviderLocalStorage extends ProviderEventEmitter {
   /**
    * @summary Gets the value of the storage by the key
+   * @protected
    * @param {ProviderStorageKey} key Provider storage key
    * @returns {string} The value of the storage by the key
    */
@@ -21,8 +22,10 @@ export class ProviderLocalStorage extends ProviderEventEmitter {
 
   /**
    * @summary Sets the value of the storage by the key
+   * @protected
    * @param {ProviderStorageKey} key Provider storage key
    * @param {string} value The value to set
+   * @returns {void}
    */
   protected setStorageValue(key: ProviderStorageKey, value: string): void {
     const storage = this.getStorage();
@@ -30,6 +33,19 @@ export class ProviderLocalStorage extends ProviderEventEmitter {
     this.saveStorage(storage);
   }
 
+  /**
+   * @summary Clears the storage
+   * @protected
+   * @returns {void}
+   */
+  protected clearStorage(): void {
+    this.saveStorage({});
+  }
+
+  /**
+   * @summary Gets the provider storage
+   * @returns {ProviderStorage} The provider storage
+   */
   private getStorage(): ProviderStorage {
     try {
       return JSON.parse(
@@ -41,6 +57,10 @@ export class ProviderLocalStorage extends ProviderEventEmitter {
     }
   }
 
+  /**
+   * @summary Saves the provider storage
+   * @param {ProviderStorage} storage Provider storage object
+   */
   private saveStorage(storage: ProviderStorage): void {
     localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(storage));
   }

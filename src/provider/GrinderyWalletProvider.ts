@@ -23,20 +23,18 @@ export class GrinderyWalletProvider extends Provider
     super();
 
     this.registerProviderMethods({
-      /**
-       * @summary Connect a dApp to the Grindery Wallet.
-       * @since 0.1.0
-       * @returns {Promise<string[]>} The list of user wallets' addresses.
-       */
       eth_requestAccounts: {
         sessionRequired: false,
         execute: async (params?: RequestArgumentsParams): Promise<string[]> => {
           if (this.isWalletConnected()) {
             try {
-              return await this.request<string[]>({
+              const accounts = await this.request<string[]>({
                 method: 'eth_accounts',
                 params: params || [],
               });
+              this.address = accounts[0] || '';
+              this.emit('accountsChanged', { accounts });
+              return accounts;
             } catch (error) {
               this.setStorageValue('sessionId', '');
               // skip failed request and continue with pairing
@@ -55,21 +53,20 @@ export class GrinderyWalletProvider extends Provider
                 pairingToken: this.getStorageValue('pairingToken'),
               });
 
+              this.clearStorage();
               this.setStorageValue('sessionId', pairResult.session.sessionId);
-              this.setStorageValue('pairingToken', '');
-              this.setStorageValue('connectUrl', '');
-              this.setStorageValue('connectUrlBrowser', '');
 
               if (!pairResult.session.sessionId) {
                 throw new ProviderError('Pairing failed', 4900);
               }
 
+              const accounts =
+                pairResult.session?.namespaces?.[`eip155`]?.accounts || [];
+              this.address = accounts[0] || '';
+              this.emit('accountsChanged', { accounts });
               return [];
             } catch (error) {
-              this.setStorageValue('sessionId', '');
-              this.setStorageValue('pairingToken', '');
-              this.setStorageValue('connectUrl', '');
-              this.setStorageValue('connectUrlBrowser', '');
+              this.clearStorage();
               // skip failed request and continue with pairing
             }
           }
@@ -103,31 +100,16 @@ export class GrinderyWalletProvider extends Provider
             this.setStorageValue('pairingToken', '');
             this.setStorageValue('connectUrl', '');
             this.setStorageValue('connectUrlBrowser', '');
-            if (pairResult.session.namespaces[`eip155`].accounts.length > 0) {
-              return pairResult.session.namespaces[`eip155`].accounts;
-            }
-            return await this.sendGrinderyRpcApiRequest<string[]>(
-              'checkout_request',
-              {
-                sessionId: pairResult.session.sessionId,
-                scope: this.chainId,
-                request: {
-                  method: 'eth_accounts',
-                  params: [],
-                },
-              }
-            );
+            const accounts =
+              pairResult.session?.namespaces?.[`eip155`]?.accounts || [];
+            this.address = accounts[0] || '';
+            this.emit('accountsChanged', { accounts });
+            return accounts;
           } catch (error) {
             throw this.createProviderRpcError(error);
           }
         },
       },
-
-      /**
-       * @summary Get a list of user wallets' addresses.
-       * @since 0.1.0
-       * @returns {Promise<string[]>} The list of user wallets' addresses.
-       */
       eth_accounts: {
         sessionRequired: true,
         execute: async (params?: RequestArgumentsParams): Promise<string[]> => {
@@ -139,9 +121,12 @@ export class GrinderyWalletProvider extends Provider
             if (!requestToken) {
               throw new ProviderError('No request token', 4900);
             }
-            return await this.waitGrinderyRpcProviderRequest<string[]>(
-              requestToken
-            );
+            const accounts = await this.waitGrinderyRpcProviderRequest<
+              string[]
+            >(requestToken);
+            this.address = accounts[0] || '';
+            this.emit('accountsChanged', { accounts });
+            return accounts;
           } catch (error) {
             throw this.createProviderRpcError(error);
           }

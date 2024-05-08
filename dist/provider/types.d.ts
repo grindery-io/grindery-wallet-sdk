@@ -43,7 +43,7 @@ export interface ProviderInterface extends ProviderEventEmitter {
     removeListener(event: 'accountsChanged', listener: (accounts: string[]) => void): this;
     removeListener(event: 'message', listener: (message: ProviderMessage) => void): this;
 }
-export declare type ProviderStorageKey = 'pairingToken' | 'sessionId' | 'address' | 'connectUrl' | 'connectUrlBrowser';
+export declare type ProviderStorageKey = 'pairingToken' | 'sessionId' | 'connectUrl' | 'connectUrlBrowser';
 export declare type ProviderStorage = {
     [key in ProviderStorageKey]?: string;
 };

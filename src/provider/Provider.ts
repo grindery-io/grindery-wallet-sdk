@@ -9,14 +9,25 @@ import {
   RequestArgumentsParams,
 } from './types';
 
+/**
+ * @summary The provider class
+ * @since 0.1.0
+ * @extends ProviderLocalStorage
+ */
 export class Provider extends ProviderLocalStorage {
   constructor() {
     super();
 
     this.injectProvider();
+
+    addEventListener('load', () => {
+      this.emit('connect', { chainId: this.chainId });
+      this.restoreSession();
+    });
   }
 
   /**
+   * @public
    * @returns {boolean} True if the provider is connected to the server.
    */
   public isConnected(): boolean {
@@ -24,6 +35,7 @@ export class Provider extends ProviderLocalStorage {
   }
 
   /**
+   * @public
    * @returns {boolean} True if the provider is connected to the server and the Grindery Wallet.
    */
   public isWalletConnected(): boolean {
@@ -31,14 +43,42 @@ export class Provider extends ProviderLocalStorage {
   }
 
   /**
+   * @public
    * @returns {boolean} True if the provider is connected to the server and the Grindery Wallet pairing is in progress (pending).
    */
   public isWalletConnectionPending(): boolean {
     return this.isConnected() && !!this.getStorageValue('pairingToken');
   }
 
+  /**
+   * @summary Gets the connected chain ID in hex format
+   * @public
+   * @returns {string} The chain ID in hex format
+   */
+  public getChain(): string {
+    return `0x${parseFloat(this.chainId.split(':')[1]).toString(16)}`;
+  }
+
+  /**
+   * @summary Gets the connected user's wallet address
+   * @public
+   * @returns {string} The ethereum wallet address
+   */
+  public getAddress(): string {
+    return this.address.split(':')[1];
+  }
+
+  /**
+   * @summary Sends a request to the provider
+   * @public
+   * @param {RequestArguments} args Request arguments
+   * @param {string} args.method The method name
+   * @param {RequestArgumentsParams} args.params The method parameters
+   * @returns {T} The result of the request
+   */
   public async request<T>({ method, params }: RequestArguments): Promise<T> {
-    if (method !== 'wallet_ping' && !this.chainId) {
+    if (!this.chainId) {
+      this.emit('disconnect', new ProviderError('Disconnected', 4900));
       throw new ProviderError('Disconnected', 4900);
     }
     if (!this.methods[method]) {
@@ -58,23 +98,45 @@ export class Provider extends ProviderLocalStorage {
 
   /**
    * @summary The application ID.
+   * @protected
    */
   protected appId: string = window.location.href;
 
   /**
    * @summary The chain ID in CAIP-2 format; e.g. "eip155:1".
+   * @protected
    */
   protected chainId: string = 'eip155:137';
 
   /**
    * @summary The list of supported provider methods.
+   * @protected
    */
   protected methods: ProviderMethods = {};
 
+  /**
+   * @summary The user's wallet address.
+   * @protected
+   */
+  protected address: string = '';
+
+  /**
+   * @summary Registers the provider methods.
+   * @protected
+   * @param {ProviderMethods} methods A map of supported provider methods.
+   * @returns {void}
+   */
   protected registerProviderMethods(methods: ProviderMethods): void {
     this.methods = methods;
   }
 
+  /**
+   * @summary Sends a provider request to the Grindery RPC API.
+   * @protected
+   * @param {GrinderyRpcProviderRequestMethodName} method Provider request method name
+   * @param {Array} params Provider request parameters
+   * @returns {ProviderRequestResult} The request token to use in the `waitGrinderyRpcProviderRequest` method
+   */
   protected async sendGrinderyRpcProviderRequest(
     method: GrinderyRpcProviderRequestMethodName,
     params?: readonly unknown[]
@@ -99,6 +161,13 @@ export class Provider extends ProviderLocalStorage {
     }
   }
 
+  /**
+   * @summary Waits for the result of the provider request.
+   * @protected
+   * @param {string} requestToken A token to identify provider request. Recieved in the results of `sendGrinderyRpcProviderRequest` method.
+   * @param {number} timeout Optional. The time in milliseconds to wait for the request result. Default is 30000.
+   * @returns The result of the provider request
+   */
   protected async waitGrinderyRpcProviderRequest<T>(
     requestToken: string,
     timeout?: number
@@ -119,6 +188,13 @@ export class Provider extends ProviderLocalStorage {
     }
   }
 
+  /**
+   * @summary Sends a request to the Grindery Walletconnect RPC API.
+   * @protected
+   * @param {GrinderyRpcMethodName} method Request method name
+   * @param {RequestArgumentsParams} params Request parameters
+   * @returns {T} The result of the request
+   */
   protected async sendGrinderyRpcApiRequest<T>(
     method: GrinderyRpcMethodName,
     params?: RequestArgumentsParams
@@ -149,7 +225,13 @@ export class Provider extends ProviderLocalStorage {
     }
   }
 
-  protected createProviderRpcError(error: unknown): ProviderError {
+  /**
+   * @summary Creates a provider error from an unknown error
+   * @protected
+   * @param {unknown} error Optional. Error object.
+   * @returns {ProviderError} The provider error
+   */
+  protected createProviderRpcError(error?: unknown): ProviderError {
     let errorResponse: ProviderError;
     if (error instanceof ProviderError) {
       errorResponse = new ProviderError(error.message || 'Unknown error');
@@ -165,6 +247,30 @@ export class Provider extends ProviderLocalStorage {
     return errorResponse;
   }
 
+  /**
+   * @summary Restores the session if session Id is stored in the local storage
+   * @private
+   * @returns {void}
+   */
+  private async restoreSession(): Promise<void> {
+    const sessionId = this.getStorageValue('sessionId');
+    if (sessionId) {
+      try {
+        await this.request<string[]>({
+          method: 'eth_requestAccounts',
+        });
+      } catch (error) {
+        this.address = '';
+        this.clearStorage();
+      }
+    }
+  }
+
+  /**
+   * @summary Injects the provider into the window object
+   * @private
+   * @returns {void}
+   */
   private injectProvider(): void {
     if (!window.ethereum) {
       window.ethereum = this;
@@ -178,9 +284,5 @@ export class Provider extends ProviderLocalStorage {
         window.ethereum.providers = [window.ethereum, this];
       }
     }
-
-    addEventListener('load', () => {
-      this.emit('connect', { chainId: this.chainId });
-    });
   }
 }
