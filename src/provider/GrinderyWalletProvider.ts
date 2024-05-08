@@ -32,7 +32,7 @@ export class GrinderyWalletProvider extends Provider
                 method: 'eth_accounts',
                 params: params || [],
               });
-              this.address = accounts[0] || '';
+              this.accounts = accounts;
               this.emit('accountsChanged', { accounts });
               return accounts;
             } catch (error) {
@@ -62,7 +62,7 @@ export class GrinderyWalletProvider extends Provider
 
               const accounts =
                 pairResult.session?.namespaces?.[`eip155`]?.accounts || [];
-              this.address = accounts[0] || '';
+              this.accounts = accounts;
               this.emit('accountsChanged', { accounts });
               return [];
             } catch (error) {
@@ -102,7 +102,7 @@ export class GrinderyWalletProvider extends Provider
             this.setStorageValue('connectUrlBrowser', '');
             const accounts =
               pairResult.session?.namespaces?.[`eip155`]?.accounts || [];
-            this.address = accounts[0] || '';
+            this.accounts = accounts;
             this.emit('accountsChanged', { accounts });
             return accounts;
           } catch (error) {
@@ -124,7 +124,7 @@ export class GrinderyWalletProvider extends Provider
             const accounts = await this.waitGrinderyRpcProviderRequest<
               string[]
             >(requestToken);
-            this.address = accounts[0] || '';
+            this.accounts = accounts;
             this.emit('accountsChanged', { accounts });
             return accounts;
           } catch (error) {

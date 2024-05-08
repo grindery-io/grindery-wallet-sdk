@@ -21,7 +21,7 @@ export class Provider extends ProviderLocalStorage {
     this.injectProvider();
 
     addEventListener('load', () => {
-      this.emit('connect', { chainId: this.chainId });
+      this.emit('connect', { chainId: this.getChain() });
       this.restoreSession();
     });
   }
@@ -65,7 +65,7 @@ export class Provider extends ProviderLocalStorage {
    * @returns {string} The ethereum wallet address
    */
   public getAddress(): string {
-    return this.address.split(':')[1];
+    return this.accounts[0]?.split(':')[1] || '';
   }
 
   /**
@@ -115,10 +115,10 @@ export class Provider extends ProviderLocalStorage {
   protected methods: ProviderMethods = {};
 
   /**
-   * @summary The user's wallet address.
+   * @summary The user's wallet addresses list.
    * @protected
    */
-  protected address: string = '';
+  protected accounts: string[] = [];
 
   /**
    * @summary Registers the provider methods.
@@ -260,7 +260,7 @@ export class Provider extends ProviderLocalStorage {
           method: 'eth_requestAccounts',
         });
       } catch (error) {
-        this.address = '';
+        this.accounts = [];
         this.clearStorage();
       }
     }
