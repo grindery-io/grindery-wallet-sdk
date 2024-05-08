@@ -1,12 +1,10 @@
 # Grindery Wallet SDK
 
-<img src="cover.png" alt="Grindery Wallet Beta" width="320" />
+<img src="https://grindery-io.github.io/grindery-wallet-sdk/cover.png" alt="Grindery Wallet Beta" width="320" />
 
 Grindery Wallet SDK is a library that provides a reliable, secure, and seamless connection from your dapp to the Grindery Smart-Wallet.
 
 Grindery Wallet SDK enables your dapp to provide a seamless user experience for Grindery users, without relying on third-party libraries. By integrating your dapp using the SDK, millions of Telegram users can connect to their preferred Grindery Smart-Wallet.
-
-The SDK uses the Grindery Wallet Ethereum provider as specified by [EIP-1193](https://eips.ethereum.org/EIPS/eip-1193).
 
 ## Table of Contents:
 
@@ -39,7 +37,7 @@ The SDK uses the Grindery Wallet Ethereum provider as specified by [EIP-1193](ht
 
 # Example implementation
 
-See an example implementation [here](example/index.html).
+See an example implementation here: https://grindery-io.github.io/grindery-wallet-sdk/example.
 
 # Installing SDK
 
@@ -55,21 +53,21 @@ Place the script before the closing `</head>` tag, using this code:
 
 Once the script is loaded, a `window.Grindery.WalletSDK` object will become available.
 
-## Wallet SDK Class
+## Wallet SDK properties
 
 ---
 
 ### WalletSDK.provider
 
-Provides access to [Grindery Wallet Injected Ethereum Provider](#injected-ethereum-provider) API as specified by [EIP-1193](https://eips.ethereum.org/EIPS/eip-1193).
+Provides access to [Grindery Wallet Ethereum Provider API](#injected-ethereum-provider).
 
-> More SDK documentation coming soon.
+> ⚠️ More SDK documentation coming soon.
 
 # Injected Ethereum Provider
 
-Grindery Wallet SDK automatically injects an Ethereum Provider,
+Grindery Wallet SDK automatically injects Ethereum Provider API as specified by [EIP-1193](https://eips.ethereum.org/EIPS/eip-1193).
 
-Provider can be accessed via `window.ethereum` or `window.Grindery.WalletSDK.provider`.
+Provider API can be accessed via `window.ethereum` or `window.Grindery.WalletSDK.provider`.
 
 ## Multiple injected providers
 
