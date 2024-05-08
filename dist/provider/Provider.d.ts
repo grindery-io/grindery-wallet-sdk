@@ -60,10 +60,10 @@ export declare class Provider extends ProviderLocalStorage {
      */
     protected methods: ProviderMethods;
     /**
-     * @summary The user's wallet address.
+     * @summary The user's wallet addresses list.
      * @protected
      */
-    protected address: string;
+    protected accounts: string[];
     /**
      * @summary Registers the provider methods.
      * @protected

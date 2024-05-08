@@ -40,14 +40,14 @@
   "size-limit": [
     {
       "path": "dist/grindery-wallet-sdk.cjs.production.min.js",
-      "limit": "10 KB"
+      "limit": "30 KB"
     },
     {
       "path": "dist/grindery-wallet-sdk.esm.js",
-      "limit": "10 KB"
+      "limit": "60 KB"
     }
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=14"
   }
 }

@@ -575,14 +575,14 @@ var Provider = /*#__PURE__*/function (_ProviderLocalStorage) {
      */
     _this.methods = {};
     /**
-     * @summary The user's wallet address.
+     * @summary The user's wallet addresses list.
      * @protected
      */
-    _this.address = '';
+    _this.accounts = [];
     _this.injectProvider();
     addEventListener('load', function () {
       _this.emit('connect', {
-        chainId: _this.chainId
+        chainId: _this.getChain()
       });
       _this.restoreSession();
     });
@@ -625,7 +625,8 @@ var Provider = /*#__PURE__*/function (_ProviderLocalStorage) {
    * @returns {string} The ethereum wallet address
    */;
   _proto.getAddress = function getAddress() {
-    return this.address.split(':')[1];
+    var _this$accounts$;
+    return ((_this$accounts$ = this.accounts[0]) == null ? void 0 : _this$accounts$.split(':')[1]) || '';
   }
   /**
    * @summary Sends a request to the provider
@@ -899,7 +900,7 @@ var Provider = /*#__PURE__*/function (_ProviderLocalStorage) {
           case 7:
             _context5.prev = 7;
             _context5.t0 = _context5["catch"](2);
-            this.address = '';
+            this.accounts = [];
             this.clearStorage();
           case 11:
           case "end":
@@ -966,7 +967,7 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_Provider) {
                   });
                 case 4:
                   accounts = _context.sent;
-                  _this.address = accounts[0] || '';
+                  _this.accounts = accounts;
                   _this.emit('accountsChanged', {
                     accounts: accounts
                   });
@@ -1001,7 +1002,7 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_Provider) {
                   throw new ProviderError('Pairing failed', 4900);
                 case 23:
                   _accounts = ((_pairResult$session = pairResult.session) == null || (_pairResult$session = _pairResult$session.namespaces) == null || (_pairResult$session = _pairResult$session["eip155"]) == null ? void 0 : _pairResult$session.accounts) || [];
-                  _this.address = _accounts[0] || '';
+                  _this.accounts = _accounts;
                   _this.emit('accountsChanged', {
                     accounts: _accounts
                   });
@@ -1049,7 +1050,7 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_Provider) {
                   _this.setStorageValue('connectUrl', '');
                   _this.setStorageValue('connectUrlBrowser', '');
                   _accounts2 = ((_pairResult$session2 = _pairResult.session) == null || (_pairResult$session2 = _pairResult$session2.namespaces) == null || (_pairResult$session2 = _pairResult$session2["eip155"]) == null ? void 0 : _pairResult$session2.accounts) || [];
-                  _this.address = _accounts2[0] || '';
+                  _this.accounts = _accounts2;
                   _this.emit('accountsChanged', {
                     accounts: _accounts2
                   });
@@ -1094,7 +1095,7 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_Provider) {
                   return _this.waitGrinderyRpcProviderRequest(requestToken);
                 case 9:
                   accounts = _context2.sent;
-                  _this.address = accounts[0] || '';
+                  _this.accounts = accounts;
                   _this.emit('accountsChanged', {
                     accounts: accounts
                   });
