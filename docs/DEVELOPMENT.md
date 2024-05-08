@@ -5,19 +5,19 @@ The SDK library compiled using [TSDX tool](https://tsdx.io/).
 ## Table of Contents:
 
 - [Commands](#commands)
-  - [Configuration](#configuration)
-    - [Jest](#jest)
+- [Configuration](#configuration)
+  - [Jest](#jest)
     - [Bundle Analysis](#bundle-analysis)
-      - [Setup Files](#setup-files)
-    - [Rollup](#rollup)
-    - [TypeScript](#typescript)
-  - [Continuous Integration](#continuous-integration)
-    - [GitHub Actions](#github-actions)
-  - [Optimizations](#optimizations)
-  - [Module Formats](#module-formats)
-  - [Named Exports](#named-exports)
-  - [Including Styles](#including-styles)
-  - [Publishing to NPM](#publishing-to-npm)
+    - [Setup Files](#setup-files)
+  - [Rollup](#rollup)
+  - [TypeScript](#typescript)
+- [Continuous Integration](#continuous-integration)
+  - [GitHub Actions](#github-actions)
+- [Optimizations](#optimizations)
+- [Module Formats](#module-formats)
+- [Named Exports](#named-exports)
+- [Including Styles](#including-styles)
+- [Publishing to NPM](#publishing-to-npm)
 
 ## Commands
 

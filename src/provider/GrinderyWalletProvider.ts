@@ -2,10 +2,12 @@ import { ProviderError } from './ProviderError';
 import { ProviderLocalStorage } from './ProviderLocalStorage';
 import {
   GrinderyRpcMethodName,
+  GrinderyRpcProviderRequestMethodName,
   ProviderInterface,
   ProviderMethods,
   ProviderPairingResult,
   ProviderRequestPairingResult,
+  ProviderRequestResult,
   RequestArguments,
   RequestArgumentsParams,
 } from './types';
@@ -173,98 +175,72 @@ export class GrinderyWalletProvider extends ProviderLocalStorage
     eth_accounts: {
       sessionRequired: true,
       pairingTokenRequired: false,
-      execute: async (params?: RequestArgumentsParams): Promise<string[]> => {
-        return await this.sendGrinderyRpcApiRequest<string[]>(
-          'checkout_request',
-          {
-            sessionId: this.getStorageValue('sessionId'),
-            scope: this.chainId,
-            request: {
-              method: 'eth_accounts',
-              params: params || [],
-            },
-          }
+      execute: async (
+        params?: RequestArgumentsParams
+      ): Promise<ProviderRequestResult> => {
+        return await this.sendGrinderyRpcProviderRequest(
+          'eth_accounts',
+          params ? (Array.isArray(params) ? params : [params]) : []
         );
       },
     },
     eth_sendTransaction: {
       sessionRequired: true,
       pairingTokenRequired: false,
-      execute: async (params?: RequestArgumentsParams): Promise<string[]> => {
+      execute: async (
+        params?: RequestArgumentsParams
+      ): Promise<ProviderRequestResult> => {
         if (!this.isWalletConnected()) {
           throw new ProviderError('Unauthorized', 4900);
         }
-        return await this.sendGrinderyRpcApiRequest<string[]>(
-          'checkout_request',
-          {
-            sessionId: this.getStorageValue('sessionId'),
-            scope: this.chainId,
-            request: {
-              method: 'eth_sendTransaction',
-              params: params || [],
-            },
-          }
+        return await this.sendGrinderyRpcProviderRequest(
+          'eth_sendTransaction',
+          params ? (Array.isArray(params) ? params : [params]) : []
         );
       },
     },
     personal_sign: {
       sessionRequired: true,
       pairingTokenRequired: false,
-      execute: async (params?: RequestArgumentsParams): Promise<string> => {
+      execute: async (
+        params?: Partial<RequestArgumentsParams>
+      ): Promise<{ requestToken: string }> => {
         if (!this.isWalletConnected()) {
           throw new ProviderError('Unauthorized', 4900);
         }
-        return await this.sendGrinderyRpcApiRequest<string>(
-          'checkout_request',
-          {
-            sessionId: this.getStorageValue('sessionId'),
-            scope: this.chainId,
-            request: {
-              method: 'personal_sign',
-              params: params || [],
-            },
-          }
+        return await this.sendGrinderyRpcProviderRequest(
+          'personal_sign',
+          params ? (Array.isArray(params) ? params : [params]) : []
         );
       },
     },
   };
 
-  private injectProvider(): void {
-    if (!window.ethereum) {
-      window.ethereum = this;
-    } else {
-      if (
-        window.ethereum.providers &&
-        Array.isArray(window.ethereum.providers)
-      ) {
-        window.ethereum.providers.push(this);
-      } else {
-        window.ethereum.providers = [window.ethereum, this];
-      }
+  private async sendGrinderyRpcProviderRequest(
+    method: GrinderyRpcProviderRequestMethodName,
+    params?: readonly unknown[]
+  ): Promise<ProviderRequestResult> {
+    if (!this.getStorageValue('sessionId')) {
+      throw new ProviderError('Unauthorized', 4900);
     }
-
-    addEventListener('load', () => {
-      setTimeout(() => {
-        this.emit('connect', { chainId: this.chainId });
-      }, 1000);
-    });
+    try {
+      return await this.sendGrinderyRpcApiRequest<ProviderRequestResult>(
+        'checkout_request',
+        {
+          sessionId: this.getStorageValue('sessionId'),
+          scope: this.chainId,
+          request: {
+            method,
+            params,
+          },
+        }
+      );
+    } catch (error) {
+      throw this.createProviderRpcError(error);
+    }
   }
 
-  private createProviderRpcError(error: unknown): ProviderError {
-    let errorResponse: ProviderError;
-    if (error instanceof ProviderError) {
-      errorResponse = new ProviderError(error.message || 'Unknown error');
-      errorResponse.code = error.code || 4900;
-      errorResponse.data = error.data;
-    } else if (error instanceof Error) {
-      errorResponse = new ProviderError(error.message || 'Unknown error');
-      errorResponse.code = 4900;
-    } else {
-      errorResponse = new ProviderError('Unknown error');
-      errorResponse.code = 4900;
-    }
-    return errorResponse;
-  }
+  // waitForRequestResult
 
   private async sendGrinderyRpcApiRequest<T>(
     method: GrinderyRpcMethodName,
@@ -294,5 +270,40 @@ export class GrinderyWalletProvider extends ProviderLocalStorage
     } catch (error) {
       throw this.createProviderRpcError(error);
     }
+  }
+
+  private createProviderRpcError(error: unknown): ProviderError {
+    let errorResponse: ProviderError;
+    if (error instanceof ProviderError) {
+      errorResponse = new ProviderError(error.message || 'Unknown error');
+      errorResponse.code = error.code || 4900;
+      errorResponse.data = error.data;
+    } else if (error instanceof Error) {
+      errorResponse = new ProviderError(error.message || 'Unknown error');
+      errorResponse.code = 4900;
+    } else {
+      errorResponse = new ProviderError('Unknown error');
+      errorResponse.code = 4900;
+    }
+    return errorResponse;
+  }
+
+  private injectProvider(): void {
+    if (!window.ethereum) {
+      window.ethereum = this;
+    } else {
+      if (
+        window.ethereum.providers &&
+        Array.isArray(window.ethereum.providers)
+      ) {
+        window.ethereum.providers.push(this);
+      } else {
+        window.ethereum.providers = [window.ethereum, this];
+      }
+    }
+
+    addEventListener('load', () => {
+      this.emit('connect', { chainId: this.chainId });
+    });
   }
 }

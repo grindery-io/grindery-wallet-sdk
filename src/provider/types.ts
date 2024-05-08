@@ -94,3 +94,12 @@ export interface ProviderPairingResult {
   sessionId: string;
   address: string;
 }
+
+export type GrinderyRpcProviderRequestMethodName =
+  | 'eth_accounts'
+  | 'personal_sign'
+  | 'eth_sendTransaction';
+
+export interface ProviderRequestResult {
+  requestToken: string;
+}

@@ -691,14 +691,7 @@
                 while (1) switch (_context4.prev = _context4.next) {
                   case 0:
                     _context4.next = 2;
-                    return _this.sendGrinderyRpcApiRequest('checkout_request', {
-                      sessionId: _this.getStorageValue('sessionId'),
-                      scope: _this.chainId,
-                      request: {
-                        method: 'eth_accounts',
-                        params: params || []
-                      }
-                    });
+                    return _this.sendGrinderyRpcProviderRequest('eth_accounts', params ? Array.isArray(params) ? params : [params] : []);
                   case 2:
                     return _context4.abrupt("return", _context4.sent);
                   case 3:
@@ -728,14 +721,7 @@
                     throw new ProviderError('Unauthorized', 4900);
                   case 2:
                     _context5.next = 4;
-                    return _this.sendGrinderyRpcApiRequest('checkout_request', {
-                      sessionId: _this.getStorageValue('sessionId'),
-                      scope: _this.chainId,
-                      request: {
-                        method: 'eth_sendTransaction',
-                        params: params || []
-                      }
-                    });
+                    return _this.sendGrinderyRpcProviderRequest('eth_sendTransaction', params ? Array.isArray(params) ? params : [params] : []);
                   case 4:
                     return _context5.abrupt("return", _context5.sent);
                   case 5:
@@ -765,14 +751,7 @@
                     throw new ProviderError('Unauthorized', 4900);
                   case 2:
                     _context6.next = 4;
-                    return _this.sendGrinderyRpcApiRequest('checkout_request', {
-                      sessionId: _this.getStorageValue('sessionId'),
-                      scope: _this.chainId,
-                      request: {
-                        method: 'personal_sign',
-                        params: params || []
-                      }
-                    });
+                    return _this.sendGrinderyRpcProviderRequest('personal_sign', params ? Array.isArray(params) ? params : [params] : []);
                   case 4:
                     return _context6.abrupt("return", _context6.sent);
                   case 5:
@@ -853,25 +832,101 @@
       }
       return request;
     }();
-    _proto.injectProvider = function injectProvider() {
-      var _this2 = this;
-      if (!window.ethereum) {
-        window.ethereum = this;
-      } else {
-        if (window.ethereum.providers && Array.isArray(window.ethereum.providers)) {
-          window.ethereum.providers.push(this);
-        } else {
-          window.ethereum.providers = [window.ethereum, this];
-        }
+    _proto.sendGrinderyRpcProviderRequest = /*#__PURE__*/function () {
+      var _sendGrinderyRpcProviderRequest = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8(method, params) {
+        return _regeneratorRuntime().wrap(function _callee8$(_context8) {
+          while (1) switch (_context8.prev = _context8.next) {
+            case 0:
+              if (this.getStorageValue('sessionId')) {
+                _context8.next = 2;
+                break;
+              }
+              throw new ProviderError('Unauthorized', 4900);
+            case 2:
+              _context8.prev = 2;
+              _context8.next = 5;
+              return this.sendGrinderyRpcApiRequest('checkout_request', {
+                sessionId: this.getStorageValue('sessionId'),
+                scope: this.chainId,
+                request: {
+                  method: method,
+                  params: params
+                }
+              });
+            case 5:
+              return _context8.abrupt("return", _context8.sent);
+            case 8:
+              _context8.prev = 8;
+              _context8.t0 = _context8["catch"](2);
+              throw this.createProviderRpcError(_context8.t0);
+            case 11:
+            case "end":
+              return _context8.stop();
+          }
+        }, _callee8, this, [[2, 8]]);
+      }));
+      function sendGrinderyRpcProviderRequest(_x8, _x9) {
+        return _sendGrinderyRpcProviderRequest.apply(this, arguments);
       }
-      addEventListener('load', function () {
-        setTimeout(function () {
-          _this2.emit('connect', {
-            chainId: _this2.chainId
-          });
-        }, 1000);
-      });
-    };
+      return sendGrinderyRpcProviderRequest;
+    }() // waitForRequestResult
+    ;
+    _proto.sendGrinderyRpcApiRequest =
+    /*#__PURE__*/
+    function () {
+      var _sendGrinderyRpcApiRequest = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee9(method, params) {
+        var response, data;
+        return _regeneratorRuntime().wrap(function _callee9$(_context9) {
+          while (1) switch (_context9.prev = _context9.next) {
+            case 0:
+              _context9.prev = 0;
+              _context9.next = 3;
+              return fetch('https://walletconnect-api.grindery.com', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  jsonrpc: '2.0',
+                  id: 1,
+                  method: method,
+                  params: params || []
+                })
+              });
+            case 3:
+              response = _context9.sent;
+              _context9.next = 6;
+              return response.json();
+            case 6:
+              data = _context9.sent;
+              if (!data.error) {
+                _context9.next = 9;
+                break;
+              }
+              throw new ProviderError(data.error.message, data.error.code);
+            case 9:
+              if (data.result) {
+                _context9.next = 11;
+                break;
+              }
+              throw new ProviderError('No result', 4900);
+            case 11:
+              return _context9.abrupt("return", data.result);
+            case 14:
+              _context9.prev = 14;
+              _context9.t0 = _context9["catch"](0);
+              throw this.createProviderRpcError(_context9.t0);
+            case 17:
+            case "end":
+              return _context9.stop();
+          }
+        }, _callee9, this, [[0, 14]]);
+      }));
+      function sendGrinderyRpcApiRequest(_x10, _x11) {
+        return _sendGrinderyRpcApiRequest.apply(this, arguments);
+      }
+      return sendGrinderyRpcApiRequest;
+    }();
     _proto.createProviderRpcError = function createProviderRpcError(error) {
       var errorResponse;
       if (error instanceof ProviderError) {
@@ -887,60 +942,23 @@
       }
       return errorResponse;
     };
-    _proto.sendGrinderyRpcApiRequest = /*#__PURE__*/function () {
-      var _sendGrinderyRpcApiRequest = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8(method, params) {
-        var response, data;
-        return _regeneratorRuntime().wrap(function _callee8$(_context8) {
-          while (1) switch (_context8.prev = _context8.next) {
-            case 0:
-              _context8.prev = 0;
-              _context8.next = 3;
-              return fetch('https://walletconnect-api.grindery.com', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                  jsonrpc: '2.0',
-                  id: 1,
-                  method: method,
-                  params: params || []
-                })
-              });
-            case 3:
-              response = _context8.sent;
-              _context8.next = 6;
-              return response.json();
-            case 6:
-              data = _context8.sent;
-              if (!data.error) {
-                _context8.next = 9;
-                break;
-              }
-              throw new ProviderError(data.error.message, data.error.code);
-            case 9:
-              if (data.result) {
-                _context8.next = 11;
-                break;
-              }
-              throw new ProviderError('No result', 4900);
-            case 11:
-              return _context8.abrupt("return", data.result);
-            case 14:
-              _context8.prev = 14;
-              _context8.t0 = _context8["catch"](0);
-              throw this.createProviderRpcError(_context8.t0);
-            case 17:
-            case "end":
-              return _context8.stop();
-          }
-        }, _callee8, this, [[0, 14]]);
-      }));
-      function sendGrinderyRpcApiRequest(_x8, _x9) {
-        return _sendGrinderyRpcApiRequest.apply(this, arguments);
+    _proto.injectProvider = function injectProvider() {
+      var _this2 = this;
+      if (!window.ethereum) {
+        window.ethereum = this;
+      } else {
+        if (window.ethereum.providers && Array.isArray(window.ethereum.providers)) {
+          window.ethereum.providers.push(this);
+        } else {
+          window.ethereum.providers = [window.ethereum, this];
+        }
       }
-      return sendGrinderyRpcApiRequest;
-    }();
+      addEventListener('load', function () {
+        _this2.emit('connect', {
+          chainId: _this2.chainId
+        });
+      });
+    };
     return GrinderyWalletProvider;
   }(ProviderLocalStorage);
 

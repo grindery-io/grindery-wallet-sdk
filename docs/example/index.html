@@ -81,11 +81,10 @@
 
                   provider
                     .request({ method: 'eth_requestAccounts' })
-                    .then(accounts => {
-                      console.log('eth_requestAccounts', accounts);
+                    .then(res => {
+                      console.log('eth_requestAccounts', res);
                       el.innerHTML = `
                         <p class="text-center mb-4">Grindery Wallet Connected!</p>
-                        <p class="text-center">${accounts[0]}</p>
                       `;
                     })
                     .catch(error => {

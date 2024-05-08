@@ -144,7 +144,7 @@ Wait for pairing requst to be approved by user and get result.
 
 The SDK library compiled using [TSDX tool](https://tsdx.io/).
 
-See full [development documentation here](DOCUMENTATION.md).
+See full [development documentation here](DEVELOPMENT.md).
 
 # License
 

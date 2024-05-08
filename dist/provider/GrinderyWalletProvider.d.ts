@@ -10,7 +10,8 @@ export declare class GrinderyWalletProvider extends ProviderLocalStorage impleme
     private appId;
     private chainId;
     private methods;
-    private injectProvider;
-    private createProviderRpcError;
+    private sendGrinderyRpcProviderRequest;
     private sendGrinderyRpcApiRequest;
+    private createProviderRpcError;
+    private injectProvider;
 }
