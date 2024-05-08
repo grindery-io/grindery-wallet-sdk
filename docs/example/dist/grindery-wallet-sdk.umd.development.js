@@ -428,10 +428,20 @@
     return ProviderError;
   }( /*#__PURE__*/_wrapNativeSuper(Error));
 
+  /**
+   * @summary A class for emitting provider events
+   * @since 0.1.0
+   */
   var ProviderEventEmitter = /*#__PURE__*/function () {
     function ProviderEventEmitter() {
       this.events = new Map();
     }
+    /**
+     * @summary Adds a listener to the provider event
+     * @param {string} event Event name
+     * @param {Function} callback Callback function
+     * @returns {ProviderEventEmitter} The instance of the class itself
+     */
     var _proto = ProviderEventEmitter.prototype;
     _proto.on = function on(event, callback) {
       if (!this.events.has(event)) {
@@ -439,7 +449,13 @@
       }
       this.events.get(event).push(callback);
       return this;
-    };
+    }
+    /**
+     * @summary Removes a listener from the provider event
+     * @param {string} event Event name
+     * @param {Function} callback Callback function
+     * @returns {ProviderEventEmitter} The instance of the class itself
+     */;
     _proto.removeListener = function removeListener(event, callback) {
       if (this.events.has(event)) {
         var callbacks = this.events.get(event).filter(function (cb) {
@@ -448,7 +464,13 @@
         this.events.set(event, callbacks);
       }
       return this;
-    };
+    }
+    /**
+     * @summary Emits an event
+     * @param {string} event Event name
+     * @param data Event data
+     * @returns {ProviderEventEmitter} The instance of the class itself
+     */;
     _proto.emit = function emit(event) {
       for (var _len = arguments.length, data = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
         data[_key - 1] = arguments[_key];
@@ -465,16 +487,31 @@
   }();
 
   var LOCALSTORAGE_KEY = 'GrinderyWalletProvider';
+  /**
+   * @summary A local storage class for the provider
+   * @since 0.1.0
+   * @extends ProviderEventEmitter
+   */
   var ProviderLocalStorage = /*#__PURE__*/function (_ProviderEventEmitter) {
     function ProviderLocalStorage() {
       return _ProviderEventEmitter.apply(this, arguments) || this;
     }
     _inheritsLoose(ProviderLocalStorage, _ProviderEventEmitter);
     var _proto = ProviderLocalStorage.prototype;
+    /**
+     * @summary Gets the value of the storage by the key
+     * @param {ProviderStorageKey} key Provider storage key
+     * @returns {string} The value of the storage by the key
+     */
     _proto.getStorageValue = function getStorageValue(key) {
       var value = this.getStorage()[key] || '';
       return value;
-    };
+    }
+    /**
+     * @summary Sets the value of the storage by the key
+     * @param {ProviderStorageKey} key Provider storage key
+     * @param {string} value The value to set
+     */;
     _proto.setStorageValue = function setStorageValue(key, value) {
       var storage = this.getStorage();
       storage[key] = value;
@@ -494,18 +531,275 @@
     return ProviderLocalStorage;
   }(ProviderEventEmitter);
 
-  var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderLocalStorage) {
-    function GrinderyWalletProvider() {
+  var Provider = /*#__PURE__*/function (_ProviderLocalStorage) {
+    function Provider() {
       var _this;
       _this = _ProviderLocalStorage.call(this) || this;
-      _this.isGrinderyWallet = true;
-      _this.appId = window.location.origin || 'localhost';
+      /**
+       * @summary The application ID.
+       */
+      _this.appId = window.location.href;
+      /**
+       * @summary The chain ID in CAIP-2 format; e.g. "eip155:1".
+       */
       _this.chainId = 'eip155:137';
-      /* Avaialble provider `request` methods */
-      _this.methods = {
+      /**
+       * @summary The list of supported provider methods.
+       */
+      _this.methods = {};
+      _this.injectProvider();
+      return _this;
+    }
+    /**
+     * @returns {boolean} True if the provider is connected to the server.
+     */
+    _inheritsLoose(Provider, _ProviderLocalStorage);
+    var _proto = Provider.prototype;
+    _proto.isConnected = function isConnected() {
+      return !!this.chainId;
+    }
+    /**
+     * @returns {boolean} True if the provider is connected to the server and the Grindery Wallet.
+     */;
+    _proto.isWalletConnected = function isWalletConnected() {
+      return this.isConnected() && !!this.getStorageValue('sessionId');
+    }
+    /**
+     * @returns {boolean} True if the provider is connected to the server and the Grindery Wallet pairing is in progress (pending).
+     */;
+    _proto.isWalletConnectionPending = function isWalletConnectionPending() {
+      return this.isConnected() && !!this.getStorageValue('pairingToken');
+    };
+    _proto.request = /*#__PURE__*/function () {
+      var _request = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(_ref) {
+        var method, params;
+        return _regeneratorRuntime().wrap(function _callee$(_context) {
+          while (1) switch (_context.prev = _context.next) {
+            case 0:
+              method = _ref.method, params = _ref.params;
+              if (!(method !== 'wallet_ping' && !this.chainId)) {
+                _context.next = 3;
+                break;
+              }
+              throw new ProviderError('Disconnected', 4900);
+            case 3:
+              if (this.methods[method]) {
+                _context.next = 5;
+                break;
+              }
+              throw new ProviderError('Unsupported Method', 4200);
+            case 5:
+              _context.prev = 5;
+              if (!(this.methods[method].sessionRequired && !this.isWalletConnected())) {
+                _context.next = 8;
+                break;
+              }
+              throw new ProviderError('Unauthorized', 4900);
+            case 8:
+              _context.next = 10;
+              return this.methods[method].execute(params);
+            case 10:
+              return _context.abrupt("return", _context.sent);
+            case 13:
+              _context.prev = 13;
+              _context.t0 = _context["catch"](5);
+              throw this.createProviderRpcError(_context.t0);
+            case 16:
+            case "end":
+              return _context.stop();
+          }
+        }, _callee, this, [[5, 13]]);
+      }));
+      function request(_x) {
+        return _request.apply(this, arguments);
+      }
+      return request;
+    }();
+    _proto.registerProviderMethods = function registerProviderMethods(methods) {
+      this.methods = methods;
+    };
+    _proto.sendGrinderyRpcProviderRequest = /*#__PURE__*/function () {
+      var _sendGrinderyRpcProviderRequest = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(method, params) {
+        return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+          while (1) switch (_context2.prev = _context2.next) {
+            case 0:
+              if (this.getStorageValue('sessionId')) {
+                _context2.next = 2;
+                break;
+              }
+              throw new ProviderError('Unauthorized', 4900);
+            case 2:
+              _context2.prev = 2;
+              _context2.next = 5;
+              return this.sendGrinderyRpcApiRequest('checkout_request', {
+                sessionId: this.getStorageValue('sessionId'),
+                scope: this.chainId,
+                request: {
+                  method: method,
+                  params: params
+                }
+              });
+            case 5:
+              return _context2.abrupt("return", _context2.sent);
+            case 8:
+              _context2.prev = 8;
+              _context2.t0 = _context2["catch"](2);
+              throw this.createProviderRpcError(_context2.t0);
+            case 11:
+            case "end":
+              return _context2.stop();
+          }
+        }, _callee2, this, [[2, 8]]);
+      }));
+      function sendGrinderyRpcProviderRequest(_x2, _x3) {
+        return _sendGrinderyRpcProviderRequest.apply(this, arguments);
+      }
+      return sendGrinderyRpcProviderRequest;
+    }();
+    _proto.waitGrinderyRpcProviderRequest = /*#__PURE__*/function () {
+      var _waitGrinderyRpcProviderRequest = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(requestToken, timeout) {
+        return _regeneratorRuntime().wrap(function _callee3$(_context3) {
+          while (1) switch (_context3.prev = _context3.next) {
+            case 0:
+              if (this.getStorageValue('sessionId')) {
+                _context3.next = 2;
+                break;
+              }
+              throw new ProviderError('Unauthorized', 4900);
+            case 2:
+              _context3.prev = 2;
+              _context3.next = 5;
+              return this.sendGrinderyRpcApiRequest('checkout_waitForRequestResult', {
+                requestToken: requestToken,
+                timeout: timeout
+              });
+            case 5:
+              return _context3.abrupt("return", _context3.sent);
+            case 8:
+              _context3.prev = 8;
+              _context3.t0 = _context3["catch"](2);
+              throw this.createProviderRpcError(_context3.t0);
+            case 11:
+            case "end":
+              return _context3.stop();
+          }
+        }, _callee3, this, [[2, 8]]);
+      }));
+      function waitGrinderyRpcProviderRequest(_x4, _x5) {
+        return _waitGrinderyRpcProviderRequest.apply(this, arguments);
+      }
+      return waitGrinderyRpcProviderRequest;
+    }();
+    _proto.sendGrinderyRpcApiRequest = /*#__PURE__*/function () {
+      var _sendGrinderyRpcApiRequest = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee4(method, params) {
+        var response, data;
+        return _regeneratorRuntime().wrap(function _callee4$(_context4) {
+          while (1) switch (_context4.prev = _context4.next) {
+            case 0:
+              _context4.prev = 0;
+              _context4.next = 3;
+              return fetch('https://walletconnect-api.grindery.com', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  jsonrpc: '2.0',
+                  id: 1,
+                  method: method,
+                  params: params || []
+                })
+              });
+            case 3:
+              response = _context4.sent;
+              _context4.next = 6;
+              return response.json();
+            case 6:
+              data = _context4.sent;
+              if (!data.error) {
+                _context4.next = 9;
+                break;
+              }
+              throw new ProviderError(data.error.message, data.error.code);
+            case 9:
+              if (data.result) {
+                _context4.next = 11;
+                break;
+              }
+              throw new ProviderError('No result', 4900);
+            case 11:
+              return _context4.abrupt("return", data.result);
+            case 14:
+              _context4.prev = 14;
+              _context4.t0 = _context4["catch"](0);
+              throw this.createProviderRpcError(_context4.t0);
+            case 17:
+            case "end":
+              return _context4.stop();
+          }
+        }, _callee4, this, [[0, 14]]);
+      }));
+      function sendGrinderyRpcApiRequest(_x6, _x7) {
+        return _sendGrinderyRpcApiRequest.apply(this, arguments);
+      }
+      return sendGrinderyRpcApiRequest;
+    }();
+    _proto.createProviderRpcError = function createProviderRpcError(error) {
+      var errorResponse;
+      if (error instanceof ProviderError) {
+        errorResponse = new ProviderError(error.message || 'Unknown error');
+        errorResponse.code = error.code || 4900;
+        errorResponse.data = error.data;
+      } else if (error instanceof Error) {
+        errorResponse = new ProviderError(error.message || 'Unknown error');
+        errorResponse.code = 4900;
+      } else {
+        errorResponse = new ProviderError('Unknown error');
+        errorResponse.code = 4900;
+      }
+      return errorResponse;
+    };
+    _proto.injectProvider = function injectProvider() {
+      var _this2 = this;
+      if (!window.ethereum) {
+        window.ethereum = this;
+      } else {
+        if (window.ethereum.providers && Array.isArray(window.ethereum.providers)) {
+          window.ethereum.providers.push(this);
+        } else {
+          window.ethereum.providers = [window.ethereum, this];
+        }
+      }
+      addEventListener('load', function () {
+        _this2.emit('connect', {
+          chainId: _this2.chainId
+        });
+      });
+    };
+    return Provider;
+  }(ProviderLocalStorage);
+
+  /**
+   * @summary The Grindery Wallet Ethereum Injected Provider Class.
+   * @extends Provider
+   * @implements ProviderInterface
+   */
+  var GrinderyWalletProvider = /*#__PURE__*/function (_Provider) {
+    function GrinderyWalletProvider() {
+      var _this;
+      _this = _Provider.call(this) || this;
+      /**
+       * @summary Indicates that the provider is a Grindery Wallet.
+       */
+      _this.isGrinderyWallet = true;
+      _this.registerProviderMethods({
+        /**
+         * @summary Connect a dApp to the Grindery Wallet.
+         * @since 0.1.0
+         * @returns {Promise<string[]>} The list of user wallets' addresses.
+         */
         eth_requestAccounts: {
           sessionRequired: false,
-          pairingTokenRequired: false,
           execute: function () {
             var _execute = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(params) {
               var pairResult, result, _pairResult;
@@ -540,11 +834,8 @@
                       connectUrlBrowser: _this.getStorageValue('connectUrlBrowser')
                     });
                     _context.next = 15;
-                    return _this.request({
-                      method: 'checkout_waitForPairingResult',
-                      params: {
-                        pairingToken: _this.getStorageValue('pairingToken')
-                      }
+                    return _this.sendGrinderyRpcApiRequest('checkout_waitForPairingResult', {
+                      pairingToken: _this.getStorageValue('pairingToken')
                     });
                   case 15:
                     pairResult = _context.sent;
@@ -570,11 +861,8 @@
                   case 31:
                     _context.prev = 31;
                     _context.next = 34;
-                    return _this.request({
-                      method: 'checkout_requestPairing',
-                      params: {
-                        appId: _this.appId
-                      }
+                    return _this.sendGrinderyRpcApiRequest('checkout_requestPairing', {
+                      appId: _this.appId
                     });
                   case 34:
                     result = _context.sent;
@@ -592,11 +880,8 @@
                       connectUrlBrowser: result.connectUrlBrowser
                     });
                     _context.next = 43;
-                    return _this.request({
-                      method: 'checkout_waitForPairingResult',
-                      params: {
-                        pairingToken: result.pairingToken
-                      }
+                    return _this.sendGrinderyRpcApiRequest('checkout_waitForPairingResult', {
+                      pairingToken: result.pairingToken
                     });
                   case 43:
                     _pairResult = _context.sent;
@@ -634,23 +919,44 @@
             return execute;
           }()
         },
-        checkout_requestPairing: {
-          sessionRequired: false,
-          pairingTokenRequired: false,
+        /**
+         * @summary Get a list of user wallets' addresses.
+         * @since 0.1.0
+         * @returns {Promise<string[]>} The list of user wallets' addresses.
+         */
+        eth_accounts: {
+          sessionRequired: true,
           execute: function () {
             var _execute2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(params) {
+              var _yield$_this$sendGrin, requestToken;
               return _regeneratorRuntime().wrap(function _callee2$(_context2) {
                 while (1) switch (_context2.prev = _context2.next) {
                   case 0:
-                    _context2.next = 2;
-                    return _this.sendGrinderyRpcApiRequest('checkout_requestPairing', params);
-                  case 2:
-                    return _context2.abrupt("return", _context2.sent);
+                    _context2.prev = 0;
+                    _context2.next = 3;
+                    return _this.sendGrinderyRpcProviderRequest('eth_accounts', params ? Array.isArray(params) ? params : [params] : []);
                   case 3:
+                    _yield$_this$sendGrin = _context2.sent;
+                    requestToken = _yield$_this$sendGrin.requestToken;
+                    if (requestToken) {
+                      _context2.next = 7;
+                      break;
+                    }
+                    throw new ProviderError('No request token', 4900);
+                  case 7:
+                    _context2.next = 9;
+                    return _this.waitGrinderyRpcProviderRequest(requestToken);
+                  case 9:
+                    return _context2.abrupt("return", _context2.sent);
+                  case 12:
+                    _context2.prev = 12;
+                    _context2.t0 = _context2["catch"](0);
+                    throw _this.createProviderRpcError(_context2.t0);
+                  case 15:
                   case "end":
                     return _context2.stop();
                 }
-              }, _callee2);
+              }, _callee2, null, [[0, 12]]);
             }));
             function execute(_x2) {
               return _execute2.apply(this, arguments);
@@ -658,23 +964,39 @@
             return execute;
           }()
         },
-        checkout_waitForPairingResult: {
-          sessionRequired: false,
-          pairingTokenRequired: true,
+        eth_sendTransaction: {
+          sessionRequired: true,
           execute: function () {
             var _execute3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(params) {
+              var _yield$_this$sendGrin2, requestToken;
               return _regeneratorRuntime().wrap(function _callee3$(_context3) {
                 while (1) switch (_context3.prev = _context3.next) {
                   case 0:
-                    _context3.next = 2;
-                    return _this.sendGrinderyRpcApiRequest('checkout_waitForPairingResult', params);
-                  case 2:
-                    return _context3.abrupt("return", _context3.sent);
+                    _context3.prev = 0;
+                    _context3.next = 3;
+                    return _this.sendGrinderyRpcProviderRequest('eth_sendTransaction', params ? Array.isArray(params) ? params : [params] : []);
                   case 3:
+                    _yield$_this$sendGrin2 = _context3.sent;
+                    requestToken = _yield$_this$sendGrin2.requestToken;
+                    if (requestToken) {
+                      _context3.next = 7;
+                      break;
+                    }
+                    throw new ProviderError('No request token', 4900);
+                  case 7:
+                    _context3.next = 9;
+                    return _this.waitGrinderyRpcProviderRequest(requestToken);
+                  case 9:
+                    return _context3.abrupt("return", _context3.sent);
+                  case 12:
+                    _context3.prev = 12;
+                    _context3.t0 = _context3["catch"](0);
+                    throw _this.createProviderRpcError(_context3.t0);
+                  case 15:
                   case "end":
                     return _context3.stop();
                 }
-              }, _callee3);
+              }, _callee3, null, [[0, 12]]);
             }));
             function execute(_x3) {
               return _execute3.apply(this, arguments);
@@ -682,285 +1004,52 @@
             return execute;
           }()
         },
-        eth_accounts: {
+        personal_sign: {
           sessionRequired: true,
-          pairingTokenRequired: false,
           execute: function () {
             var _execute4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee4(params) {
+              var _yield$_this$sendGrin3, requestToken;
               return _regeneratorRuntime().wrap(function _callee4$(_context4) {
                 while (1) switch (_context4.prev = _context4.next) {
                   case 0:
-                    _context4.next = 2;
-                    return _this.sendGrinderyRpcProviderRequest('eth_accounts', params ? Array.isArray(params) ? params : [params] : []);
-                  case 2:
-                    return _context4.abrupt("return", _context4.sent);
+                    _context4.prev = 0;
+                    _context4.next = 3;
+                    return _this.sendGrinderyRpcProviderRequest('personal_sign', params ? Array.isArray(params) ? params : [params] : []);
                   case 3:
+                    _yield$_this$sendGrin3 = _context4.sent;
+                    requestToken = _yield$_this$sendGrin3.requestToken;
+                    if (requestToken) {
+                      _context4.next = 7;
+                      break;
+                    }
+                    throw new ProviderError('No request token', 4900);
+                  case 7:
+                    _context4.next = 9;
+                    return _this.waitGrinderyRpcProviderRequest(requestToken);
+                  case 9:
+                    return _context4.abrupt("return", _context4.sent);
+                  case 12:
+                    _context4.prev = 12;
+                    _context4.t0 = _context4["catch"](0);
+                    throw _this.createProviderRpcError(_context4.t0);
+                  case 15:
                   case "end":
                     return _context4.stop();
                 }
-              }, _callee4);
+              }, _callee4, null, [[0, 12]]);
             }));
             function execute(_x4) {
               return _execute4.apply(this, arguments);
             }
             return execute;
           }()
-        },
-        eth_sendTransaction: {
-          sessionRequired: true,
-          pairingTokenRequired: false,
-          execute: function () {
-            var _execute5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5(params) {
-              return _regeneratorRuntime().wrap(function _callee5$(_context5) {
-                while (1) switch (_context5.prev = _context5.next) {
-                  case 0:
-                    if (_this.isWalletConnected()) {
-                      _context5.next = 2;
-                      break;
-                    }
-                    throw new ProviderError('Unauthorized', 4900);
-                  case 2:
-                    _context5.next = 4;
-                    return _this.sendGrinderyRpcProviderRequest('eth_sendTransaction', params ? Array.isArray(params) ? params : [params] : []);
-                  case 4:
-                    return _context5.abrupt("return", _context5.sent);
-                  case 5:
-                  case "end":
-                    return _context5.stop();
-                }
-              }, _callee5);
-            }));
-            function execute(_x5) {
-              return _execute5.apply(this, arguments);
-            }
-            return execute;
-          }()
-        },
-        personal_sign: {
-          sessionRequired: true,
-          pairingTokenRequired: false,
-          execute: function () {
-            var _execute6 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee6(params) {
-              return _regeneratorRuntime().wrap(function _callee6$(_context6) {
-                while (1) switch (_context6.prev = _context6.next) {
-                  case 0:
-                    if (_this.isWalletConnected()) {
-                      _context6.next = 2;
-                      break;
-                    }
-                    throw new ProviderError('Unauthorized', 4900);
-                  case 2:
-                    _context6.next = 4;
-                    return _this.sendGrinderyRpcProviderRequest('personal_sign', params ? Array.isArray(params) ? params : [params] : []);
-                  case 4:
-                    return _context6.abrupt("return", _context6.sent);
-                  case 5:
-                  case "end":
-                    return _context6.stop();
-                }
-              }, _callee6);
-            }));
-            function execute(_x6) {
-              return _execute6.apply(this, arguments);
-            }
-            return execute;
-          }()
         }
-      };
-      _this.injectProvider();
+      });
       return _this;
     }
-    _inheritsLoose(GrinderyWalletProvider, _ProviderLocalStorage);
-    var _proto = GrinderyWalletProvider.prototype;
-    _proto.isConnected = function isConnected() {
-      return !!this.chainId;
-    };
-    _proto.isWalletConnected = function isWalletConnected() {
-      return this.isConnected() && !!this.getStorageValue('sessionId');
-    };
-    _proto.isWalletConnectionPending = function isWalletConnectionPending() {
-      return this.isConnected() && !!this.getStorageValue('pairingToken');
-    };
-    _proto.request = /*#__PURE__*/function () {
-      var _request = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee7(_ref) {
-        var method, params;
-        return _regeneratorRuntime().wrap(function _callee7$(_context7) {
-          while (1) switch (_context7.prev = _context7.next) {
-            case 0:
-              method = _ref.method, params = _ref.params;
-              if (!(method !== 'wallet_ping' && !this.chainId)) {
-                _context7.next = 3;
-                break;
-              }
-              throw new ProviderError('Disconnected', 4900);
-            case 3:
-              if (this.methods[method]) {
-                _context7.next = 5;
-                break;
-              }
-              throw new ProviderError('Unsupported Method', 4200);
-            case 5:
-              _context7.prev = 5;
-              if (!(this.methods[method].sessionRequired && !this.isWalletConnected())) {
-                _context7.next = 8;
-                break;
-              }
-              throw new ProviderError('Unauthorized', 4900);
-            case 8:
-              if (!(this.methods[method].pairingTokenRequired && !this.isWalletConnectionPending())) {
-                _context7.next = 10;
-                break;
-              }
-              throw new ProviderError('Unauthorized', 4900);
-            case 10:
-              _context7.next = 12;
-              return this.methods[method].execute(params);
-            case 12:
-              return _context7.abrupt("return", _context7.sent);
-            case 15:
-              _context7.prev = 15;
-              _context7.t0 = _context7["catch"](5);
-              throw this.createProviderRpcError(_context7.t0);
-            case 18:
-            case "end":
-              return _context7.stop();
-          }
-        }, _callee7, this, [[5, 15]]);
-      }));
-      function request(_x7) {
-        return _request.apply(this, arguments);
-      }
-      return request;
-    }();
-    _proto.sendGrinderyRpcProviderRequest = /*#__PURE__*/function () {
-      var _sendGrinderyRpcProviderRequest = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8(method, params) {
-        return _regeneratorRuntime().wrap(function _callee8$(_context8) {
-          while (1) switch (_context8.prev = _context8.next) {
-            case 0:
-              if (this.getStorageValue('sessionId')) {
-                _context8.next = 2;
-                break;
-              }
-              throw new ProviderError('Unauthorized', 4900);
-            case 2:
-              _context8.prev = 2;
-              _context8.next = 5;
-              return this.sendGrinderyRpcApiRequest('checkout_request', {
-                sessionId: this.getStorageValue('sessionId'),
-                scope: this.chainId,
-                request: {
-                  method: method,
-                  params: params
-                }
-              });
-            case 5:
-              return _context8.abrupt("return", _context8.sent);
-            case 8:
-              _context8.prev = 8;
-              _context8.t0 = _context8["catch"](2);
-              throw this.createProviderRpcError(_context8.t0);
-            case 11:
-            case "end":
-              return _context8.stop();
-          }
-        }, _callee8, this, [[2, 8]]);
-      }));
-      function sendGrinderyRpcProviderRequest(_x8, _x9) {
-        return _sendGrinderyRpcProviderRequest.apply(this, arguments);
-      }
-      return sendGrinderyRpcProviderRequest;
-    }() // waitForRequestResult
-    ;
-    _proto.sendGrinderyRpcApiRequest =
-    /*#__PURE__*/
-    function () {
-      var _sendGrinderyRpcApiRequest = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee9(method, params) {
-        var response, data;
-        return _regeneratorRuntime().wrap(function _callee9$(_context9) {
-          while (1) switch (_context9.prev = _context9.next) {
-            case 0:
-              _context9.prev = 0;
-              _context9.next = 3;
-              return fetch('https://walletconnect-api.grindery.com', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                  jsonrpc: '2.0',
-                  id: 1,
-                  method: method,
-                  params: params || []
-                })
-              });
-            case 3:
-              response = _context9.sent;
-              _context9.next = 6;
-              return response.json();
-            case 6:
-              data = _context9.sent;
-              if (!data.error) {
-                _context9.next = 9;
-                break;
-              }
-              throw new ProviderError(data.error.message, data.error.code);
-            case 9:
-              if (data.result) {
-                _context9.next = 11;
-                break;
-              }
-              throw new ProviderError('No result', 4900);
-            case 11:
-              return _context9.abrupt("return", data.result);
-            case 14:
-              _context9.prev = 14;
-              _context9.t0 = _context9["catch"](0);
-              throw this.createProviderRpcError(_context9.t0);
-            case 17:
-            case "end":
-              return _context9.stop();
-          }
-        }, _callee9, this, [[0, 14]]);
-      }));
-      function sendGrinderyRpcApiRequest(_x10, _x11) {
-        return _sendGrinderyRpcApiRequest.apply(this, arguments);
-      }
-      return sendGrinderyRpcApiRequest;
-    }();
-    _proto.createProviderRpcError = function createProviderRpcError(error) {
-      var errorResponse;
-      if (error instanceof ProviderError) {
-        errorResponse = new ProviderError(error.message || 'Unknown error');
-        errorResponse.code = error.code || 4900;
-        errorResponse.data = error.data;
-      } else if (error instanceof Error) {
-        errorResponse = new ProviderError(error.message || 'Unknown error');
-        errorResponse.code = 4900;
-      } else {
-        errorResponse = new ProviderError('Unknown error');
-        errorResponse.code = 4900;
-      }
-      return errorResponse;
-    };
-    _proto.injectProvider = function injectProvider() {
-      var _this2 = this;
-      if (!window.ethereum) {
-        window.ethereum = this;
-      } else {
-        if (window.ethereum.providers && Array.isArray(window.ethereum.providers)) {
-          window.ethereum.providers.push(this);
-        } else {
-          window.ethereum.providers = [window.ethereum, this];
-        }
-      }
-      addEventListener('load', function () {
-        _this2.emit('connect', {
-          chainId: _this2.chainId
-        });
-      });
-    };
+    _inheritsLoose(GrinderyWalletProvider, _Provider);
     return GrinderyWalletProvider;
-  }(ProviderLocalStorage);
+  }(Provider);
 
   var GrinderyWalletSDK = /*#__PURE__*/function () {
     function GrinderyWalletSDK() {

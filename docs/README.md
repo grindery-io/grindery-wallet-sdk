@@ -23,7 +23,7 @@ Grindery Wallet SDK enables your dapp to provide a seamless user experience for 
 
 # Example implementation
 
-See an example implementation here: https://grindery-io.github.io/grindery-wallet-sdk/example.
+See an example implementation here: [https://grindery-io.github.io/grindery-wallet-sdk/example](https://grindery-io.github.io/grindery-wallet-sdk/example).
 
 # Installing SDK
 

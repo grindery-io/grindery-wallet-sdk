@@ -52,7 +52,7 @@ export interface ProviderRequestPairingResult {
     connectUrl: string;
     connectUrlBrowser: string;
 }
-export declare type GrinderyRpcMethodName = 'checkout_requestPairing' | 'checkout_waitForPairingResult' | 'checkout_request';
+export declare type GrinderyRpcMethodName = 'checkout_requestPairing' | 'checkout_waitForPairingResult' | 'checkout_request' | 'checkout_waitForRequestResult';
 export interface ProviderPairingResult {
     sessionId: string;
     address: string;

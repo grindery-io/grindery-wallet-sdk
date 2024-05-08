@@ -1,17 +1,14 @@
-import { ProviderLocalStorage } from './ProviderLocalStorage';
-import { ProviderInterface, RequestArguments } from './types';
-export declare class GrinderyWalletProvider extends ProviderLocalStorage implements ProviderInterface {
+import { Provider } from './Provider';
+import { ProviderInterface } from './types';
+/**
+ * @summary The Grindery Wallet Ethereum Injected Provider Class.
+ * @extends Provider
+ * @implements ProviderInterface
+ */
+export declare class GrinderyWalletProvider extends Provider implements ProviderInterface {
+    /**
+     * @summary Indicates that the provider is a Grindery Wallet.
+     */
     readonly isGrinderyWallet: boolean;
     constructor();
-    isConnected(): boolean;
-    isWalletConnected(): boolean;
-    isWalletConnectionPending(): boolean;
-    request<T>({ method, params }: RequestArguments): Promise<T>;
-    private appId;
-    private chainId;
-    private methods;
-    private sendGrinderyRpcProviderRequest;
-    private sendGrinderyRpcApiRequest;
-    private createProviderRpcError;
-    private injectProvider;
 }

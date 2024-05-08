@@ -88,7 +88,8 @@ export interface ProviderRequestPairingResult {
 export type GrinderyRpcMethodName =
   | 'checkout_requestPairing'
   | 'checkout_waitForPairingResult'
-  | 'checkout_request';
+  | 'checkout_request'
+  | 'checkout_waitForRequestResult';
 
 export interface ProviderPairingResult {
   sessionId: string;
