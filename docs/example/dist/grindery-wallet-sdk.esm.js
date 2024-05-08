@@ -580,7 +580,7 @@ var Provider = /*#__PURE__*/function (_ProviderLocalStorage) {
      */
     _this.accounts = [];
     _this.injectProvider();
-    addEventListener('load', function () {
+    window.addEventListener('load', function () {
       _this.emit('connect', {
         chainId: _this.getChain()
       });

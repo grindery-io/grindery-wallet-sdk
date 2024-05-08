@@ -20,7 +20,7 @@ export class Provider extends ProviderLocalStorage {
 
     this.injectProvider();
 
-    addEventListener('load', () => {
+    window.addEventListener('load', () => {
       this.emit('connect', { chainId: this.getChain() });
       this.restoreSession();
     });
