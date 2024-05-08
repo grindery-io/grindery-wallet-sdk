@@ -613,7 +613,7 @@
                       scope: _this.chainId,
                       request: {
                         method: 'eth_accounts',
-                        params: params
+                        params: []
                       }
                     });
                   case 49:

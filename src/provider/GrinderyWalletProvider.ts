@@ -139,7 +139,7 @@ export class GrinderyWalletProvider extends ProviderLocalStorage
               scope: this.chainId,
               request: {
                 method: 'eth_accounts',
-                params,
+                params: [],
               },
             }
           );

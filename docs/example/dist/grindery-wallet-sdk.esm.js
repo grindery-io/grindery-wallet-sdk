@@ -608,7 +608,7 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderLocalStorage) {
                     scope: _this.chainId,
                     request: {
                       method: 'eth_accounts',
-                      params: params
+                      params: []
                     }
                   });
                 case 49:
