@@ -99,7 +99,7 @@
 
             provider.on('pairing', data => {
               if (WebApp && WebApp.openTelegramLink) {
-                WebApp.openLink(data.connectUrlBrowser);
+                WebApp.openTelegramLink(data.connectUrlBrowser);
                 if (WebApp.close) {
                   window.Telegram.WebApp.close();
                 }

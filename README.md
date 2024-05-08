@@ -8,6 +8,7 @@ Grindery Wallet SDK enables your dapp to provide a seamless user experience for 
 
 ## Table of Contents:
 
+- [Example implementation](#example-implementation)
 - [Installing SDK](#installing-sdk)
 - [Basic usage](#basic-usage)
 - [Injected Ethereum Provider](#injected-ethereum-provider)
@@ -17,7 +18,6 @@ Grindery Wallet SDK enables your dapp to provide a seamless user experience for 
   - [eth_accounts](#method_eth_accounts)
   - [eth_sendTransaction](#method_eth_sendtransaction)
   - [personal_sign](#method_personal_sign)
-- [Example implementation](#example-implementation)
 - [SDK Development](#sdk-development)
   - [Commands](#commands)
   - [Configuration](#configuration)
@@ -34,6 +34,10 @@ Grindery Wallet SDK enables your dapp to provide a seamless user experience for 
   - [Including Styles](#including-styles)
   - [Publishing to NPM](#publishing-to-npm)
 - [License](#license)
+
+# Example implementation
+
+See an example implementation in [docs/example/index.html](docs/example/index.html)
 
 # Installing SDK
 
@@ -86,7 +90,7 @@ Connect a dApp to the Grindery Wallet.
 
 This method must always be called first, to initate dApp connection and get user's wallet address.
 
-> The method internally uses `checkout_requestPairing` and `checkout_waitForPairingResult` methods.
+> The method internally uses [`checkout_requestPairing`](#method_checkout_requestpairing) and [`checkout_waitForPairingResult`](#method_checkout_waitforpairingresult) methods.
 
 **Request params:** none
 
@@ -155,10 +159,6 @@ Wait for pairing requst to be approved by user and get result.
 **Response result:** String. The signature.
 
 ---
-
-# Example implementation
-
-See an example implementation in [docs/example/index.html](docs/example/index.html)
 
 # SDK Development
 

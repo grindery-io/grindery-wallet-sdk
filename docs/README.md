@@ -10,6 +10,7 @@ The SDK uses the Grindery Wallet Ethereum provider as specified by [EIP-1193](ht
 
 ## Table of Contents:
 
+- [Example implementation](#example-implementation)
 - [Installing SDK](#installing-sdk)
 - [Basic usage](#basic-usage)
 - [Injected Ethereum Provider](#injected-ethereum-provider)
@@ -19,7 +20,6 @@ The SDK uses the Grindery Wallet Ethereum provider as specified by [EIP-1193](ht
   - [eth_accounts](#method_eth_accounts)
   - [eth_sendTransaction](#method_eth_sendtransaction)
   - [personal_sign](#method_personal_sign)
-- [Example implementation](#example-implementation)
 - [SDK Development](#sdk-development)
   - [Commands](#commands)
   - [Configuration](#configuration)
@@ -37,6 +37,10 @@ The SDK uses the Grindery Wallet Ethereum provider as specified by [EIP-1193](ht
   - [Publishing to NPM](#publishing-to-npm)
 - [License](#license)
 
+# Example implementation
+
+See an example implementation [here](example/index.html).
+
 # Installing SDK
 
 Place the script before the closing `</head>` tag, using this code:
@@ -51,7 +55,7 @@ Place the script before the closing `</head>` tag, using this code:
 
 Once the script is loaded, a `window.Grindery.WalletSDK` object will become available.
 
-## Wallet SDK properties
+## Wallet SDK Class
 
 ---
 
@@ -88,7 +92,7 @@ Connect a dApp to the Grindery Wallet.
 
 This method must always be called first, to initate dApp connection and get user's wallet address.
 
-> The method internally uses `checkout_requestPairing` and `checkout_waitForPairingResult` methods.
+> The method internally uses [`checkout_requestPairing`](#method_checkout_requestpairing) and [`checkout_waitForPairingResult`](#method_checkout_waitforpairingresult) methods.
 
 **Request params:** none
 
@@ -157,10 +161,6 @@ Wait for pairing requst to be approved by user and get result.
 **Response result:** String. The signature.
 
 ---
-
-# Example implementation
-
-See an example implementation [here](example/index.html).
 
 # SDK Development
 
