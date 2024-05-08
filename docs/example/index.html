@@ -96,7 +96,12 @@
           }
 
           provider.on('pairing', data => {
-            if (WebApp && WebApp.openTelegramLink && WebApp.MainButton) {
+            if (
+              WebApp &&
+              WebApp.openTelegramLink &&
+              WebApp.platform &&
+              WebApp.platform !== 'unknown'
+            ) {
               WebApp.openTelegramLink(data.connectUrlBrowser);
               if (WebApp.close) {
                 window.Telegram.WebApp.close();
