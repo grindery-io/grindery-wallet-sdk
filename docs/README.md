@@ -264,4 +264,4 @@ We recommend using [np](https://github.com/sindresorhus/np).
 
 # License
 
-[MIT](LICENSE)
+MIT

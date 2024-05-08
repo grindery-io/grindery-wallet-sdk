@@ -1,12 +1,10 @@
 # Grindery Wallet SDK
 
-<img src="cover.png" alt="Grindery Wallet Beta" width="320" />
+<img src="docs/cover.png" alt="Grindery Wallet Beta" width="320" />
 
 Grindery Wallet SDK is a library that provides a reliable, secure, and seamless connection from your dapp to the Grindery Smart-Wallet.
 
 Grindery Wallet SDK enables your dapp to provide a seamless user experience for Grindery users, without relying on third-party libraries. By integrating your dapp using the SDK, millions of Telegram users can connect to their preferred Grindery Smart-Wallet.
-
-The SDK uses the Grindery Wallet Ethereum provider as specified by [EIP-1193](https://eips.ethereum.org/EIPS/eip-1193).
 
 ## Table of Contents:
 
