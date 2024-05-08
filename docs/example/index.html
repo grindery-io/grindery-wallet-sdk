@@ -49,10 +49,24 @@
 
         if (provider) {
           provider.on('connect', () => {
+            const WebApp = window && window.Telegram && window.Telegram.WebApp;
+            if (WebApp) {
+              const user = WebApp.initDataUnsafe && WebApp.initDataUnsafe.user;
+              if (user) {
+                var userNamePlaceholder = document.querySelector('.username');
+                if (userNamePlaceholder) {
+                  userNamePlaceholder.innerHTML = ' @' + user.username;
+                }
+              }
+            }
+
             const el = document.getElementById('walletSDK');
             if (el) {
-              el.innerHTML =
-                '<button class="py-2 px-4 bg-blue-500 text-white rounded-xl connect">Connect Grindery Wallet</button>';
+              el.innerHTML = `
+                <button class="py-2 px-4 bg-blue-500 text-white rounded-xl connect">
+                  Connect Grindery Wallet
+                </button>
+              `;
               const button = el.querySelector('button');
               if (button) {
                 button.addEventListener('click', () => {
@@ -63,7 +77,10 @@
                     .request({ method: 'eth_requestAccounts' })
                     .then(accounts => {
                       console.log('eth_requestAccounts', accounts);
-                      el.innerHTML = '<p>Grindery Wallet Connected!</p>';
+                      el.innerHTML = `
+                        <p class="text-center mb-4">Grindery Wallet Connected!</p>
+                        <p class="text-center">${accounts[0]}</p>
+                      `;
                     })
                     .catch(error => {
                       console.error('eth_requestAccounts', error);
@@ -75,17 +92,9 @@
             }
 
             provider.on('pairing', data => {
-              if (
-                window.Telegram &&
-                window.Telegram.WebApp &&
-                window.Telegram.WebApp.openTelegramLink
-              ) {
-                window.Telegram.WebApp.openLink(data.connectUrlBrowser);
-                if (
-                  window.Telegram &&
-                  window.Telegram.WebApp &&
-                  window.Telegram.WebApp.close
-                ) {
+              if (WebApp && WebApp.openTelegramLink) {
+                WebApp.openLink(data.connectUrlBrowser);
+                if (WebApp.close) {
                   window.Telegram.WebApp.close();
                 }
               } else {
