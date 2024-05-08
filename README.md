@@ -13,8 +13,6 @@ Grindery Wallet SDK enables your dapp to provide a seamless user experience for 
 - [Basic usage](#basic-usage)
 - [Injected Ethereum Provider](#injected-ethereum-provider)
   - [eth_requestAccounts](#method_eth_requestaccounts)
-  - [checkout_requestPairing](#method_checkout_requestpairing)
-  - [checkout_waitForPairingResult](#method_checkout_waitforpairingresult)
   - [eth_accounts](#method_eth_accounts)
   - [eth_sendTransaction](#method_eth_sendtransaction)
   - [personal_sign](#method_personal_sign)
@@ -60,8 +58,6 @@ If the user has multiple wallet browser extensions installed that inject ethereu
 ## Provider Methods
 
 - [eth_requestAccounts](#method_eth_requestaccounts)
-- [checkout_requestPairing](#method_checkout_requestpairing)
-- [checkout_waitForPairingResult](#method_checkout_waitforpairingresult)
 - [eth_accounts](#method_eth_accounts)
 - [eth_sendTransaction](#method_eth_sendtransaction)
 - [personal_sign](#method_personal_sign)
@@ -87,35 +83,6 @@ Get connected user's wallet addresses.
 **Request params:** none
 
 **Response result:** Array of Strings. An array of user addresses.
-
----
-
-### Method: <a id="method_checkout_requestpairing">`checkout_requestPairing`</a>
-
-Connect new dApp.
-
-**Request params:** none
-
-**Response result:**
-
-- `pairingToken` String. A token required to request pairing result.
-- `connectUrl` String. An URL to redirect user to initiate dApp connection.
-- `connectUrlBrowser` String. An URL to redirect user to initiate dApp connection.
-
----
-
-### Method: <a id="method_checkout_waitforpairingresult">`checkout_waitForPairingResult`</a>
-
-Wait for pairing requst to be approved by user and get result.
-
-**Request params:**
-
-- `pairingToken` String. Required. A pairing token received from [checkout_requestPairing](#method_checkout_requestpairing) method.
-- `timeout` Number. Optional. Polling timeout.
-
-**Response result:**
-
-- `sessionId` String. A session ID required to identify provider requests.
 
 ---
 
