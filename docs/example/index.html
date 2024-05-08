@@ -78,16 +78,24 @@
                 button.innerHTML = 'Connecting...';
                 button.disabled = true;
 
+                provider.on('pairing', data => {
+                  if (
+                    WebApp &&
+                    WebApp.openTelegramLink &&
+                    WebApp.platform &&
+                    WebApp.platform !== 'unknown'
+                  ) {
+                    WebApp.openTelegramLink(data.connectUrlBrowser);
+                    if (WebApp.close) {
+                      window.Telegram.WebApp.close();
+                    }
+                  } else {
+                    window.open(data.connectUrlBrowser, '_blank');
+                  }
+                });
+
                 provider
                   .request({ method: 'eth_requestAccounts' })
-                  .then(res => {
-                    console.log('eth_requestAccounts', res);
-                    const address = provider.getAddress();
-                    el.innerHTML = `
-                        <p class="text-center mb-4">Grindery Wallet Connected!</p>
-                        <p class="text-center mb-4">${address}</p>
-                      `;
-                  })
                   .catch(error => {
                     console.error('eth_requestAccounts', error);
                     button.innerHTML = 'Try again';
@@ -97,24 +105,30 @@
             }
           }
 
-          provider.on('pairing', data => {
-            if (
-              WebApp &&
-              WebApp.openTelegramLink &&
-              WebApp.platform &&
-              WebApp.platform !== 'unknown'
-            ) {
-              WebApp.openTelegramLink(data.connectUrlBrowser);
-              if (WebApp.close) {
-                window.Telegram.WebApp.close();
-              }
+          provider.on('accountsChanged', ({ accounts }) => {
+            console.log('accountsChanged', accounts);
+            if (accounts.length > 0) {
+              const address = accounts[0];
+              el.innerHTML = `
+                <p class="text-center mb-4">Grindery Wallet Connected!</p>
+                <p class="text-center mb-4">${address}</p>
+              `;
             } else {
-              window.open(data.connectUrlBrowser, '_blank');
+              el.innerHTML = `
+                <button class="py-2 px-4 bg-blue-500 text-white rounded-xl connect">
+                  Connect Grindery Wallet
+                </button>
+              `;
             }
           });
 
           provider.on('disconnect', data => {
             console.log('disconnect', data);
+            el.innerHTML = `
+              <button class="py-2 px-4 bg-blue-500 text-white rounded-xl connect">
+                Connect Grindery Wallet
+              </button>
+            `;
           });
         });
       }

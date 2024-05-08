@@ -631,7 +631,7 @@
      */;
     _proto.getAddress = function getAddress() {
       var _this$accounts$;
-      return ((_this$accounts$ = this.accounts[0]) == null ? void 0 : _this$accounts$.split(':')[1]) || '';
+      return ((_this$accounts$ = this.accounts[0]) == null ? void 0 : _this$accounts$.split(':')[2]) || '';
     }
     /**
      * @summary Sends a request to the provider
