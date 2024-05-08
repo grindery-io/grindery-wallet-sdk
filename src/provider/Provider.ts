@@ -65,7 +65,7 @@ export class Provider extends ProviderLocalStorage {
    * @returns {string} The ethereum wallet address
    */
   public getAddress(): string {
-    return this.accounts[0]?.split(':')[1] || '';
+    return this.accounts[0]?.split(':')[2] || '';
   }
 
   /**
