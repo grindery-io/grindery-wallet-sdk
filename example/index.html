@@ -12,7 +12,7 @@
       GrinderyWalletSDK usage example
     </h1>
     <div id="walletSDK" class="px-4 py-4 text-center">
-      Connecting provider...
+      Waiting wallet provider...
     </div>
     <script type="text/javascript">
       // inject tg user id for testing
@@ -28,7 +28,7 @@
       };
     </script>
     <script
-      src="../dist/grindery-wallet-sdk.umd.development.js"
+      src="dist/grindery-wallet-sdk.umd.development.js"
       type="text/javascript"
     ></script>
     <script type="text/javascript">
@@ -42,17 +42,44 @@
           provider.on('connect', () => {
             const el = document.getElementById('walletSDK');
             if (el) {
-              el.innerHTML = 'Provider connected!';
+              el.innerHTML =
+                '<button class="py-2 px-4 bg-blue-500 text-white rounded-xl connect">Connect Grindery Wallet</button>';
+              const button = el.querySelector('button');
+              if (button) {
+                button.addEventListener('click', () => {
+                  button.innerHTML = 'Connecting...';
+                  button.disabled = true;
+
+                  provider
+                    .request({ method: 'eth_requestAccounts' })
+                    .then(accounts => {
+                      console.log('eth_requestAccounts', accounts);
+                      el.innerHTML = '<p>Grindery Wallet Connected!</p>';
+                    })
+                    .catch(error => {
+                      console.error('eth_requestAccounts', error);
+                      button.innerHTML = 'Try again';
+                      button.disabled = false;
+                    });
+                });
+              }
             }
 
-            provider
-              .request({ method: 'eth_accounts' })
-              .then(accounts => {
-                console.log('eth_accounts', accounts);
-              })
-              .catch(error => {
-                console.error('eth_accounts', error);
-              });
+            provider.on('pairing', data => {
+              if (
+                window.Telegram &&
+                window.Telegram.WebApp &&
+                window.Telegram.WebApp.openLink
+              ) {
+                window.Telegram.WebApp.openLink(data.connectUrlBrowser);
+              } else {
+                window.open(data.connectUrl, '_self');
+              }
+            });
+
+            provider.on('disconnect', data => {
+              console.log('disconnect', data);
+            });
           });
         }
       });

@@ -10,7 +10,7 @@ declare global {
   }
 }
 
-function init(_: Event) {
+function init() {
   if (
     !window.Grindery?.WalletSDK ||
     !(window.Grindery.WalletSDK instanceof GrinderyWalletSDK)
@@ -23,4 +23,4 @@ function init(_: Event) {
 }
 
 // Initialize the SDK when the page is loaded
-addEventListener('load', init);
+init();

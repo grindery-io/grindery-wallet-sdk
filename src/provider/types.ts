@@ -17,7 +17,11 @@ export interface RequestArguments {
 }
 
 export interface ProviderMethods {
-  [name: string]: (params?: RequestArgumentsParams) => Promise<unknown>;
+  [name: string]: {
+    sessionRequired?: boolean;
+    pairingTokenRequired?: boolean;
+    execute: (params?: RequestArgumentsParams) => Promise<unknown>;
+  };
 }
 
 export interface ProviderMessage {
@@ -64,8 +68,29 @@ export interface ProviderInterface extends ProviderEventEmitter {
   ): this;
 }
 
-export type ProviderStorageKey = 'accessToken' | 'userId' | 'address';
+export type ProviderStorageKey =
+  | 'pairingToken'
+  | 'sessionId'
+  | 'address'
+  | 'connectUrl'
+  | 'connectUrlBrowser';
 
 export type ProviderStorage = {
   [key in ProviderStorageKey]?: string;
 };
+
+export interface ProviderRequestPairingResult {
+  pairingToken: string;
+  connectUrl: string;
+  connectUrlBrowser: string;
+}
+
+export type GrinderyRpcMethodName =
+  | 'checkout_requestPairing'
+  | 'checkout_waitForPairingResult'
+  | 'checkout_request';
+
+export interface ProviderPairingResult {
+  sessionId: string;
+  address: string;
+}

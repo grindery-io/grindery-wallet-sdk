@@ -11,7 +11,7 @@
   ],
   "scripts": {
     "start": "tsdx watch --format cjs,esm,umd",
-    "build": "tsdx build --format cjs,esm,umd",
+    "build": "tsdx build --format cjs,esm,umd && rm -rf example/dist && cp -rf dist example/dist",
     "test": "tsdx test",
     "lint": "tsdx lint",
     "prepare": "tsdx build",

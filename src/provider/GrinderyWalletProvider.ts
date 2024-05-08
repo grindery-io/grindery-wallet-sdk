@@ -1,8 +1,11 @@
 import { ProviderError } from './ProviderError';
 import { ProviderLocalStorage } from './ProviderLocalStorage';
 import {
+  GrinderyRpcMethodName,
   ProviderInterface,
   ProviderMethods,
+  ProviderPairingResult,
+  ProviderRequestPairingResult,
   RequestArguments,
   RequestArgumentsParams,
 } from './types';
@@ -13,7 +16,6 @@ export class GrinderyWalletProvider extends ProviderLocalStorage
 
   constructor() {
     super();
-
     this.injectProvider();
   }
 
@@ -21,8 +23,12 @@ export class GrinderyWalletProvider extends ProviderLocalStorage
     return !!this.chainId;
   }
 
-  public isAccountsConnected(): boolean {
-    return this.accounts.length > 0;
+  public isWalletConnected(): boolean {
+    return this.isConnected() && !!this.getStorageValue('sessionId');
+  }
+
+  public isWalletConnectionPending(): boolean {
+    return this.isConnected() && !!this.getStorageValue('pairingToken');
   }
 
   public async request<T>({ method, params }: RequestArguments): Promise<T> {
@@ -34,95 +40,187 @@ export class GrinderyWalletProvider extends ProviderLocalStorage
     }
 
     try {
-      return (await this.methods[method](params)) as T;
+      if (this.methods[method].sessionRequired && !this.isWalletConnected()) {
+        throw new ProviderError('Unauthorized', 4900);
+      }
+      if (
+        this.methods[method].pairingTokenRequired &&
+        !this.isWalletConnectionPending()
+      ) {
+        throw new ProviderError('Unauthorized', 4900);
+      }
+      return (await this.methods[method].execute(params)) as T;
     } catch (error) {
       throw this.createProviderRpcError(error);
     }
   }
 
-  private accounts: string[] = [];
-  private chainId: string = '';
+  private appId: string = window.location.origin || 'localhost';
+  private chainId: string = 'eip155:137';
 
-  /* Avaialble `request` methods */
+  /* Avaialble provider `request` methods */
   private methods: ProviderMethods = {
-    eth_accounts: async (_?: RequestArgumentsParams): Promise<string[]> => {
-      if (!this.getStorageValue('accessToken') || this.accounts.length === 0) {
-        throw new ProviderError('Unauthorized', 4900);
-      }
-      return this.accounts;
-    },
-    eth_requestAccounts: async (
-      params?: {
-        userId?: string;
-      } & RequestArgumentsParams
-    ): Promise<string[]> => {
-      if (this.getStorageValue('accessToken') && this.accounts.length > 0) {
-        return this.accounts;
-      }
-      try {
-        const result = await this.request<{
-          success: boolean;
-          address?: string;
-          accessToken?: string;
-          connectUrl?: string;
-        }>({
-          method: 'wallet_pair',
-          params: { userId: params?.userId || this.getStorageValue('userId') },
-        });
-
-        if (
-          result.success &&
-          result.address &&
-          new RegExp(/^0x[0-9a-fA-F]{40}$/).test(result.address) &&
-          result.accessToken
-        ) {
-          this.setStorageValue('address', result.address);
-          this.setStorageValue('accessToken', result.accessToken);
-          this.accounts = [result.address];
-          this.emit('accountsChanged', { accounts: this.accounts });
-          return this.accounts;
+    eth_requestAccounts: {
+      sessionRequired: false,
+      pairingTokenRequired: false,
+      execute: async (params?: RequestArgumentsParams): Promise<string[]> => {
+        if (this.isWalletConnected()) {
+          try {
+            return await this.request<string[]>({
+              method: 'eth_accounts',
+              params: params || [],
+            });
+          } catch (error) {
+            this.setStorageValue('sessionId', '');
+            // skip failed request and continue with pairing
+          }
         }
-        throw new ProviderError('Pairing failed', 4900);
-      } catch (error) {
-        throw this.createProviderRpcError(error);
-      }
+        if (this.isWalletConnectionPending()) {
+          try {
+            this.emit('restorePairing', {
+              connectUrl: this.getStorageValue('connectUrl'),
+              connectUrlBrowser: this.getStorageValue('connectUrlBrowser'),
+            });
+
+            const pairResult = await this.request<ProviderPairingResult>({
+              method: 'checkout_waitForPairingResult',
+              params: { pairingToken: this.getStorageValue('pairingToken') },
+            });
+
+            this.setStorageValue('sessionId', pairResult.sessionId);
+
+            if (!pairResult.sessionId) {
+              throw new ProviderError('Pairing failed', 4900);
+            }
+            return [];
+          } catch (error) {
+            this.setStorageValue('pairingToken', '');
+            this.setStorageValue('connectUrl', '');
+            this.setStorageValue('connectUrlBrowser', '');
+            // skip failed request and continue with pairing
+          }
+        }
+        try {
+          const result = await this.request<ProviderRequestPairingResult>({
+            method: 'checkout_requestPairing',
+            params: { appId: this.appId },
+          });
+
+          if (!result.pairingToken || !result.connectUrl) {
+            throw new ProviderError('Pairing failed', 4900);
+          }
+
+          this.setStorageValue('pairingToken', result.pairingToken);
+          this.setStorageValue('connectUrl', result.connectUrl);
+          this.setStorageValue('connectUrlBrowser', result.connectUrlBrowser);
+          this.emit('pairing', {
+            connectUrl: result.connectUrl,
+            connectUrlBrowser: result.connectUrlBrowser,
+          });
+          const pairResult = await this.request<ProviderPairingResult>({
+            method: 'checkout_waitForPairingResult',
+            params: { pairingToken: result.pairingToken },
+          });
+
+          this.setStorageValue('sessionId', pairResult.sessionId);
+
+          if (!pairResult.sessionId) {
+            throw new ProviderError('Pairing failed', 4900);
+          }
+          return await this.sendGrinderyRpcApiRequest<string[]>(
+            'checkout_request',
+            {
+              sessionId: pairResult.sessionId,
+              scope: this.chainId,
+              request: {
+                method: 'eth_accounts',
+                params,
+              },
+            }
+          );
+        } catch (error) {
+          throw this.createProviderRpcError(error);
+        }
+      },
     },
-    wallet_pair: async (
-      params?: {
-        userId?: string;
-      } & RequestArgumentsParams
-    ): Promise<{
-      success: boolean;
-      address?: string;
-      accessToken?: string;
-      connectUrl?: string;
-    }> => {
-      return await this.sendGrinderyRpcApiRequest<{
-        success: boolean;
-        address?: string;
-        accessToken?: string;
-        connectUrl?: string;
-      }>('wallet_pair', params);
+    checkout_requestPairing: {
+      sessionRequired: false,
+      pairingTokenRequired: false,
+      execute: async (
+        params?: RequestArgumentsParams
+      ): Promise<ProviderRequestPairingResult> => {
+        return await this.sendGrinderyRpcApiRequest<
+          ProviderRequestPairingResult
+        >('checkout_requestPairing', params);
+      },
     },
-    eth_sendTransaction: async (
-      params?: RequestArgumentsParams
-    ): Promise<string[]> => {
-      if (!this.getStorageValue('accessToken') || this.accounts.length === 0) {
-        throw new ProviderError('Unauthorized', 4900);
-      }
-      return await this.sendGrinderyRpcApiRequest<string[]>(
-        'eth_sendTransaction',
-        params
-      );
+    checkout_waitForPairingResult: {
+      sessionRequired: false,
+      pairingTokenRequired: true,
+      execute: async (
+        params?: RequestArgumentsParams
+      ): Promise<ProviderRequestPairingResult> => {
+        return await this.sendGrinderyRpcApiRequest<
+          ProviderRequestPairingResult
+        >('checkout_waitForPairingResult', params);
+      },
     },
-    personal_sign: async (params?: RequestArgumentsParams): Promise<string> => {
-      if (!this.getStorageValue('accessToken') || this.accounts.length === 0) {
-        throw new ProviderError('Unauthorized', 4900);
-      }
-      return await this.sendGrinderyRpcApiRequest<string>(
-        'personal_sign',
-        params
-      );
+    eth_accounts: {
+      sessionRequired: true,
+      pairingTokenRequired: false,
+      execute: async (params?: RequestArgumentsParams): Promise<string[]> => {
+        return await this.sendGrinderyRpcApiRequest<string[]>(
+          'checkout_request',
+          {
+            sessionId: this.getStorageValue('sessionId'),
+            scope: this.chainId,
+            request: {
+              method: 'eth_accounts',
+              params: params || [],
+            },
+          }
+        );
+      },
+    },
+    eth_sendTransaction: {
+      sessionRequired: true,
+      pairingTokenRequired: false,
+      execute: async (params?: RequestArgumentsParams): Promise<string[]> => {
+        if (!this.isWalletConnected()) {
+          throw new ProviderError('Unauthorized', 4900);
+        }
+        return await this.sendGrinderyRpcApiRequest<string[]>(
+          'checkout_request',
+          {
+            sessionId: this.getStorageValue('sessionId'),
+            scope: this.chainId,
+            request: {
+              method: 'eth_sendTransaction',
+              params: params || [],
+            },
+          }
+        );
+      },
+    },
+    personal_sign: {
+      sessionRequired: true,
+      pairingTokenRequired: false,
+      execute: async (params?: RequestArgumentsParams): Promise<string> => {
+        if (!this.isWalletConnected()) {
+          throw new ProviderError('Unauthorized', 4900);
+        }
+        return await this.sendGrinderyRpcApiRequest<string>(
+          'checkout_request',
+          {
+            sessionId: this.getStorageValue('sessionId'),
+            scope: this.chainId,
+            request: {
+              method: 'personal_sign',
+              params: params || [],
+            },
+          }
+        );
+      },
     },
   };
 
@@ -140,22 +238,11 @@ export class GrinderyWalletProvider extends ProviderLocalStorage
       }
     }
 
-    this.connect();
-  }
-
-  private async connect(): Promise<void> {
-    try {
-      // TODO replace with real async handshake?
+    addEventListener('load', () => {
       setTimeout(() => {
-        this.chainId = '0x89';
-        if (this.getStorageValue('address')) {
-          this.accounts = [this.getStorageValue('address')];
-        }
         this.emit('connect', { chainId: this.chainId });
-      }, 100);
-    } catch (error) {
-      this.emit('disconnect', { error: this.createProviderRpcError(error) });
-    }
+      }, 1000);
+    });
   }
 
   private createProviderRpcError(error: unknown): ProviderError {
@@ -175,7 +262,7 @@ export class GrinderyWalletProvider extends ProviderLocalStorage
   }
 
   private async sendGrinderyRpcApiRequest<T>(
-    method: string,
+    method: GrinderyRpcMethodName,
     params?: RequestArgumentsParams
   ): Promise<T> {
     try {
@@ -183,15 +270,12 @@ export class GrinderyWalletProvider extends ProviderLocalStorage
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: this.getStorageValue('accessToken')
-            ? `Bearer ${this.getStorageValue('accessToken')}`
-            : '',
         },
         body: JSON.stringify({
           jsonrpc: '2.0',
           id: 1,
           method,
-          params,
+          params: params || [],
         }),
       });
       const data = await response.json();
