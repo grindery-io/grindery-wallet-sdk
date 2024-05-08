@@ -96,7 +96,7 @@
           }
 
           provider.on('pairing', data => {
-            if (WebApp && WebApp.openTelegramLink) {
+            if (WebApp && WebApp.openTelegramLink && WebApp.MainButton) {
               WebApp.openTelegramLink(data.connectUrlBrowser);
               if (WebApp.close) {
                 window.Telegram.WebApp.close();
