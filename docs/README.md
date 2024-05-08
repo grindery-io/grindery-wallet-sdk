@@ -68,8 +68,6 @@ Connect a dApp to the Grindery Wallet.
 
 This method must always be called first, to initate dApp connection and get user's wallet address.
 
-> The method internally uses [`checkout_requestPairing`](#method_checkout_requestpairing) and [`checkout_waitForPairingResult`](#method_checkout_waitforpairingresult) methods.
-
 **Request params:** none
 
 **Response result:** Array of Strings. An array with user addresses.
