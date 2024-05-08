@@ -160,7 +160,7 @@ Wait for pairing requst to be approved by user and get result.
 
 # Example implementation
 
-See an example implementation in [example/index.html](example/index.html)
+See an example implementation [here](example/index.html).
 
 # SDK Development
 
