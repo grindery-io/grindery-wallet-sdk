@@ -47,72 +47,70 @@
     </div>
 
     <script type="text/javascript">
-      addEventListener('load', () => {
-        const provider =
-          window.Grindery &&
-          window.Grindery.WalletSDK &&
-          window.Grindery.WalletSDK.provider;
+      const provider =
+        window.Grindery &&
+        window.Grindery.WalletSDK &&
+        window.Grindery.WalletSDK.provider;
 
-        if (provider) {
-          provider.on('connect', () => {
-            const WebApp = window && window.Telegram && window.Telegram.WebApp;
-            if (WebApp) {
-              const user = WebApp.initDataUnsafe && WebApp.initDataUnsafe.user;
-              if (user) {
-                var userNamePlaceholder = document.querySelector('.username');
-                if (userNamePlaceholder) {
-                  userNamePlaceholder.innerHTML = ' @' + user.username;
-                }
+      if (provider) {
+        provider.on('connect', () => {
+          const WebApp = window && window.Telegram && window.Telegram.WebApp;
+          if (WebApp) {
+            const user = WebApp.initDataUnsafe && WebApp.initDataUnsafe.user;
+            if (user) {
+              var userNamePlaceholder = document.querySelector('.username');
+              if (userNamePlaceholder) {
+                userNamePlaceholder.innerHTML = ' @' + user.username;
               }
             }
+          }
 
-            const el = document.getElementById('walletSDK');
-            if (el) {
-              el.innerHTML = `
+          const el = document.getElementById('walletSDK');
+          if (el) {
+            el.innerHTML = `
                 <button class="py-2 px-4 bg-blue-500 text-white rounded-xl connect">
                   Connect Grindery Wallet
                 </button>
               `;
-              const button = el.querySelector('button');
-              if (button) {
-                button.addEventListener('click', () => {
-                  button.innerHTML = 'Connecting...';
-                  button.disabled = true;
+            const button = el.querySelector('button');
+            if (button) {
+              button.addEventListener('click', () => {
+                button.innerHTML = 'Connecting...';
+                button.disabled = true;
 
-                  provider
-                    .request({ method: 'eth_requestAccounts' })
-                    .then(res => {
-                      console.log('eth_requestAccounts', res);
-                      el.innerHTML = `
+                provider
+                  .request({ method: 'eth_requestAccounts' })
+                  .then(res => {
+                    console.log('eth_requestAccounts', res);
+                    el.innerHTML = `
                         <p class="text-center mb-4">Grindery Wallet Connected!</p>
                       `;
-                    })
-                    .catch(error => {
-                      console.error('eth_requestAccounts', error);
-                      button.innerHTML = 'Try again';
-                      button.disabled = false;
-                    });
-                });
-              }
+                  })
+                  .catch(error => {
+                    console.error('eth_requestAccounts', error);
+                    button.innerHTML = 'Try again';
+                    button.disabled = false;
+                  });
+              });
             }
+          }
 
-            provider.on('pairing', data => {
-              if (WebApp && WebApp.openTelegramLink) {
-                WebApp.openTelegramLink(data.connectUrlBrowser);
-                if (WebApp.close) {
-                  window.Telegram.WebApp.close();
-                }
-              } else {
-                window.open(data.connectUrl, '_blank');
+          provider.on('pairing', data => {
+            if (WebApp && WebApp.openTelegramLink) {
+              WebApp.openTelegramLink(data.connectUrlBrowser);
+              if (WebApp.close) {
+                window.Telegram.WebApp.close();
               }
-            });
-
-            provider.on('disconnect', data => {
-              console.log('disconnect', data);
-            });
+            } else {
+              window.open(data.connectUrl, '_blank');
+            }
           });
-        }
-      });
+
+          provider.on('disconnect', data => {
+            console.log('disconnect', data);
+          });
+        });
+      }
     </script>
   </body>
 </html>
