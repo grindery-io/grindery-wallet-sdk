@@ -55,12 +55,12 @@ export class GrinderyWalletProvider extends Provider
                 pairingToken: this.getStorageValue('pairingToken'),
               });
 
-              this.setStorageValue('sessionId', pairResult.sessionId);
+              this.setStorageValue('sessionId', pairResult.session.sessionId);
               this.setStorageValue('pairingToken', '');
               this.setStorageValue('connectUrl', '');
               this.setStorageValue('connectUrlBrowser', '');
 
-              if (!pairResult.sessionId) {
+              if (!pairResult.session.sessionId) {
                 throw new ProviderError('Pairing failed', 4900);
               }
 
@@ -95,15 +95,21 @@ export class GrinderyWalletProvider extends Provider
               pairingToken: result.pairingToken,
             });
 
-            this.setStorageValue('sessionId', pairResult.sessionId);
+            this.setStorageValue('sessionId', pairResult.session.sessionId);
 
-            if (!pairResult.sessionId) {
+            if (!pairResult.session.sessionId) {
               throw new ProviderError('Pairing failed', 4900);
+            }
+            this.setStorageValue('pairingToken', '');
+            this.setStorageValue('connectUrl', '');
+            this.setStorageValue('connectUrlBrowser', '');
+            if (pairResult.session.namespaces[`eip155`].accounts.length > 0) {
+              return pairResult.session.namespaces[`eip155`].accounts;
             }
             return await this.sendGrinderyRpcApiRequest<string[]>(
               'checkout_request',
               {
-                sessionId: pairResult.sessionId,
+                sessionId: pairResult.session.sessionId,
                 scope: this.chainId,
                 request: {
                   method: 'eth_accounts',

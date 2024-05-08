@@ -92,8 +92,18 @@ export type GrinderyRpcMethodName =
   | 'checkout_waitForRequestResult';
 
 export interface ProviderPairingResult {
-  sessionId: string;
-  address: string;
+  session: {
+    expiry: number;
+    sessionId: string;
+    namespaces: {
+      [key: string]: {
+        accounts: string[];
+        chains: string[];
+        events: string[];
+        methods: string[];
+      };
+    };
+  };
 }
 
 export type GrinderyRpcProviderRequestMethodName =

@@ -54,8 +54,18 @@ export interface ProviderRequestPairingResult {
 }
 export declare type GrinderyRpcMethodName = 'checkout_requestPairing' | 'checkout_waitForPairingResult' | 'checkout_request' | 'checkout_waitForRequestResult';
 export interface ProviderPairingResult {
-    sessionId: string;
-    address: string;
+    session: {
+        expiry: number;
+        sessionId: string;
+        namespaces: {
+            [key: string]: {
+                accounts: string[];
+                chains: string[];
+                events: string[];
+                methods: string[];
+            };
+        };
+    };
 }
 export declare type GrinderyRpcProviderRequestMethodName = 'eth_accounts' | 'personal_sign' | 'eth_sendTransaction';
 export interface ProviderRequestResult {

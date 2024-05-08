@@ -836,11 +836,11 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_Provider) {
                   });
                 case 15:
                   pairResult = _context.sent;
-                  _this.setStorageValue('sessionId', pairResult.sessionId);
+                  _this.setStorageValue('sessionId', pairResult.session.sessionId);
                   _this.setStorageValue('pairingToken', '');
                   _this.setStorageValue('connectUrl', '');
                   _this.setStorageValue('connectUrlBrowser', '');
-                  if (pairResult.sessionId) {
+                  if (pairResult.session.sessionId) {
                     _context.next = 22;
                     break;
                   }
@@ -882,33 +882,42 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_Provider) {
                   });
                 case 43:
                   _pairResult = _context.sent;
-                  _this.setStorageValue('sessionId', _pairResult.sessionId);
-                  if (_pairResult.sessionId) {
+                  _this.setStorageValue('sessionId', _pairResult.session.sessionId);
+                  if (_pairResult.session.sessionId) {
                     _context.next = 47;
                     break;
                   }
                   throw new ProviderError('Pairing failed', 4900);
                 case 47:
-                  _context.next = 49;
+                  _this.setStorageValue('pairingToken', '');
+                  _this.setStorageValue('connectUrl', '');
+                  _this.setStorageValue('connectUrlBrowser', '');
+                  if (!(_pairResult.session.namespaces["eip155"].accounts.length > 0)) {
+                    _context.next = 52;
+                    break;
+                  }
+                  return _context.abrupt("return", _pairResult.session.namespaces["eip155"].accounts);
+                case 52:
+                  _context.next = 54;
                   return _this.sendGrinderyRpcApiRequest('checkout_request', {
-                    sessionId: _pairResult.sessionId,
+                    sessionId: _pairResult.session.sessionId,
                     scope: _this.chainId,
                     request: {
                       method: 'eth_accounts',
                       params: []
                     }
                   });
-                case 49:
+                case 54:
                   return _context.abrupt("return", _context.sent);
-                case 52:
-                  _context.prev = 52;
+                case 57:
+                  _context.prev = 57;
                   _context.t2 = _context["catch"](31);
                   throw _this.createProviderRpcError(_context.t2);
-                case 55:
+                case 60:
                 case "end":
                   return _context.stop();
               }
-            }, _callee, null, [[1, 7], [11, 25], [31, 52]]);
+            }, _callee, null, [[1, 7], [11, 25], [31, 57]]);
           }));
           function execute(_x) {
             return _execute.apply(this, arguments);
