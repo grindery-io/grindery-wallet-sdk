@@ -3,7 +3,7 @@
   "author": "Egor Miliukov",
   "version": "0.1.0",
   "license": "MIT",
-  "main": "dist/grindery-wallet-sdk.cjs",
+  "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "files": [
     "dist",
