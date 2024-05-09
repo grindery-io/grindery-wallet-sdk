@@ -970,29 +970,24 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderBase) {
                   // skip failed request and continue with pairing
                 case 13:
                   if (!_this.isWalletConnectionPending()) {
-                    _context.next = 32;
+                    _context.next = 31;
                     break;
                   }
                   _context.prev = 14;
-                  _this.emit('restorePairing', {
-                    shortToken: _this.getStorageValue('shortToken'),
-                    connectUrl: _this.getStorageValue('connectUrl'),
-                    connectUrlBrowser: _this.getStorageValue('connectUrlBrowser')
-                  });
-                  _context.next = 18;
+                  _context.next = 17;
                   return _this.sendGrinderyRpcApiRequest('checkout_waitForPairingResult', {
                     pairingToken: _this.getStorageValue('pairingToken')
                   });
-                case 18:
+                case 17:
                   pairResult = _context.sent;
                   _this.clearStorage();
                   _this.setStorageValue('sessionId', pairResult.session.sessionId);
                   if (pairResult.session.sessionId) {
-                    _context.next = 23;
+                    _context.next = 22;
                     break;
                   }
                   throw new ProviderError('Pairing failed', 4900);
-                case 23:
+                case 22:
                   _accounts = (((_pairResult$session = pairResult.session) == null || (_pairResult$session = _pairResult$session.namespaces) == null || (_pairResult$session = _pairResult$session["eip155"]) == null ? void 0 : _pairResult$session.accounts) || []).map(function (account) {
                     return account.includes(':') ? account.split(':')[2] || '' : account;
                   });
@@ -1001,25 +996,25 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderBase) {
                     accounts: _accounts
                   });
                   return _context.abrupt("return", []);
-                case 29:
-                  _context.prev = 29;
+                case 28:
+                  _context.prev = 28;
                   _context.t1 = _context["catch"](14);
                   _this.clearStorage();
                   // skip failed request and continue with pairing
-                case 32:
-                  _context.prev = 32;
-                  _context.next = 35;
+                case 31:
+                  _context.prev = 31;
+                  _context.next = 34;
                   return _this.sendGrinderyRpcApiRequest('checkout_requestPairing', {
                     appId: _this.appId
                   });
-                case 35:
+                case 34:
                   result = _context.sent;
                   if (!(!result.pairingToken || !result.connectUrl)) {
-                    _context.next = 38;
+                    _context.next = 37;
                     break;
                   }
                   throw new ProviderError('Pairing failed', 4900);
-                case 38:
+                case 37:
                   _this.setStorageValue('pairingToken', result.pairingToken);
                   _this.setStorageValue('connectUrl', result.connectUrl);
                   _this.setStorageValue('connectUrlBrowser', result.connectUrlBrowser);
@@ -1029,19 +1024,19 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderBase) {
                     connectUrl: result.connectUrl,
                     connectUrlBrowser: result.connectUrlBrowser
                   });
-                  _context.next = 45;
+                  _context.next = 44;
                   return _this.sendGrinderyRpcApiRequest('checkout_waitForPairingResult', {
                     pairingToken: result.pairingToken
                   });
-                case 45:
+                case 44:
                   _pairResult = _context.sent;
                   _this.setStorageValue('sessionId', _pairResult.session.sessionId);
                   if (_pairResult.session.sessionId) {
-                    _context.next = 49;
+                    _context.next = 48;
                     break;
                   }
                   throw new ProviderError('Pairing failed', 4900);
-                case 49:
+                case 48:
                   _this.setStorageValue('pairingToken', '');
                   _this.setStorageValue('connectUrl', '');
                   _this.setStorageValue('connectUrlBrowser', '');
@@ -1054,15 +1049,15 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderBase) {
                     accounts: _accounts2
                   });
                   return _context.abrupt("return", _accounts2);
-                case 59:
-                  _context.prev = 59;
-                  _context.t2 = _context["catch"](32);
+                case 58:
+                  _context.prev = 58;
+                  _context.t2 = _context["catch"](31);
                   throw _this.createProviderRpcError(_context.t2);
-                case 62:
+                case 61:
                 case "end":
                   return _context.stop();
               }
-            }, _callee, null, [[1, 10], [14, 29], [32, 59]]);
+            }, _callee, null, [[1, 10], [14, 28], [31, 58]]);
           }));
           function execute(_x) {
             return _execute.apply(this, arguments);
@@ -1178,29 +1173,24 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderBase) {
             pairingToken = this.getStorageValue('pairingToken');
             sessionId = this.getStorageValue('sessionId');
             if (!(pairingToken && !sessionId)) {
-              _context5.next = 21;
+              _context5.next = 20;
               break;
             }
             _context5.prev = 3;
-            this.emit('restorePairing', {
-              shortToken: this.getStorageValue('shortToken'),
-              connectUrl: this.getStorageValue('connectUrl'),
-              connectUrlBrowser: this.getStorageValue('connectUrlBrowser')
-            });
-            _context5.next = 7;
+            _context5.next = 6;
             return this.sendGrinderyRpcApiRequest('checkout_waitForPairingResult', {
               pairingToken: pairingToken
             });
-          case 7:
+          case 6:
             pairResult = _context5.sent;
             this.clearStorage();
             this.setStorageValue('sessionId', pairResult.session.sessionId);
             if (pairResult.session.sessionId) {
-              _context5.next = 12;
+              _context5.next = 11;
               break;
             }
             throw new ProviderError('Pairing failed', 4900);
-          case 12:
+          case 11:
             accounts = (((_pairResult$session3 = pairResult.session) == null || (_pairResult$session3 = _pairResult$session3.namespaces) == null || (_pairResult$session3 = _pairResult$session3["eip155"]) == null ? void 0 : _pairResult$session3.accounts) || []).map(function (account) {
               return account.includes(':') ? account.split(':')[2] || '' : account;
             });
@@ -1208,18 +1198,18 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderBase) {
             this.emit('accountsChanged', {
               accounts: accounts
             });
-            _context5.next = 21;
+            _context5.next = 20;
             break;
-          case 17:
-            _context5.prev = 17;
+          case 16:
+            _context5.prev = 16;
             _context5.t0 = _context5["catch"](3);
             this.accounts = [];
             this.clearStorage();
-          case 21:
+          case 20:
           case "end":
             return _context5.stop();
         }
-      }, _callee5, this, [[3, 17]]);
+      }, _callee5, this, [[3, 16]]);
     }));
     function restorePairing() {
       return _restorePairing.apply(this, arguments);
@@ -1280,7 +1270,6 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderBase) {
 var GrinderyWalletSDK = /*#__PURE__*/function () {
   function GrinderyWalletSDK() {
     this.provider = this.getWeb3Provider();
-    this.provider.on('restorePairing', this.handlePairing);
     this.provider.on('pairing', this.handlePairing);
   }
   /**

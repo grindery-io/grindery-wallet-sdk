@@ -28,7 +28,6 @@ Grindery Wallet SDK enables your dapp to provide a seamless user experience for 
     - [disconnect](#sdk-events_disconnect)
     - [accountsChanged](#sdk-events_accountschanged)
     - [pairing](#sdk-events_pairing)
-    - [restorePairing](#sdk-events_restorepairing)
 - [Advanced usage](#advanced-usage)
   - [Injected Ethereum Provider](#injected-ethereum-provider)
     - [eth_requestAccounts](#method_eth_requestaccounts)
@@ -259,7 +258,6 @@ window.Grindery.WalletSDK.removeListener('connect', data => {
 - [disconnect](#sdk-events_disconnect)
 - [accountsChanged](#sdk-events_accountschanged)
 - [pairing](#sdk-events_pairing)
-- [restorePairing](#sdk-events_restorepairing)
 
 ### <a id="sdk-events_connect">`connect`</a>
 
@@ -332,27 +330,6 @@ Event emitted when SDK requests the wallet connection.
 ```js
 window.Grindery.WalletSDK.on('pairing', data => {
   console.log('pairing', data);
-});
-```
-
----
-
-### <a id="sdk-events_restorepairing">`restorePairing`</a>
-
-Event emitted when SDK requests to restore the wallet connection.
-
-> SDK will try to automatically redirect user to the connection page if the app has been reloaded during the connection process. However we recommend to listen for this event to get the connection page URL and show it to the user.
-
-**Event data:**
-
-- `connectUrl` String. Telegram URI.
-- `connectUrlBrowser` String. Browser URL.
-
-**Example code:**
-
-```js
-window.Grindery.WalletSDK.on('restorePairing', data => {
-  console.log('restorePairing', data);
 });
 ```
 

@@ -42,12 +42,6 @@ export class GrinderyWalletProvider extends ProviderBase
           }
           if (this.isWalletConnectionPending()) {
             try {
-              this.emit('restorePairing', {
-                shortToken: this.getStorageValue('shortToken'),
-                connectUrl: this.getStorageValue('connectUrl'),
-                connectUrlBrowser: this.getStorageValue('connectUrlBrowser'),
-              });
-
               const pairResult = await this.sendGrinderyRpcApiRequest<
                 ProviderPairingResult
               >('checkout_waitForPairingResult', {
@@ -177,12 +171,6 @@ export class GrinderyWalletProvider extends ProviderBase
     const sessionId = this.getStorageValue('sessionId');
     if (pairingToken && !sessionId) {
       try {
-        this.emit('restorePairing', {
-          shortToken: this.getStorageValue('shortToken'),
-          connectUrl: this.getStorageValue('connectUrl'),
-          connectUrlBrowser: this.getStorageValue('connectUrlBrowser'),
-        });
-
         const pairResult = await this.sendGrinderyRpcApiRequest<
           ProviderPairingResult
         >('checkout_waitForPairingResult', {

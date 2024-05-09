@@ -14,7 +14,6 @@ export class GrinderyWalletSDK {
 
   constructor() {
     this.provider = this.getWeb3Provider();
-    this.provider.on('restorePairing', this.handlePairing);
     this.provider.on('pairing', this.handlePairing);
   }
 
