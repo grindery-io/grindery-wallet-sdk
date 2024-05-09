@@ -132,17 +132,14 @@ const listenWalletButtonsClicks = (address, target) => {
 
 const onPairing = (data, target) => {
   target.innerHTML = `
-  <p class="text-center mb-4">Approve wallet connection in Grindery Bot</p>
-    <p class="text-center mb-4"><a
-    target="_blank"
-    class="!text-blue-500" href="${data.connectUrlBrowser}">Click here</a> if you weren't redirected automatically</p>
-  `;
-};
-
-const onRestorePairing = (data, target) => {
-  target.innerHTML = `
-  <p class="text-center mb-4">Approve wallet connection in Grindery Bot</p>
-    <p class="text-center mb-4"><a href="${data.connectUrlBrowser}" target="_blank" rel="noreferrer">Click here</a> if you weren't redirected automatically</p>
+    <p class="text-center mb-4">Approve wallet connection in Grindery Bot</p>
+    <p class="text-center mb-4">
+      <a
+        target="_blank"
+        class="!text-blue-500" 
+        href="${data.connectUrlBrowser}"
+      >Click here</a> if you weren't redirected automatically
+    </p>
   `;
 };
 
@@ -163,7 +160,7 @@ const onDisconnect = (data, target) => {
 };
 
 const listenProviderEvents = target => {
-  WalletSDK.on('restorePairing', data => onRestorePairing(data, target));
+  WalletSDK.on('restorePairing', data => onPairing(data, target));
   WalletSDK.on('accountsChanged', data => onAccountsChanged(data, target));
   WalletSDK.on('disconnect', data => onDisconnect(data, target));
 };
