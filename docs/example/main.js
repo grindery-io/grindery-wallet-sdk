@@ -37,7 +37,9 @@ if (provider) {
           provider.on('pairing', data => {
             parent.innerHTML = `
               <p class="text-center mb-4">Approve wallet connection in Grindery Bot</p>
-                <p class="text-center mb-4"><a class="text-blue-500" href="${data.connectUrlBrowser}" target="_blank" rel="noreferrer">Click here</a> if you weren't redirected automatically</p>
+                <p class="text-center mb-4"><a
+                target="_blank"
+                class="!text-blue-500" href="${data.connectUrlBrowser}">Click here</a> if you weren't redirected automatically</p>
               `;
             if (
               WebApp &&
@@ -81,22 +83,57 @@ if (provider) {
         parent.innerHTML = `
             <p class="text-center mb-4">Grindery Wallet Connected!</p>
             <p class="text-center mb-4">${shortenAddress(address)}</p>
-            <button id="personal-sign" class="py-2 px-4 bg-blue-500 text-white rounded-xl">
-              Personal sign
-            </button>
+            <div class="mt-6">
+                <button id="personal_sign" class="py-2 px-4 bg-blue-500 text-white rounded-xl">
+                Sign message
+                </button>
+            </div>
+            <div class="mt-4">
+                <button id="eth_sendTransaction" class="py-2 px-4 bg-blue-500 text-white rounded-xl">
+                Send transaction
+                </button>
+            </div>
           `;
-        parent.querySelector('#personal-sign').addEventListener('click', () => {
+        const signButton = parent.querySelector('#personal_sign');
+        signButton.addEventListener('click', () => {
+          signButton.disabled = true;
+          signButton.innerHTML = 'Approve request in Grindery Bot...';
           provider
             .request({
               method: 'personal_sign',
-              params: [address, 'Hello, Grindery!'],
+              params: ['Hello, Grindery!', address],
             })
             .then(signature => {
               console.log('personal_sign', signature);
-              alert('Signature: ' + signature);
+              //alert('Signature: ' + signature);
+              signButton.parentElement.innerHTML = `<p class="text-center max-w-full overflow-hidden text-ellipsis">Signature: <em>${signature}</em></p>`;
             })
             .catch(error => {
               console.error('personal_sign', error);
+              signButton.disabled = false;
+              signButton.innerHTML = 'Personal sign';
+              alert('Error: ' + error.message);
+            });
+        });
+
+        const sendButton = parent.querySelector('#eth_sendTransaction');
+        sendButton.addEventListener('click', () => {
+          sendButton.disabled = true;
+          sendButton.innerHTML = 'Approve request in Grindery Bot...';
+          provider
+            .request({
+              method: 'eth_sendTransaction',
+              params: [{ to: address, value: '0xde0b6b3a7640000' }],
+            })
+            .then(txHash => {
+              console.log('eth_sendTransaction', txHash);
+              //alert('Signature: ' + signature);
+              sendButton.parentElement.innerHTML = `<p class="text-center max-w-full overflow-hidden text-ellipsis">Transaction: <em>${txHash}</em></p>`;
+            })
+            .catch(error => {
+              console.error('eth_sendTransaction', error);
+              sendButton.disabled = false;
+              sendButton.innerHTML = 'Send transaction';
               alert('Error: ' + error.message);
             });
         });
