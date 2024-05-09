@@ -1,14 +1,14 @@
-import { ProviderEventEmitter } from './ProviderEventEmitter';
-import { ProviderStorage, ProviderStorageKey } from './types';
+import { EventEmitter } from './EventEmitter';
+import { ProviderStorage, ProviderStorageKey } from '../types';
 
 const LOCALSTORAGE_KEY = 'GrinderyWalletProvider';
 
 /**
  * @summary A local storage class for the provider
  * @since 0.1.0
- * @extends ProviderEventEmitter
+ * @extends EventEmitter
  */
-export class ProviderLocalStorage extends ProviderEventEmitter {
+export class ProviderLocalStorage extends EventEmitter {
   /**
    * @summary Gets the value of the storage by the key
    * @protected

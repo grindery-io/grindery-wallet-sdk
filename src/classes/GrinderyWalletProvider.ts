@@ -1,11 +1,11 @@
-import { ProviderBase } from './ProviderBase';
-import { ProviderError } from './ProviderError';
 import {
   ProviderInterface,
   ProviderPairingResult,
   ProviderRequestPairingResult,
   RequestArgumentsParams,
-} from './types';
+} from '../types';
+import { ProviderBase } from './ProviderBase';
+import { ProviderError } from './ProviderError';
 
 /**
  * @summary The Grindery Wallet Ethereum Injected Provider Class.

@@ -1,6 +1,6 @@
+import { ProviderLocalStorage } from './LocalStorage';
+import { GrinderyRpcMethodName, GrinderyRpcProviderRequestMethodName, ProviderMethods, ProviderRequestResult, RequestArguments, RequestArgumentsParams } from '../types';
 import { ProviderError } from './ProviderError';
-import { ProviderLocalStorage } from './ProviderLocalStorage';
-import { GrinderyRpcMethodName, GrinderyRpcProviderRequestMethodName, ProviderMethods, ProviderRequestResult, RequestArguments, RequestArgumentsParams } from './types';
 /**
  * @summary The provider base class
  * @since 0.1.0

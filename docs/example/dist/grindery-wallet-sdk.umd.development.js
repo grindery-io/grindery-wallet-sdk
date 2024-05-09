@@ -416,38 +416,21 @@
   }
 
   /**
-   * @summary Error class for GrinderyWalletProvider
-   * @since 0.1.0
-   * @extends Error
-   */
-  var ProviderError = /*#__PURE__*/function (_Error) {
-    function ProviderError(message, code, data) {
-      var _this;
-      _this = _Error.call(this, message) || this;
-      _this.name = 'GrinderyWalletProviderError';
-      _this.code = code;
-      _this.data = data;
-      return _this;
-    }
-    _inheritsLoose(ProviderError, _Error);
-    return ProviderError;
-  }( /*#__PURE__*/_wrapNativeSuper(Error));
-
-  /**
    * @summary A class for emitting provider events
    * @since 0.1.0
    */
-  var ProviderEventEmitter = /*#__PURE__*/function () {
-    function ProviderEventEmitter() {
+  var EventEmitter = /*#__PURE__*/function () {
+    function EventEmitter() {
       this.events = new Map();
     }
     /**
-     * @summary Adds a listener to the provider event
+     * @summary Adds a listener to the event
+     * @public
      * @param {string} event Event name
      * @param {Function} callback Callback function
-     * @returns {ProviderEventEmitter} The instance of the class itself
+     * @returns {EventEmitter} The instance of the class itself
      */
-    var _proto = ProviderEventEmitter.prototype;
+    var _proto = EventEmitter.prototype;
     _proto.on = function on(event, callback) {
       if (!this.events.has(event)) {
         this.events.set(event, []);
@@ -456,10 +439,11 @@
       return this;
     }
     /**
-     * @summary Removes a listener from the provider event
+     * @summary Removes a listener from the event
+     * @public
      * @param {string} event Event name
      * @param {Function} callback Callback function
-     * @returns {ProviderEventEmitter} The instance of the class itself
+     * @returns {EventEmitter} The instance of the class itself
      */;
     _proto.removeListener = function removeListener(event, callback) {
       if (this.events.has(event)) {
@@ -472,36 +456,37 @@
     }
     /**
      * @summary Emits an event
+     * @public
      * @param {string} event Event name
      * @param data Event data
-     * @returns {ProviderEventEmitter} The instance of the class itself
+     * @returns {EventEmitter} The instance of the class itself
      */;
     _proto.emit = function emit(event) {
       for (var _len = arguments.length, data = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
         data[_key - 1] = arguments[_key];
       }
       if (this.events.has(event)) {
-        console.log('[GrinderyWalletProvider] > Event:', event, data);
+        console.log('[Grindery.WalletSDK] > Event:', event, data);
         this.events.get(event).forEach(function (callback) {
           callback.apply(void 0, data);
         });
       }
       return this;
     };
-    return ProviderEventEmitter;
+    return EventEmitter;
   }();
 
   var LOCALSTORAGE_KEY = 'GrinderyWalletProvider';
   /**
    * @summary A local storage class for the provider
    * @since 0.1.0
-   * @extends ProviderEventEmitter
+   * @extends EventEmitter
    */
-  var ProviderLocalStorage = /*#__PURE__*/function (_ProviderEventEmitter) {
+  var ProviderLocalStorage = /*#__PURE__*/function (_EventEmitter) {
     function ProviderLocalStorage() {
-      return _ProviderEventEmitter.apply(this, arguments) || this;
+      return _EventEmitter.apply(this, arguments) || this;
     }
-    _inheritsLoose(ProviderLocalStorage, _ProviderEventEmitter);
+    _inheritsLoose(ProviderLocalStorage, _EventEmitter);
     var _proto = ProviderLocalStorage.prototype;
     /**
      * @summary Gets the value of the storage by the key
@@ -553,7 +538,25 @@
       localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(storage));
     };
     return ProviderLocalStorage;
-  }(ProviderEventEmitter);
+  }(EventEmitter);
+
+  /**
+   * @summary Error class for GrinderyWalletProvider
+   * @since 0.1.0
+   * @extends Error
+   */
+  var ProviderError = /*#__PURE__*/function (_Error) {
+    function ProviderError(message, code, data) {
+      var _this;
+      _this = _Error.call(this, message) || this;
+      _this.name = 'GrinderyWalletProviderError';
+      _this.code = code;
+      _this.data = data;
+      return _this;
+    }
+    _inheritsLoose(ProviderError, _Error);
+    return ProviderError;
+  }( /*#__PURE__*/_wrapNativeSuper(Error));
 
   /**
    * @summary The provider base class
@@ -1277,10 +1280,145 @@
       this.provider = this.getWeb3Provider();
     }
     /**
-     * @summary Gets the Grindery Wallet ethereum provider
-     * @returns {GrinderyWalletProvider} The Grindery Wallet ethereum provider
+     * @summary Initiate connection to the Grindery Wallet
+     * @public
+     * @returns {Promise<string[]>} The array of ethereum addresses
+     * @since 0.1.0
      */
     var _proto = GrinderyWalletSDK.prototype;
+    _proto.connect =
+    /*#__PURE__*/
+    function () {
+      var _connect = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
+        return _regeneratorRuntime().wrap(function _callee$(_context) {
+          while (1) switch (_context.prev = _context.next) {
+            case 0:
+              this.provider.on('connect', function (_ref) {
+                var _window$Telegram;
+                var connectUrlBrowser = _ref.connectUrlBrowser;
+                var WebApp = (_window$Telegram = window.Telegram) == null ? void 0 : _window$Telegram.WebApp;
+                if (WebApp && WebApp.openTelegramLink && WebApp.platform && WebApp.platform !== 'unknown') {
+                  WebApp.openTelegramLink(connectUrlBrowser);
+                  if (WebApp.close) {
+                    window.Telegram.WebApp.close();
+                  }
+                } else {
+                  window.open(connectUrlBrowser, '_blank');
+                }
+              });
+              _context.next = 3;
+              return this.provider.request({
+                method: 'eth_requestAccounts'
+              });
+            case 3:
+              return _context.abrupt("return", _context.sent);
+            case 4:
+            case "end":
+              return _context.stop();
+          }
+        }, _callee, this);
+      }));
+      function connect() {
+        return _connect.apply(this, arguments);
+      }
+      return connect;
+    }()
+    /**
+     * @summary Sends a transaction request to the Grindery Wallet
+     * @public
+     * @since 0.1.0
+     * @param {object} params The transaction parameters
+     * @param {string} params.to The recipient address
+     * @param {string} [params.value] The amount to send in wei
+     * @param {string} [params.data] The data to send
+     * @returns {Promise<string[]>} Array with transaction hash string
+     */
+    ;
+    _proto.sendTransaction =
+    /*#__PURE__*/
+    function () {
+      var _sendTransaction = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(params) {
+        return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+          while (1) switch (_context2.prev = _context2.next) {
+            case 0:
+              _context2.next = 2;
+              return this.provider.request({
+                method: 'eth_sendTransaction',
+                params: [params]
+              });
+            case 2:
+              return _context2.abrupt("return", _context2.sent);
+            case 3:
+            case "end":
+              return _context2.stop();
+          }
+        }, _callee2, this);
+      }));
+      function sendTransaction(_x) {
+        return _sendTransaction.apply(this, arguments);
+      }
+      return sendTransaction;
+    }()
+    /**
+     * @summary Sends a personal signature request to the Grindery Wallet
+     * @public
+     * @since 0.1.0
+     * @param {string} message The message to sign
+     * @returns {Promise<string>} Signature string
+     */
+    ;
+    _proto.signMessage =
+    /*#__PURE__*/
+    function () {
+      var _signMessage = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(message) {
+        return _regeneratorRuntime().wrap(function _callee3$(_context3) {
+          while (1) switch (_context3.prev = _context3.next) {
+            case 0:
+              _context3.next = 2;
+              return this.provider.request({
+                method: 'personal_sign',
+                params: [message, this.provider.getAddress()]
+              });
+            case 2:
+              return _context3.abrupt("return", _context3.sent);
+            case 3:
+            case "end":
+              return _context3.stop();
+          }
+        }, _callee3, this);
+      }));
+      function signMessage(_x2) {
+        return _signMessage.apply(this, arguments);
+      }
+      return signMessage;
+    }()
+    /**
+     * @summary Adds a listener to the event
+     * @public
+     * @param {string} event Event name
+     * @param {Function} callback Callback function
+     * @returns {EventEmitter} The instance of the class itself
+     */
+    ;
+    _proto.on = function on(event, callback) {
+      this.provider.on(event, callback);
+      return this;
+    }
+    /**
+     * @summary Removes a listener from the event
+     * @public
+     * @param {string} event Event name
+     * @param {Function} callback Callback function
+     * @returns {EventEmitter} The instance of the class itself
+     */;
+    _proto.removeListener = function removeListener(event, callback) {
+      this.provider.removeListener(event, callback);
+      return this;
+    }
+    /**
+     * @summary Gets the Grindery Wallet ethereum provider
+     * @returns {GrinderyWalletProvider} The Grindery Wallet ethereum provider
+     */;
     _proto.getWeb3Provider = function getWeb3Provider() {
       var _window$ethereum;
       var provider = (_window$ethereum = window.ethereum) == null || (_window$ethereum = _window$ethereum.providers) == null ? void 0 : _window$ethereum.find(function (provider) {

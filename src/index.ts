@@ -1,4 +1,4 @@
-import { GrinderyWalletSDK } from './sdk/GrinderyWalletSDK';
+import { GrinderyWalletSDK } from './classes/GrinderyWalletSDK';
 
 declare global {
   interface Window {

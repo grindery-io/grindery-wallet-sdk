@@ -1,5 +1,5 @@
-import { ProviderError } from './ProviderError';
-import { ProviderEventEmitter } from './ProviderEventEmitter';
+import { EventEmitter } from './classes/EventEmitter';
+import { ProviderError } from './classes/ProviderError';
 
 export interface ProviderConnectInfo {
   readonly chainId: string;
@@ -39,7 +39,7 @@ export interface AppUser {
   id: string;
 }
 
-export interface ProviderInterface extends ProviderEventEmitter {
+export interface ProviderInterface extends EventEmitter {
   request<T>(args: RequestArguments): Promise<T>;
   on(event: 'connect', listener: (info: ProviderConnectInfo) => void): this;
   on(event: 'disconnect', listener: (error: ProviderError) => void): this;

@@ -1,5 +1,5 @@
+import { ProviderInterface } from '../types';
 import { ProviderBase } from './ProviderBase';
-import { ProviderInterface } from './types';
 /**
  * @summary The Grindery Wallet Ethereum Injected Provider Class.
  * @extends ProviderBase

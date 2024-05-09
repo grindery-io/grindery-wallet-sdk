@@ -1,11 +1,11 @@
-import { ProviderEventEmitter } from './ProviderEventEmitter';
-import { ProviderStorageKey } from './types';
+import { EventEmitter } from './EventEmitter';
+import { ProviderStorageKey } from '../types';
 /**
  * @summary A local storage class for the provider
  * @since 0.1.0
- * @extends ProviderEventEmitter
+ * @extends EventEmitter
  */
-export declare class ProviderLocalStorage extends ProviderEventEmitter {
+export declare class ProviderLocalStorage extends EventEmitter {
     /**
      * @summary Gets the value of the storage by the key
      * @protected
