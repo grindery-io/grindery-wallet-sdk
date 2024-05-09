@@ -71,4 +71,5 @@ export declare class GrinderyWalletSDK {
      * @returns {GrinderyWalletProvider} The Grindery Wallet ethereum provider
      */
     private getWeb3Provider;
+    private handlePairing;
 }

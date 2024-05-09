@@ -131,16 +131,24 @@ const listenWalletButtonsClicks = (address, target) => {
 };
 
 const onPairing = (data, target) => {
-  target.innerHTML = `
+  if (!target) {
+    return;
+  }
+  const redirectUrl = data.shortToken
+    ? `https://walletconnect.grindery.com/connect/wc?uri=${data.shortToken}`
+    : data.connectUrlBrowser || data.data.connectUrl || '';
+  if (redirectUrl) {
+    target.innerHTML = `
     <p class="text-center mb-4">Approve wallet connection in Grindery Bot</p>
     <p class="text-center mb-4">
       <a
         target="_blank"
         class="!text-blue-500" 
-        href="${data.connectUrlBrowser}"
+        href="${redirectUrl}"
       >Click here</a> if you weren't redirected automatically
     </p>
   `;
+  }
 };
 
 const onAccountsChanged = ({ accounts }, target) => {

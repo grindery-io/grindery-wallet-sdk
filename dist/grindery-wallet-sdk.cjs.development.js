@@ -975,6 +975,7 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderBase) {
                   }
                   _context.prev = 14;
                   _this.emit('restorePairing', {
+                    shortToken: _this.getStorageValue('shortToken'),
                     connectUrl: _this.getStorageValue('connectUrl'),
                     connectUrlBrowser: _this.getStorageValue('connectUrlBrowser')
                   });
@@ -1022,26 +1023,29 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderBase) {
                   _this.setStorageValue('pairingToken', result.pairingToken);
                   _this.setStorageValue('connectUrl', result.connectUrl);
                   _this.setStorageValue('connectUrlBrowser', result.connectUrlBrowser);
+                  _this.setStorageValue('shortToken', result.shortToken);
                   _this.emit('pairing', {
+                    shortToken: result.shortToken,
                     connectUrl: result.connectUrl,
                     connectUrlBrowser: result.connectUrlBrowser
                   });
-                  _context.next = 44;
+                  _context.next = 45;
                   return _this.sendGrinderyRpcApiRequest('checkout_waitForPairingResult', {
                     pairingToken: result.pairingToken
                   });
-                case 44:
+                case 45:
                   _pairResult = _context.sent;
                   _this.setStorageValue('sessionId', _pairResult.session.sessionId);
                   if (_pairResult.session.sessionId) {
-                    _context.next = 48;
+                    _context.next = 49;
                     break;
                   }
                   throw new ProviderError('Pairing failed', 4900);
-                case 48:
+                case 49:
                   _this.setStorageValue('pairingToken', '');
                   _this.setStorageValue('connectUrl', '');
                   _this.setStorageValue('connectUrlBrowser', '');
+                  _this.setStorageValue('shortToken', '');
                   _accounts2 = (((_pairResult$session2 = _pairResult.session) == null || (_pairResult$session2 = _pairResult$session2.namespaces) == null || (_pairResult$session2 = _pairResult$session2["eip155"]) == null ? void 0 : _pairResult$session2.accounts) || []).map(function (account) {
                     return account.includes(':') ? account.split(':')[2] || '' : account;
                   });
@@ -1050,15 +1054,15 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderBase) {
                     accounts: _accounts2
                   });
                   return _context.abrupt("return", _accounts2);
-                case 57:
-                  _context.prev = 57;
+                case 59:
+                  _context.prev = 59;
                   _context.t2 = _context["catch"](32);
                   throw _this.createProviderRpcError(_context.t2);
-                case 60:
+                case 62:
                 case "end":
                   return _context.stop();
               }
-            }, _callee, null, [[1, 10], [14, 29], [32, 57]]);
+            }, _callee, null, [[1, 10], [14, 29], [32, 59]]);
           }));
           function execute(_x) {
             return _execute.apply(this, arguments);
@@ -1179,6 +1183,7 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderBase) {
             }
             _context5.prev = 3;
             this.emit('restorePairing', {
+              shortToken: this.getStorageValue('shortToken'),
               connectUrl: this.getStorageValue('connectUrl'),
               connectUrlBrowser: this.getStorageValue('connectUrlBrowser')
             });
@@ -1275,6 +1280,8 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderBase) {
 var GrinderyWalletSDK = /*#__PURE__*/function () {
   function GrinderyWalletSDK() {
     this.provider = this.getWeb3Provider();
+    this.provider.on('restorePairing', this.handlePairing);
+    this.provider.on('pairing', this.handlePairing);
   }
   /**
    * @summary Checks if the provider is connected to the server
@@ -1304,26 +1311,13 @@ var GrinderyWalletSDK = /*#__PURE__*/function () {
       return _regeneratorRuntime().wrap(function _callee$(_context) {
         while (1) switch (_context.prev = _context.next) {
           case 0:
-            this.provider.on('connect', function (_ref) {
-              var _window$Telegram;
-              var connectUrlBrowser = _ref.connectUrlBrowser;
-              var WebApp = (_window$Telegram = window.Telegram) == null ? void 0 : _window$Telegram.WebApp;
-              if (WebApp && WebApp.openTelegramLink && WebApp.platform && WebApp.platform !== 'unknown') {
-                WebApp.openTelegramLink(connectUrlBrowser);
-                if (WebApp.close) {
-                  window.Telegram.WebApp.close();
-                }
-              } else {
-                window.open(connectUrlBrowser, '_blank');
-              }
-            });
-            _context.next = 3;
+            _context.next = 2;
             return this.provider.request({
               method: 'eth_requestAccounts'
             });
-          case 3:
+          case 2:
             return _context.abrupt("return", _context.sent);
-          case 4:
+          case 3:
           case "end":
             return _context.stop();
         }
@@ -1442,6 +1436,20 @@ var GrinderyWalletSDK = /*#__PURE__*/function () {
       provider = new GrinderyWalletProvider();
     }
     return provider;
+  };
+  _proto.handlePairing = function handlePairing(_ref) {
+    var _window$Telegram;
+    var shortToken = _ref.shortToken;
+    var WebApp = (_window$Telegram = window.Telegram) == null ? void 0 : _window$Telegram.WebApp;
+    var redirectUrl = "https://walletconnect.grindery.com/connect/wc?uri=" + shortToken;
+    if (WebApp && WebApp.openTelegramLink && WebApp.platform && WebApp.platform !== 'unknown') {
+      WebApp.openTelegramLink(redirectUrl);
+      if (WebApp.close) {
+        window.Telegram.WebApp.close();
+      }
+    } else {
+      window.open(redirectUrl, '_blank');
+    }
   };
   return GrinderyWalletSDK;
 }();

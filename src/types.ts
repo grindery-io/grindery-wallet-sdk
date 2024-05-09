@@ -72,7 +72,8 @@ export type ProviderStorageKey =
   | 'pairingToken'
   | 'sessionId'
   | 'connectUrl'
-  | 'connectUrlBrowser';
+  | 'connectUrlBrowser'
+  | 'shortToken';
 
 export type ProviderStorage = {
   [key in ProviderStorageKey]?: string;
@@ -82,6 +83,7 @@ export interface ProviderRequestPairingResult {
   pairingToken: string;
   connectUrl: string;
   connectUrlBrowser: string;
+  shortToken: string;
 }
 
 export type GrinderyRpcMethodName =

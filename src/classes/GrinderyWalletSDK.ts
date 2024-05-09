@@ -1,3 +1,4 @@
+import { ProviderRequestPairingResult } from '../types';
 import { GrinderyWalletProvider } from './GrinderyWalletProvider';
 
 /**
@@ -13,6 +14,8 @@ export class GrinderyWalletSDK {
 
   constructor() {
     this.provider = this.getWeb3Provider();
+    this.provider.on('restorePairing', this.handlePairing);
+    this.provider.on('pairing', this.handlePairing);
   }
 
   /**
@@ -38,25 +41,6 @@ export class GrinderyWalletSDK {
    * @since 0.1.0
    */
   public async connect(): Promise<string[]> {
-    this.provider.on(
-      'connect',
-      ({ connectUrlBrowser }: { connectUrlBrowser: string }) => {
-        const WebApp = window.Telegram?.WebApp;
-        if (
-          WebApp &&
-          WebApp.openTelegramLink &&
-          WebApp.platform &&
-          WebApp.platform !== 'unknown'
-        ) {
-          WebApp.openTelegramLink(connectUrlBrowser);
-          if (WebApp.close) {
-            window.Telegram.WebApp.close();
-          }
-        } else {
-          window.open(connectUrlBrowser, '_blank');
-        }
-      }
-    );
     return await this.provider.request({ method: 'eth_requestAccounts' });
   }
 
@@ -139,5 +123,23 @@ export class GrinderyWalletSDK {
       provider = new GrinderyWalletProvider();
     }
     return provider;
+  }
+
+  private handlePairing({ shortToken }: ProviderRequestPairingResult): void {
+    const WebApp = window.Telegram?.WebApp;
+    const redirectUrl = `https://walletconnect.grindery.com/connect/wc?uri=${shortToken}`;
+    if (
+      WebApp &&
+      WebApp.openTelegramLink &&
+      WebApp.platform &&
+      WebApp.platform !== 'unknown'
+    ) {
+      WebApp.openTelegramLink(redirectUrl);
+      if (WebApp.close) {
+        window.Telegram.WebApp.close();
+      }
+    } else {
+      window.open(redirectUrl, '_blank');
+    }
   }
 }

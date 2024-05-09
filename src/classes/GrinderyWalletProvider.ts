@@ -43,6 +43,7 @@ export class GrinderyWalletProvider extends ProviderBase
           if (this.isWalletConnectionPending()) {
             try {
               this.emit('restorePairing', {
+                shortToken: this.getStorageValue('shortToken'),
                 connectUrl: this.getStorageValue('connectUrl'),
                 connectUrlBrowser: this.getStorageValue('connectUrlBrowser'),
               });
@@ -85,7 +86,9 @@ export class GrinderyWalletProvider extends ProviderBase
             this.setStorageValue('pairingToken', result.pairingToken);
             this.setStorageValue('connectUrl', result.connectUrl);
             this.setStorageValue('connectUrlBrowser', result.connectUrlBrowser);
+            this.setStorageValue('shortToken', result.shortToken);
             this.emit('pairing', {
+              shortToken: result.shortToken,
               connectUrl: result.connectUrl,
               connectUrlBrowser: result.connectUrlBrowser,
             });
@@ -103,6 +106,7 @@ export class GrinderyWalletProvider extends ProviderBase
             this.setStorageValue('pairingToken', '');
             this.setStorageValue('connectUrl', '');
             this.setStorageValue('connectUrlBrowser', '');
+            this.setStorageValue('shortToken', '');
             const accounts = (
               pairResult.session?.namespaces?.[`eip155`]?.accounts || []
             ).map(account =>
@@ -174,6 +178,7 @@ export class GrinderyWalletProvider extends ProviderBase
     if (pairingToken && !sessionId) {
       try {
         this.emit('restorePairing', {
+          shortToken: this.getStorageValue('shortToken'),
           connectUrl: this.getStorageValue('connectUrl'),
           connectUrlBrowser: this.getStorageValue('connectUrlBrowser'),
         });

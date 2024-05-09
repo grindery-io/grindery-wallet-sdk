@@ -43,7 +43,7 @@ export interface ProviderInterface extends EventEmitter {
     removeListener(event: 'accountsChanged', listener: (accounts: string[]) => void): this;
     removeListener(event: 'message', listener: (message: ProviderMessage) => void): this;
 }
-export declare type ProviderStorageKey = 'pairingToken' | 'sessionId' | 'connectUrl' | 'connectUrlBrowser';
+export declare type ProviderStorageKey = 'pairingToken' | 'sessionId' | 'connectUrl' | 'connectUrlBrowser' | 'shortToken';
 export declare type ProviderStorage = {
     [key in ProviderStorageKey]?: string;
 };
@@ -51,6 +51,7 @@ export interface ProviderRequestPairingResult {
     pairingToken: string;
     connectUrl: string;
     connectUrlBrowser: string;
+    shortToken: string;
 }
 export declare type GrinderyRpcMethodName = 'checkout_requestPairing' | 'checkout_waitForPairingResult' | 'checkout_request' | 'checkout_waitForRequestResult';
 export interface ProviderPairingResult {
