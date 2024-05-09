@@ -127,7 +127,6 @@ if (provider) {
             })
             .then(txHash => {
               console.log('eth_sendTransaction', txHash);
-              //alert('Signature: ' + signature);
               sendButton.parentElement.innerHTML = `<p class="text-center max-w-full overflow-hidden text-ellipsis">Transaction: <em>${txHash}</em></p>`;
             })
             .catch(error => {
