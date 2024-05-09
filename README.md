@@ -12,6 +12,8 @@ Grindery Wallet SDK enables your dapp to provide a seamless user experience for 
 
 - [Example implementation](#example-implementation)
 - [Installing SDK](#installing-sdk)
+  - [Browser](#browser)
+  - [Node](#node)
 - [Basic usage](#basic-usage)
   - [Methods](#sdk-methods)
     - [.connect()](#sdk-methods_connect)
@@ -36,13 +38,43 @@ See an example implementation here: [https://grindery-io.github.io/grindery-wall
 
 # Installing SDK
 
-Place the script before the closing `</head>` tag, using this code:
+## Browser
+
+Download SDK from GitHub: [https://github.com/grindery-io/grindery-wallet-sdk](https://github.com/grindery-io/grindery-wallet-sdk)
+
+Extract downloaded archive and copy `dist/grindery-wallet-sdk.umd.production.min.js` file into the root of your project public folder.
+
+Place the script tag before the closing `</head>` tag, using this code:
 
 ```html
 <script src="grindery-wallet-sdk.umd.production.min.js"></script>
 ```
 
-> If you are building a [Telegram Mini App](https://core.telegram.org/bots/webapps) - make sure to put Grindery script tag BELOW Telegram script.
+> If you are building a [Telegram Mini App](https://core.telegram.org/bots/webapps) - make sure to put Grindery script tag AFTER Telegram script.
+
+## Node
+
+Wallet SDK is a front-end library. It can be installed via node package managers to use with modern frontend frameworks, but it can't be used on the server side.
+
+At least version 18 Node is required.
+
+**Install with NPM:**
+
+```bash
+npm install --save grindery-io/grindery-wallet-sdk
+```
+
+**Or Yarn:**
+
+```bash
+yarn add grindery-io/grindery-wallet-sdk
+```
+
+Include module in your code:
+
+```js
+import 'grindery-wallet-sdk';
+```
 
 # Basic usage
 
