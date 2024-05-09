@@ -125,7 +125,10 @@ export class GrinderyWalletSDK {
     return provider;
   }
 
-  private handlePairing({ shortToken }: ProviderRequestPairingResult): void {
+  private handlePairing({
+    shortToken,
+    connectUrlBrowser,
+  }: ProviderRequestPairingResult): void {
     const WebApp = window.Telegram?.WebApp;
     const redirectUrl = `https://walletconnect.grindery.com/connect/wc?uri=${shortToken}`;
     if (
@@ -134,7 +137,7 @@ export class GrinderyWalletSDK {
       WebApp.platform &&
       WebApp.platform !== 'unknown'
     ) {
-      WebApp.openTelegramLink(redirectUrl);
+      WebApp.openTelegramLink(connectUrlBrowser);
       if (WebApp.close) {
         window.Telegram.WebApp.close();
       }

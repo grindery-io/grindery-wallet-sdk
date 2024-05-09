@@ -1437,11 +1437,12 @@ var GrinderyWalletSDK = /*#__PURE__*/function () {
   };
   _proto.handlePairing = function handlePairing(_ref) {
     var _window$Telegram;
-    var shortToken = _ref.shortToken;
+    var shortToken = _ref.shortToken,
+      connectUrlBrowser = _ref.connectUrlBrowser;
     var WebApp = (_window$Telegram = window.Telegram) == null ? void 0 : _window$Telegram.WebApp;
     var redirectUrl = "https://walletconnect.grindery.com/connect/wc?uri=" + shortToken;
     if (WebApp && WebApp.openTelegramLink && WebApp.platform && WebApp.platform !== 'unknown') {
-      WebApp.openTelegramLink(redirectUrl);
+      WebApp.openTelegramLink(connectUrlBrowser);
       if (WebApp.close) {
         window.Telegram.WebApp.close();
       }
