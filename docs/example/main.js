@@ -12,22 +12,22 @@ const user = WebApp && WebApp.initDataUnsafe && WebApp.initDataUnsafe.user;
 
 if (provider) {
   provider.on('connect', () => {
+    const parent = document.getElementById('walletSDK');
     if (WebApp) {
       if (user) {
-        var userNamePlaceholder = document.querySelector('.username');
+        var userNamePlaceholder = parent.querySelector('.username');
         if (userNamePlaceholder) {
           userNamePlaceholder.innerHTML = ' @' + user.username;
         }
       }
     }
 
-    const parent = document.getElementById('walletSDK');
     if (parent) {
       parent.innerHTML = `
-            <button class="py-2 px-4 bg-blue-500 text-white rounded-xl connect">
-              Connect Grindery Wallet
-            </button>
-          `;
+        <button class="py-2 px-4 bg-blue-500 text-white rounded-xl connect">
+            Connect Grindery Wallet
+        </button>
+        `;
       const button = parent.querySelector('button');
       if (button) {
         button.addEventListener('click', () => {
@@ -81,7 +81,25 @@ if (provider) {
         parent.innerHTML = `
             <p class="text-center mb-4">Grindery Wallet Connected!</p>
             <p class="text-center mb-4">${shortenAddress(address)}</p>
+            <button id="personal-sign" class="py-2 px-4 bg-blue-500 text-white rounded-xl">
+              Personal sign
+            </button>
           `;
+        parent.querySelector('#personal-sign').addEventListener('click', () => {
+          provider
+            .request({
+              method: 'personal_sign',
+              params: [address, 'Hello, Grindery!'],
+            })
+            .then(signature => {
+              console.log('personal_sign', signature);
+              alert('Signature: ' + signature);
+            })
+            .catch(error => {
+              console.error('personal_sign', error);
+              alert('Error: ' + error.message);
+            });
+        });
       } else {
         parent.innerHTML = `
             <button class="py-2 px-4 bg-blue-500 text-white rounded-xl connect">
