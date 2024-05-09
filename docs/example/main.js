@@ -24,7 +24,7 @@ if (provider) {
 
     if (parent) {
       parent.innerHTML = `
-        <button class="py-2 px-4 bg-blue-500 text-white rounded-xl connect">
+        <button class="py-2 px-4 bg-blue-500 text-white rounded-xl connect disabled:opacity-50">
             Connect Grindery Wallet
         </button>
         `;
@@ -139,7 +139,7 @@ if (provider) {
         });
       } else {
         parent.innerHTML = `
-            <button class="py-2 px-4 bg-blue-500 text-white rounded-xl connect">
+            <button class="py-2 px-4 bg-blue-500 text-white rounded-xl connect disabled:opacity-50">
               Connect Grindery Wallet
             </button>
           `;
@@ -149,7 +149,7 @@ if (provider) {
     provider.on('disconnect', data => {
       console.log('disconnect', data);
       parent.innerHTML = `
-          <button class="py-2 px-4 bg-blue-500 text-white rounded-xl connect">
+          <button class="py-2 px-4 bg-blue-500 text-white rounded-xl connect disabled:opacity-50">
             Connect Grindery Wallet
           </button>
         `;
