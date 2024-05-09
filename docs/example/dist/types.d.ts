@@ -1,5 +1,5 @@
-import { EventEmitter } from './classes/EventEmitter';
-import { ProviderError } from './classes/ProviderError';
+import { WalletProviderError } from './provider/WalletProviderError';
+import { WalletProviderEventEmitter } from './provider/WalletProviderEventEmitter';
 import { GrinderyRpcMethodNames, GrinderyRpcProviderRequestMethodNames, ProviderEvents, ProviderStorageKeys } from './enums';
 export declare type ChainId = string;
 export declare type PairingToken = string;
@@ -58,16 +58,16 @@ export interface ProviderRequestResult {
     requestToken: RequestToken;
 }
 export declare type ProviderEvent = keyof typeof ProviderEvents;
-export interface ProviderInterface extends EventEmitter {
+export interface ProviderInterface extends WalletProviderEventEmitter {
     request<T>(args: RequestArguments): Promise<T>;
     on(event: ProviderEvents.connect, listener: (info: ProviderConnectInfo) => void): this;
-    on(event: ProviderEvents.disconnect, listener: (error: ProviderError) => void): this;
+    on(event: ProviderEvents.disconnect, listener: (error: WalletProviderError) => void): this;
     on(event: ProviderEvents.chainChanged, listener: (chainId: ChainId) => void): this;
-    on(event: ProviderEvents.accountsChanged, listener: (accounts: string[]) => void): this;
+    on(event: ProviderEvents.accountsChanged, listener: (accounts: Address[]) => void): this;
     on(event: ProviderEvents.message, listener: (message: ProviderMessage) => void): this;
     removeListener(event: ProviderEvents.connect, listener: (info: ProviderConnectInfo) => void): this;
-    removeListener(event: ProviderEvents.disconnect, listener: (error: ProviderError) => void): this;
+    removeListener(event: ProviderEvents.disconnect, listener: (error: WalletProviderError) => void): this;
     removeListener(event: ProviderEvents.chainChanged, listener: (chainId: ChainId) => void): this;
-    removeListener(event: ProviderEvents.accountsChanged, listener: (accounts: string[]) => void): this;
+    removeListener(event: ProviderEvents.accountsChanged, listener: (accounts: Address[]) => void): this;
     removeListener(event: ProviderEvents.message, listener: (message: ProviderMessage) => void): this;
 }

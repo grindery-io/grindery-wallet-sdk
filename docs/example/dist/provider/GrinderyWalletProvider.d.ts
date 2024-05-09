@@ -1,11 +1,11 @@
 import { ProviderInterface } from '../types';
-import { ProviderBase } from './ProviderBase';
+import { WalletProvider } from './WalletProvider';
 /**
  * @summary The Grindery Wallet Ethereum Injected Provider Class.
- * @extends ProviderBase
+ * @extends WalletProvider
  * @implements ProviderInterface
  */
-export declare class GrinderyWalletProvider extends ProviderBase implements ProviderInterface {
+export declare class GrinderyWalletProvider extends WalletProvider implements ProviderInterface {
     /**
      * @summary Indicates that the provider is a Grindery Wallet.
      */

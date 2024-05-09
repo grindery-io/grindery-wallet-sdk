@@ -1,12 +1,12 @@
-import { ProviderLocalStorage } from './LocalStorage';
+import { WalletProviderLocalStorage } from './WalletProviderLocalStorage';
 import { Address, ChainId, GrinderyRpcMethodName, GrinderyRpcProviderRequestMethodName, ProviderMethods, ProviderRequestResult, RequestArguments, RequestArgumentsParams, RequestToken } from '../types';
-import { ProviderError } from './ProviderError';
+import { WalletProviderError } from './WalletProviderError';
 /**
- * @summary The provider base class
+ * @summary The base wallet provider class
  * @since 0.1.0
- * @extends ProviderLocalStorage
+ * @extends WalletProviderLocalStorage
  */
-export declare class ProviderBase extends ProviderLocalStorage {
+export declare class WalletProvider extends WalletProviderLocalStorage {
     constructor();
     /**
      * @public
@@ -108,9 +108,9 @@ export declare class ProviderBase extends ProviderLocalStorage {
      * @summary Creates a provider error from an unknown error
      * @protected
      * @param {unknown} error Optional. Error object.
-     * @returns {ProviderError} The provider error
+     * @returns {WalletProviderError} The provider error
      */
-    protected createProviderRpcError(error?: unknown): ProviderError;
+    protected createProviderRpcError(error?: unknown): WalletProviderError;
     /**
      * @summary Injects the provider into the window object
      * @private

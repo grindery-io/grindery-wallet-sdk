@@ -1,4 +1,4 @@
-import { ProviderLocalStorage } from './LocalStorage';
+import { WalletProviderLocalStorage } from './WalletProviderLocalStorage';
 import {
   Address,
   ChainId,
@@ -10,7 +10,7 @@ import {
   RequestArgumentsParams,
   RequestToken,
 } from '../types';
-import { ProviderError } from './ProviderError';
+import { WalletProviderError } from './WalletProviderError';
 import {
   GrinderyRpcMethodNames,
   ProviderEvents,
@@ -18,11 +18,11 @@ import {
 } from '../enums';
 
 /**
- * @summary The provider base class
+ * @summary The base wallet provider class
  * @since 0.1.0
- * @extends ProviderLocalStorage
+ * @extends WalletProviderLocalStorage
  */
-export class ProviderBase extends ProviderLocalStorage {
+export class WalletProvider extends WalletProviderLocalStorage {
   constructor() {
     super();
 
@@ -89,20 +89,20 @@ export class ProviderBase extends ProviderLocalStorage {
     if (!this.chainId) {
       this.emit(
         ProviderEvents.disconnect,
-        new ProviderError('Disconnected', 4900)
+        new WalletProviderError('Disconnected', 4900)
       );
-      throw new ProviderError('Disconnected', 4900);
+      throw new WalletProviderError('Disconnected', 4900);
     }
     if (!this.methods) {
-      throw new ProviderError('Unsupported Method', 4200);
+      throw new WalletProviderError('Unsupported Method', 4200);
     }
     if (!this.methods[method]) {
-      throw new ProviderError('Unsupported Method', 4200);
+      throw new WalletProviderError('Unsupported Method', 4200);
     }
 
     try {
       if (this.methods[method].sessionRequired && !this.isWalletConnected()) {
-        throw new ProviderError('Unauthorized', 4900);
+        throw new WalletProviderError('Unauthorized', 4900);
       }
 
       return (await this.methods[method].execute(params)) as T;
@@ -177,7 +177,7 @@ export class ProviderBase extends ProviderLocalStorage {
     params?: readonly unknown[]
   ): Promise<ProviderRequestResult> {
     if (!this.getStorageValue(ProviderStorageKeys.sessionId)) {
-      throw new ProviderError('Unauthorized', 4900);
+      throw new WalletProviderError('Unauthorized', 4900);
     }
     try {
       return await this.sendGrinderyRpcApiRequest<ProviderRequestResult>(
@@ -208,7 +208,7 @@ export class ProviderBase extends ProviderLocalStorage {
     timeout?: number
   ): Promise<T> {
     if (!this.getStorageValue(ProviderStorageKeys.sessionId)) {
-      throw new ProviderError('Unauthorized', 4900);
+      throw new WalletProviderError('Unauthorized', 4900);
     }
     try {
       return await this.sendGrinderyRpcApiRequest<T>(
@@ -249,10 +249,10 @@ export class ProviderBase extends ProviderLocalStorage {
       });
       const data = await response.json();
       if (data.error) {
-        throw new ProviderError(data.error.message, data.error.code);
+        throw new WalletProviderError(data.error.message, data.error.code);
       }
       if (!data.result) {
-        throw new ProviderError('No result', 4900);
+        throw new WalletProviderError('No result', 4900);
       }
       return data.result;
     } catch (error) {
@@ -264,19 +264,19 @@ export class ProviderBase extends ProviderLocalStorage {
    * @summary Creates a provider error from an unknown error
    * @protected
    * @param {unknown} error Optional. Error object.
-   * @returns {ProviderError} The provider error
+   * @returns {WalletProviderError} The provider error
    */
-  protected createProviderRpcError(error?: unknown): ProviderError {
-    let errorResponse: ProviderError;
-    if (error instanceof ProviderError) {
-      errorResponse = new ProviderError(error.message || 'Unknown error');
+  protected createProviderRpcError(error?: unknown): WalletProviderError {
+    let errorResponse: WalletProviderError;
+    if (error instanceof WalletProviderError) {
+      errorResponse = new WalletProviderError(error.message || 'Unknown error');
       errorResponse.code = error.code || 4900;
       errorResponse.data = error.data;
     } else if (error instanceof Error) {
-      errorResponse = new ProviderError(error.message || 'Unknown error');
+      errorResponse = new WalletProviderError(error.message || 'Unknown error');
       errorResponse.code = 4900;
     } else {
-      errorResponse = new ProviderError('Unknown error');
+      errorResponse = new WalletProviderError('Unknown error');
       errorResponse.code = 4900;
     }
     return errorResponse;

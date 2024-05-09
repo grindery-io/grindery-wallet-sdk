@@ -1,5 +1,5 @@
 import { ProviderEvent } from '../types';
-import { GrinderyWalletProvider } from './GrinderyWalletProvider';
+import { GrinderyWalletProvider } from '../provider/GrinderyWalletProvider';
 /**
  * @summary The Grindery Wallet SDK class
  * @since 0.1.0

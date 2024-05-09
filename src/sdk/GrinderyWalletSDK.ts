@@ -3,7 +3,7 @@ import {
   ProviderEvents,
 } from '../enums';
 import { ProviderEvent, ProviderRequestPairingResult } from '../types';
-import { GrinderyWalletProvider } from './GrinderyWalletProvider';
+import { GrinderyWalletProvider } from '../provider/GrinderyWalletProvider';
 
 /**
  * @summary The Grindery Wallet SDK class

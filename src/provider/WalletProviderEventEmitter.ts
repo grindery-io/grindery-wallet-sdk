@@ -4,7 +4,7 @@ import { ProviderEvent } from '../types';
  * @summary A class for emitting provider events
  * @since 0.1.0
  */
-export class EventEmitter {
+export class WalletProviderEventEmitter {
   /**
    * @summary A map of events and their listeners
    * @public

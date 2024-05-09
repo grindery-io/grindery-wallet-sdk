@@ -1,5 +1,5 @@
-import { EventEmitter } from './classes/EventEmitter';
-import { ProviderError } from './classes/ProviderError';
+import { WalletProviderError } from './provider/WalletProviderError';
+import { WalletProviderEventEmitter } from './provider/WalletProviderEventEmitter';
 import {
   GrinderyRpcMethodNames,
   GrinderyRpcProviderRequestMethodNames,
@@ -78,7 +78,7 @@ export interface ProviderRequestResult {
 
 export type ProviderEvent = keyof typeof ProviderEvents;
 
-export interface ProviderInterface extends EventEmitter {
+export interface ProviderInterface extends WalletProviderEventEmitter {
   request<T>(args: RequestArguments): Promise<T>;
   on(
     event: ProviderEvents.connect,
@@ -86,7 +86,7 @@ export interface ProviderInterface extends EventEmitter {
   ): this;
   on(
     event: ProviderEvents.disconnect,
-    listener: (error: ProviderError) => void
+    listener: (error: WalletProviderError) => void
   ): this;
   on(
     event: ProviderEvents.chainChanged,
@@ -94,7 +94,7 @@ export interface ProviderInterface extends EventEmitter {
   ): this;
   on(
     event: ProviderEvents.accountsChanged,
-    listener: (accounts: string[]) => void
+    listener: (accounts: Address[]) => void
   ): this;
   on(
     event: ProviderEvents.message,
@@ -106,7 +106,7 @@ export interface ProviderInterface extends EventEmitter {
   ): this;
   removeListener(
     event: ProviderEvents.disconnect,
-    listener: (error: ProviderError) => void
+    listener: (error: WalletProviderError) => void
   ): this;
   removeListener(
     event: ProviderEvents.chainChanged,
@@ -114,7 +114,7 @@ export interface ProviderInterface extends EventEmitter {
   ): this;
   removeListener(
     event: ProviderEvents.accountsChanged,
-    listener: (accounts: string[]) => void
+    listener: (accounts: Address[]) => void
   ): this;
   removeListener(
     event: ProviderEvents.message,

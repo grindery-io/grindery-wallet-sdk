@@ -446,8 +446,8 @@ var GrinderyRpcProviderRequestMethodNames;
  * @summary A class for emitting provider events
  * @since 0.1.0
  */
-var EventEmitter = /*#__PURE__*/function () {
-  function EventEmitter() {
+var WalletProviderEventEmitter = /*#__PURE__*/function () {
+  function WalletProviderEventEmitter() {
     this.events = new Map();
   }
   /**
@@ -457,7 +457,7 @@ var EventEmitter = /*#__PURE__*/function () {
    * @param {Function} callback Callback function
    * @returns {EventEmitter} The instance of the class itself
    */
-  var _proto = EventEmitter.prototype;
+  var _proto = WalletProviderEventEmitter.prototype;
   _proto.on = function on(event, callback) {
     if (!this.events.has(event)) {
       this.events.set(event, []);
@@ -500,21 +500,21 @@ var EventEmitter = /*#__PURE__*/function () {
     }
     return this;
   };
-  return EventEmitter;
+  return WalletProviderEventEmitter;
 }();
 
 var LOCALSTORAGE_KEY = 'GrinderyWalletProvider';
 /**
  * @summary A local storage class for the provider
  * @since 0.1.0
- * @extends EventEmitter
+ * @extends WalletProviderEventEmitter
  */
-var ProviderLocalStorage = /*#__PURE__*/function (_EventEmitter) {
-  function ProviderLocalStorage() {
-    return _EventEmitter.apply(this, arguments) || this;
+var WalletProviderLocalStorage = /*#__PURE__*/function (_WalletProviderEventE) {
+  function WalletProviderLocalStorage() {
+    return _WalletProviderEventE.apply(this, arguments) || this;
   }
-  _inheritsLoose(ProviderLocalStorage, _EventEmitter);
-  var _proto = ProviderLocalStorage.prototype;
+  _inheritsLoose(WalletProviderLocalStorage, _WalletProviderEventE);
+  var _proto = WalletProviderLocalStorage.prototype;
   /**
    * @summary Gets the value of the storage by the key
    * @protected
@@ -564,16 +564,16 @@ var ProviderLocalStorage = /*#__PURE__*/function (_EventEmitter) {
   _proto.saveStorage = function saveStorage(storage) {
     localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(storage));
   };
-  return ProviderLocalStorage;
-}(EventEmitter);
+  return WalletProviderLocalStorage;
+}(WalletProviderEventEmitter);
 
 /**
- * @summary Error class for GrinderyWalletProvider
+ * @summary Error class for WalletProvider
  * @since 0.1.0
  * @extends Error
  */
-var ProviderError = /*#__PURE__*/function (_Error) {
-  function ProviderError(message, code, data) {
+var WalletProviderError = /*#__PURE__*/function (_Error) {
+  function WalletProviderError(message, code, data) {
     var _this;
     _this = _Error.call(this, message) || this;
     _this.name = 'GrinderyWalletProviderError';
@@ -581,19 +581,19 @@ var ProviderError = /*#__PURE__*/function (_Error) {
     _this.data = data;
     return _this;
   }
-  _inheritsLoose(ProviderError, _Error);
-  return ProviderError;
+  _inheritsLoose(WalletProviderError, _Error);
+  return WalletProviderError;
 }( /*#__PURE__*/_wrapNativeSuper(Error));
 
 /**
- * @summary The provider base class
+ * @summary The base wallet provider class
  * @since 0.1.0
- * @extends ProviderLocalStorage
+ * @extends WalletProviderLocalStorage
  */
-var ProviderBase = /*#__PURE__*/function (_ProviderLocalStorage) {
-  function ProviderBase() {
+var WalletProvider = /*#__PURE__*/function (_WalletProviderLocalS) {
+  function WalletProvider() {
     var _this;
-    _this = _ProviderLocalStorage.call(this) || this;
+    _this = _WalletProviderLocalS.call(this) || this;
     /**
      * @summary The application ID.
      * @protected
@@ -616,8 +616,8 @@ var ProviderBase = /*#__PURE__*/function (_ProviderLocalStorage) {
    * @public
    * @returns {boolean} True if the provider is connected to the server.
    */
-  _inheritsLoose(ProviderBase, _ProviderLocalStorage);
-  var _proto = ProviderBase.prototype;
+  _inheritsLoose(WalletProvider, _WalletProviderLocalS);
+  var _proto = WalletProvider.prototype;
   _proto.isConnected = function isConnected() {
     return !!this.chainId;
   }
@@ -672,27 +672,27 @@ var ProviderBase = /*#__PURE__*/function (_ProviderLocalStorage) {
               _context.next = 4;
               break;
             }
-            this.emit(ProviderEvents.disconnect, new ProviderError('Disconnected', 4900));
-            throw new ProviderError('Disconnected', 4900);
+            this.emit(ProviderEvents.disconnect, new WalletProviderError('Disconnected', 4900));
+            throw new WalletProviderError('Disconnected', 4900);
           case 4:
             if (this.methods) {
               _context.next = 6;
               break;
             }
-            throw new ProviderError('Unsupported Method', 4200);
+            throw new WalletProviderError('Unsupported Method', 4200);
           case 6:
             if (this.methods[method]) {
               _context.next = 8;
               break;
             }
-            throw new ProviderError('Unsupported Method', 4200);
+            throw new WalletProviderError('Unsupported Method', 4200);
           case 8:
             _context.prev = 8;
             if (!(this.methods[method].sessionRequired && !this.isWalletConnected())) {
               _context.next = 11;
               break;
             }
-            throw new ProviderError('Unauthorized', 4900);
+            throw new WalletProviderError('Unauthorized', 4900);
           case 11:
             _context.next = 13;
             return this.methods[method].execute(params);
@@ -777,7 +777,7 @@ var ProviderBase = /*#__PURE__*/function (_ProviderLocalStorage) {
               _context3.next = 2;
               break;
             }
-            throw new ProviderError('Unauthorized', 4900);
+            throw new WalletProviderError('Unauthorized', 4900);
           case 2:
             _context3.prev = 2;
             _context3.next = 5;
@@ -825,7 +825,7 @@ var ProviderBase = /*#__PURE__*/function (_ProviderLocalStorage) {
               _context4.next = 2;
               break;
             }
-            throw new ProviderError('Unauthorized', 4900);
+            throw new WalletProviderError('Unauthorized', 4900);
           case 2:
             _context4.prev = 2;
             _context4.next = 5;
@@ -890,13 +890,13 @@ var ProviderBase = /*#__PURE__*/function (_ProviderLocalStorage) {
               _context5.next = 9;
               break;
             }
-            throw new ProviderError(data.error.message, data.error.code);
+            throw new WalletProviderError(data.error.message, data.error.code);
           case 9:
             if (data.result) {
               _context5.next = 11;
               break;
             }
-            throw new ProviderError('No result', 4900);
+            throw new WalletProviderError('No result', 4900);
           case 11:
             return _context5.abrupt("return", data.result);
           case 14:
@@ -918,20 +918,20 @@ var ProviderBase = /*#__PURE__*/function (_ProviderLocalStorage) {
    * @summary Creates a provider error from an unknown error
    * @protected
    * @param {unknown} error Optional. Error object.
-   * @returns {ProviderError} The provider error
+   * @returns {WalletProviderError} The provider error
    */
   ;
   _proto.createProviderRpcError = function createProviderRpcError(error) {
     var errorResponse;
-    if (error instanceof ProviderError) {
-      errorResponse = new ProviderError(error.message || 'Unknown error');
+    if (error instanceof WalletProviderError) {
+      errorResponse = new WalletProviderError(error.message || 'Unknown error');
       errorResponse.code = error.code || 4900;
       errorResponse.data = error.data;
     } else if (error instanceof Error) {
-      errorResponse = new ProviderError(error.message || 'Unknown error');
+      errorResponse = new WalletProviderError(error.message || 'Unknown error');
       errorResponse.code = 4900;
     } else {
-      errorResponse = new ProviderError('Unknown error');
+      errorResponse = new WalletProviderError('Unknown error');
       errorResponse.code = 4900;
     }
     return errorResponse;
@@ -952,19 +952,19 @@ var ProviderBase = /*#__PURE__*/function (_ProviderLocalStorage) {
       }
     }
   };
-  return ProviderBase;
-}(ProviderLocalStorage);
+  return WalletProvider;
+}(WalletProviderLocalStorage);
 
 /**
  * @summary The Grindery Wallet Ethereum Injected Provider Class.
- * @extends ProviderBase
+ * @extends WalletProvider
  * @implements ProviderInterface
  */
-var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderBase) {
+var GrinderyWalletProvider = /*#__PURE__*/function (_WalletProvider) {
   function GrinderyWalletProvider() {
     var _this$registerProvide;
     var _this;
-    _this = _ProviderBase.call(this) || this;
+    _this = _WalletProvider.call(this) || this;
     /**
      * @summary Indicates that the provider is a Grindery Wallet.
      */
@@ -1018,7 +1018,7 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderBase) {
                     _context.next = 22;
                     break;
                   }
-                  throw new ProviderError('Pairing failed', 4900);
+                  throw new WalletProviderError('Pairing failed', 4900);
                 case 22:
                   _accounts = (((_pairResult$session = pairResult.session) == null || (_pairResult$session = _pairResult$session.namespaces) == null || (_pairResult$session = _pairResult$session["eip155"]) == null ? void 0 : _pairResult$session.accounts) || []).map(function (account) {
                     return account.includes(':') ? account.split(':')[2] || '' : account;
@@ -1045,7 +1045,7 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderBase) {
                     _context.next = 37;
                     break;
                   }
-                  throw new ProviderError('Pairing failed', 4900);
+                  throw new WalletProviderError('Pairing failed', 4900);
                 case 37:
                   _this.setStorageValue(ProviderStorageKeys.pairingToken, result.pairingToken);
                   _this.setStorageValue(ProviderStorageKeys.connectUrl, result.connectUrl);
@@ -1067,7 +1067,7 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderBase) {
                     _context.next = 48;
                     break;
                   }
-                  throw new ProviderError('Pairing failed', 4900);
+                  throw new WalletProviderError('Pairing failed', 4900);
                 case 48:
                   _this.setStorageValue(ProviderStorageKeys.pairingToken, '');
                   _this.setStorageValue(ProviderStorageKeys.connectUrl, '');
@@ -1189,7 +1189,7 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderBase) {
    * @private
    * @returns {void}
    */
-  _inheritsLoose(GrinderyWalletProvider, _ProviderBase);
+  _inheritsLoose(GrinderyWalletProvider, _WalletProvider);
   var _proto = GrinderyWalletProvider.prototype;
   _proto.restorePairing =
   /*#__PURE__*/
@@ -1218,7 +1218,7 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderBase) {
               _context5.next = 11;
               break;
             }
-            throw new ProviderError('Pairing failed', 4900);
+            throw new WalletProviderError('Pairing failed', 4900);
           case 11:
             accounts = (((_pairResult$session3 = pairResult.session) == null || (_pairResult$session3 = _pairResult$session3.namespaces) == null || (_pairResult$session3 = _pairResult$session3["eip155"]) == null ? void 0 : _pairResult$session3.accounts) || []).map(function (account) {
               return account.includes(':') ? account.split(':')[2] || '' : account;
@@ -1290,7 +1290,7 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderBase) {
     return restoreSession;
   }();
   return GrinderyWalletProvider;
-}(ProviderBase);
+}(WalletProvider);
 
 /**
  * @summary The Grindery Wallet SDK class

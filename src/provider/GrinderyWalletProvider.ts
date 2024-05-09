@@ -9,15 +9,15 @@ import {
   ProviderRequestPairingResult,
   RequestArgumentsParams,
 } from '../types';
-import { ProviderBase } from './ProviderBase';
-import { ProviderError } from './ProviderError';
+import { WalletProvider } from './WalletProvider';
+import { WalletProviderError } from './WalletProviderError';
 
 /**
  * @summary The Grindery Wallet Ethereum Injected Provider Class.
- * @extends ProviderBase
+ * @extends WalletProvider
  * @implements ProviderInterface
  */
-export class GrinderyWalletProvider extends ProviderBase
+export class GrinderyWalletProvider extends WalletProvider
   implements ProviderInterface {
   /**
    * @summary Indicates that the provider is a Grindery Wallet.
@@ -62,7 +62,7 @@ export class GrinderyWalletProvider extends ProviderBase
               );
 
               if (!pairResult.session.sessionId) {
-                throw new ProviderError('Pairing failed', 4900);
+                throw new WalletProviderError('Pairing failed', 4900);
               }
 
               const accounts = (
@@ -86,7 +86,7 @@ export class GrinderyWalletProvider extends ProviderBase
             });
 
             if (!result.pairingToken || !result.connectUrl) {
-              throw new ProviderError('Pairing failed', 4900);
+              throw new WalletProviderError('Pairing failed', 4900);
             }
 
             this.setStorageValue(
@@ -122,7 +122,7 @@ export class GrinderyWalletProvider extends ProviderBase
             );
 
             if (!pairResult.session.sessionId) {
-              throw new ProviderError('Pairing failed', 4900);
+              throw new WalletProviderError('Pairing failed', 4900);
             }
             this.setStorageValue(ProviderStorageKeys.pairingToken, '');
             this.setStorageValue(ProviderStorageKeys.connectUrl, '');
@@ -211,7 +211,7 @@ export class GrinderyWalletProvider extends ProviderBase
         );
 
         if (!pairResult.session.sessionId) {
-          throw new ProviderError('Pairing failed', 4900);
+          throw new WalletProviderError('Pairing failed', 4900);
         }
 
         const accounts = (
