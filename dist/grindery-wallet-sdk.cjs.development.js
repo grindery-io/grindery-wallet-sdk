@@ -1277,12 +1277,26 @@ var GrinderyWalletSDK = /*#__PURE__*/function () {
     this.provider = this.getWeb3Provider();
   }
   /**
+   * @summary Checks if the provider is connected to the server
+   * @returns {boolean} True if the provider is connected to the server.
+   */
+  var _proto = GrinderyWalletSDK.prototype;
+  _proto.isConnected = function isConnected() {
+    return this.provider.isConnected();
+  }
+  /**
+   * @summary Checks if the provider is connected to the server and the Grindery Wallet
+   * @returns {boolean} True if the provider is connected to the server and the Grindery Wallet.
+   */;
+  _proto.isWalletConnected = function isWalletConnected() {
+    return this.provider.isWalletConnected();
+  }
+  /**
    * @summary Initiate connection to the Grindery Wallet
    * @public
    * @returns {Promise<string[]>} The array of ethereum addresses
    * @since 0.1.0
-   */
-  var _proto = GrinderyWalletSDK.prototype;
+   */;
   _proto.connect =
   /*#__PURE__*/
   function () {

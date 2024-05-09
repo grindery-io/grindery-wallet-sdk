@@ -11,6 +11,16 @@ export declare class GrinderyWalletSDK {
     provider: GrinderyWalletProvider;
     constructor();
     /**
+     * @summary Checks if the provider is connected to the server
+     * @returns {boolean} True if the provider is connected to the server.
+     */
+    isConnected(): boolean;
+    /**
+     * @summary Checks if the provider is connected to the server and the Grindery Wallet
+     * @returns {boolean} True if the provider is connected to the server and the Grindery Wallet.
+     */
+    isWalletConnected(): boolean;
+    /**
      * @summary Initiate connection to the Grindery Wallet
      * @public
      * @returns {Promise<string[]>} The array of ethereum addresses

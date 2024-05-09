@@ -16,6 +16,22 @@ export class GrinderyWalletSDK {
   }
 
   /**
+   * @summary Checks if the provider is connected to the server
+   * @returns {boolean} True if the provider is connected to the server.
+   */
+  public isConnected(): boolean {
+    return this.provider.isConnected();
+  }
+
+  /**
+   * @summary Checks if the provider is connected to the server and the Grindery Wallet
+   * @returns {boolean} True if the provider is connected to the server and the Grindery Wallet.
+   */
+  public isWalletConnected(): boolean {
+    return this.provider.isWalletConnected();
+  }
+
+  /**
    * @summary Initiate connection to the Grindery Wallet
    * @public
    * @returns {Promise<string[]>} The array of ethereum addresses
