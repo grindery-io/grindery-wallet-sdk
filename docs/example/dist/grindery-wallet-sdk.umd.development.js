@@ -568,7 +568,7 @@
        * @summary The application ID.
        * @protected
        */
-      _this.appId = window.location.href;
+      _this.appId = document.title || 'Grindery Wallet Provider';
       /**
        * @summary The chain ID in CAIP-2 format; e.g. "eip155:1".
        * @protected

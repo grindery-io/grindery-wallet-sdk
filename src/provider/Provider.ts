@@ -102,7 +102,7 @@ export class Provider extends ProviderLocalStorage {
    * @summary The application ID.
    * @protected
    */
-  protected appId: string = window.location.href;
+  protected appId: string = document.title || 'Grindery Wallet Provider';
 
   /**
    * @summary The chain ID in CAIP-2 format; e.g. "eip155:1".

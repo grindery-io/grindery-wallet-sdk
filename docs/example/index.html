@@ -47,6 +47,13 @@
     </div>
 
     <script type="text/javascript">
+      const shortenAddress = address => {
+        return address.length > 10
+          ? address.substring(0, 6) +
+              '...' +
+              address.substring(address.length - 4)
+          : address;
+      };
       const provider =
         window.Grindery &&
         window.Grindery.WalletSDK &&
@@ -79,6 +86,10 @@
                 button.disabled = true;
 
                 provider.on('pairing', data => {
+                  el.innerHTML = `
+                  <p class="text-center mb-4">Approve wallet connection in Grindery Bot</p>
+                    <p class="text-center mb-4"><a href="${data.connectUrlBrowser}" target="_blank" rel="noreferrer">Click here</a> if you weren't redirected automatically</p>
+                  `;
                   if (
                     WebApp &&
                     WebApp.openTelegramLink &&
@@ -98,11 +109,22 @@
                   .request({ method: 'eth_requestAccounts' })
                   .catch(error => {
                     console.error('eth_requestAccounts', error);
-                    button.innerHTML = 'Try again';
-                    button.disabled = false;
+                    el.innerHTML = `
+                      <p class="text-center mb-4">Failed to connect wallet</p>
+                      <button class="py-2 px-4 bg-blue-500 text-white rounded-xl connect" onClick="window.location.reload();">
+                        Reload and try again
+                      </button>
+                    `;
                   });
               });
             }
+
+            provider.on('restorePairing', data => {
+              el.innerHTML = `
+              <p class="text-center mb-4">Approve wallet connection in Grindery Bot</p>
+                <p class="text-center mb-4"><a href="${data.connectUrlBrowser}" target="_blank" rel="noreferrer">Click here</a> if you weren't redirected automatically</p>
+              `;
+            });
           }
 
           provider.on('accountsChanged', ({ accounts }) => {
@@ -111,7 +133,7 @@
               const address = accounts[0];
               el.innerHTML = `
                 <p class="text-center mb-4">Grindery Wallet Connected!</p>
-                <p class="text-center mb-4">${address}</p>
+                <p class="text-center mb-4">${shortenAddress(address)}</p>
               `;
             } else {
               el.innerHTML = `
