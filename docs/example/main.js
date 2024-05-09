@@ -84,12 +84,12 @@ if (provider) {
             <p class="text-center mb-4">Grindery Wallet Connected!</p>
             <p class="text-center mb-4">${shortenAddress(address)}</p>
             <div class="mt-6">
-                <button id="personal_sign" class="py-2 px-4 bg-blue-500 text-white rounded-xl">
+                <button id="personal_sign" class="py-2 px-4 bg-blue-500 text-white rounded-xl disabled:opacity-50">
                 Sign message
                 </button>
             </div>
             <div class="mt-4">
-                <button id="eth_sendTransaction" class="py-2 px-4 bg-blue-500 text-white rounded-xl">
+                <button id="eth_sendTransaction" class="py-2 px-4 bg-blue-500 text-white rounded-xl disabled:opacity-50">
                 Send transaction
                 </button>
             </div>
