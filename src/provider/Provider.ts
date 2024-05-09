@@ -131,6 +131,23 @@ export class Provider extends ProviderLocalStorage {
   }
 
   /**
+   * @summary Sends a provider request to the Grindery RPC API and waits for the result.
+   * @protected
+   * @param {GrinderyRpcProviderRequestMethodName} method Provider request method name
+   * @param {Array} params Provider request parameters
+   * @param {number} timeout Optional. The time in milliseconds to wait for the request result. Default is 30000.
+   * @returns The result of the provider request
+   */
+  protected async sendAndWaitGrinderyRpcProviderRequest<T>(
+    method: GrinderyRpcProviderRequestMethodName,
+    params?: readonly unknown[],
+    timeout?: number
+  ): Promise<T> {
+    const request = await this.sendGrinderyRpcProviderRequest(method, params);
+    return this.waitGrinderyRpcProviderRequest(request.requestToken, timeout);
+  }
+
+  /**
    * @summary Sends a provider request to the Grindery RPC API.
    * @protected
    * @param {GrinderyRpcProviderRequestMethodName} method Provider request method name

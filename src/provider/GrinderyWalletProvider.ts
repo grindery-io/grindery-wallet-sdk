@@ -114,16 +114,12 @@ export class GrinderyWalletProvider extends Provider
         sessionRequired: true,
         execute: async (params?: RequestArgumentsParams): Promise<string[]> => {
           try {
-            const { requestToken } = await this.sendGrinderyRpcProviderRequest(
+            const accounts = await this.sendAndWaitGrinderyRpcProviderRequest<
+              string[]
+            >(
               'eth_accounts',
               params ? (Array.isArray(params) ? params : [params]) : []
             );
-            if (!requestToken) {
-              throw new ProviderError('No request token', 4900);
-            }
-            const accounts = await this.waitGrinderyRpcProviderRequest<
-              string[]
-            >(requestToken);
             this.accounts = accounts;
             this.emit('accountsChanged', { accounts });
             return accounts;
@@ -135,20 +131,10 @@ export class GrinderyWalletProvider extends Provider
       eth_sendTransaction: {
         sessionRequired: true,
         execute: async (params?: RequestArgumentsParams): Promise<string[]> => {
-          try {
-            const { requestToken } = await this.sendGrinderyRpcProviderRequest(
-              'eth_sendTransaction',
-              params ? (Array.isArray(params) ? params : [params]) : []
-            );
-            if (!requestToken) {
-              throw new ProviderError('No request token', 4900);
-            }
-            return await this.waitGrinderyRpcProviderRequest<string[]>(
-              requestToken
-            );
-          } catch (error) {
-            throw this.createProviderRpcError(error);
-          }
+          return await this.sendAndWaitGrinderyRpcProviderRequest<string[]>(
+            'eth_sendTransaction',
+            params ? (Array.isArray(params) ? params : [params]) : []
+          );
         },
       },
       personal_sign: {
@@ -156,18 +142,10 @@ export class GrinderyWalletProvider extends Provider
         execute: async (
           params?: Partial<RequestArgumentsParams>
         ): Promise<string> => {
-          try {
-            const { requestToken } = await this.sendGrinderyRpcProviderRequest(
-              'personal_sign',
-              params ? (Array.isArray(params) ? params : [params]) : []
-            );
-            if (!requestToken) {
-              throw new ProviderError('No request token', 4900);
-            }
-            return await this.waitGrinderyRpcProviderRequest(requestToken);
-          } catch (error) {
-            throw this.createProviderRpcError(error);
-          }
+          return await this.sendAndWaitGrinderyRpcProviderRequest(
+            'personal_sign',
+            params ? (Array.isArray(params) ? params : [params]) : []
+          );
         },
       },
     });
