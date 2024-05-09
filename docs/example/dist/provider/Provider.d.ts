@@ -112,6 +112,12 @@ export declare class Provider extends ProviderLocalStorage {
      */
     protected createProviderRpcError(error?: unknown): ProviderError;
     /**
+     * @summary Restores the pairing process if pairing token is stored in the local storage
+     * @private
+     * @returns {void}
+     */
+    private restorePairing;
+    /**
      * @summary Restores the session if session Id is stored in the local storage
      * @private
      * @returns {void}

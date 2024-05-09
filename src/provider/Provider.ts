@@ -4,6 +4,7 @@ import {
   GrinderyRpcMethodName,
   GrinderyRpcProviderRequestMethodName,
   ProviderMethods,
+  ProviderPairingResult,
   ProviderRequestResult,
   RequestArguments,
   RequestArgumentsParams,
@@ -22,6 +23,7 @@ export class Provider extends ProviderLocalStorage {
 
     window.addEventListener('load', () => {
       this.emit('connect', { chainId: this.getChain() });
+      this.restorePairing();
       this.restoreSession();
     });
   }
@@ -65,7 +67,7 @@ export class Provider extends ProviderLocalStorage {
    * @returns {string} The ethereum wallet address
    */
   public getAddress(): string {
-    return this.accounts[0]?.split(':')[2] || '';
+    return this.accounts[0] || '';
   }
 
   /**
@@ -268,13 +270,56 @@ export class Provider extends ProviderLocalStorage {
   }
 
   /**
+   * @summary Restores the pairing process if pairing token is stored in the local storage
+   * @private
+   * @returns {void}
+   */
+  private async restorePairing(): Promise<void> {
+    const pairingToken = this.getStorageValue('pairingToken');
+    const sessionId = this.getStorageValue('sessionId');
+    if (pairingToken && !sessionId) {
+      try {
+        this.emit('restorePairing', {
+          connectUrl: this.getStorageValue('connectUrl'),
+          connectUrlBrowser: this.getStorageValue('connectUrlBrowser'),
+        });
+
+        const pairResult = await this.sendGrinderyRpcApiRequest<
+          ProviderPairingResult
+        >('checkout_waitForPairingResult', {
+          pairingToken,
+        });
+
+        this.clearStorage();
+        this.setStorageValue('sessionId', pairResult.session.sessionId);
+
+        if (!pairResult.session.sessionId) {
+          throw new ProviderError('Pairing failed', 4900);
+        }
+
+        const accounts = (
+          pairResult.session?.namespaces?.[`eip155`]?.accounts || []
+        ).map(account =>
+          account.includes(':') ? account.split(':')[2] || '' : account
+        );
+        this.accounts = accounts;
+        this.emit('accountsChanged', { accounts });
+      } catch (error) {
+        this.accounts = [];
+        this.clearStorage();
+      }
+    }
+  }
+
+  /**
    * @summary Restores the session if session Id is stored in the local storage
    * @private
    * @returns {void}
    */
   private async restoreSession(): Promise<void> {
+    const pairingToken = this.getStorageValue('pairingToken');
     const sessionId = this.getStorageValue('sessionId');
-    if (sessionId) {
+    if (sessionId && !pairingToken) {
       try {
         await this.request<string[]>({
           method: 'eth_requestAccounts',

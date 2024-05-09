@@ -584,6 +584,7 @@ var Provider = /*#__PURE__*/function (_ProviderLocalStorage) {
       _this.emit('connect', {
         chainId: _this.getChain()
       });
+      _this.restorePairing();
       _this.restoreSession();
     });
     return _this;
@@ -625,8 +626,7 @@ var Provider = /*#__PURE__*/function (_ProviderLocalStorage) {
    * @returns {string} The ethereum wallet address
    */;
   _proto.getAddress = function getAddress() {
-    var _this$accounts$;
-    return ((_this$accounts$ = this.accounts[0]) == null ? void 0 : _this$accounts$.split(':')[2]) || '';
+    return this.accounts[0] || '';
   }
   /**
    * @summary Sends a request to the provider
@@ -908,41 +908,106 @@ var Provider = /*#__PURE__*/function (_ProviderLocalStorage) {
     return errorResponse;
   }
   /**
-   * @summary Restores the session if session Id is stored in the local storage
+   * @summary Restores the pairing process if pairing token is stored in the local storage
    * @private
    * @returns {void}
    */;
-  _proto.restoreSession =
+  _proto.restorePairing =
   /*#__PURE__*/
   function () {
-    var _restoreSession = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee6() {
-      var sessionId;
+    var _restorePairing = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee6() {
+      var pairingToken, sessionId, _pairResult$session, pairResult, accounts;
       return _regeneratorRuntime().wrap(function _callee6$(_context6) {
         while (1) switch (_context6.prev = _context6.next) {
           case 0:
+            pairingToken = this.getStorageValue('pairingToken');
             sessionId = this.getStorageValue('sessionId');
-            if (!sessionId) {
-              _context6.next = 11;
+            if (!(pairingToken && !sessionId)) {
+              _context6.next = 21;
               break;
             }
-            _context6.prev = 2;
-            _context6.next = 5;
-            return this.request({
-              method: 'eth_requestAccounts'
+            _context6.prev = 3;
+            this.emit('restorePairing', {
+              connectUrl: this.getStorageValue('connectUrl'),
+              connectUrlBrowser: this.getStorageValue('connectUrlBrowser')
             });
-          case 5:
-            _context6.next = 11;
-            break;
+            _context6.next = 7;
+            return this.sendGrinderyRpcApiRequest('checkout_waitForPairingResult', {
+              pairingToken: pairingToken
+            });
           case 7:
-            _context6.prev = 7;
-            _context6.t0 = _context6["catch"](2);
+            pairResult = _context6.sent;
+            this.clearStorage();
+            this.setStorageValue('sessionId', pairResult.session.sessionId);
+            if (pairResult.session.sessionId) {
+              _context6.next = 12;
+              break;
+            }
+            throw new ProviderError('Pairing failed', 4900);
+          case 12:
+            accounts = (((_pairResult$session = pairResult.session) == null || (_pairResult$session = _pairResult$session.namespaces) == null || (_pairResult$session = _pairResult$session["eip155"]) == null ? void 0 : _pairResult$session.accounts) || []).map(function (account) {
+              return account.includes(':') ? account.split(':')[2] || '' : account;
+            });
+            this.accounts = accounts;
+            this.emit('accountsChanged', {
+              accounts: accounts
+            });
+            _context6.next = 21;
+            break;
+          case 17:
+            _context6.prev = 17;
+            _context6.t0 = _context6["catch"](3);
             this.accounts = [];
             this.clearStorage();
-          case 11:
+          case 21:
           case "end":
             return _context6.stop();
         }
-      }, _callee6, this, [[2, 7]]);
+      }, _callee6, this, [[3, 17]]);
+    }));
+    function restorePairing() {
+      return _restorePairing.apply(this, arguments);
+    }
+    return restorePairing;
+  }()
+  /**
+   * @summary Restores the session if session Id is stored in the local storage
+   * @private
+   * @returns {void}
+   */
+  ;
+  _proto.restoreSession =
+  /*#__PURE__*/
+  function () {
+    var _restoreSession = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee7() {
+      var pairingToken, sessionId;
+      return _regeneratorRuntime().wrap(function _callee7$(_context7) {
+        while (1) switch (_context7.prev = _context7.next) {
+          case 0:
+            pairingToken = this.getStorageValue('pairingToken');
+            sessionId = this.getStorageValue('sessionId');
+            if (!(sessionId && !pairingToken)) {
+              _context7.next = 12;
+              break;
+            }
+            _context7.prev = 3;
+            _context7.next = 6;
+            return this.request({
+              method: 'eth_requestAccounts'
+            });
+          case 6:
+            _context7.next = 12;
+            break;
+          case 8:
+            _context7.prev = 8;
+            _context7.t0 = _context7["catch"](3);
+            this.accounts = [];
+            this.clearStorage();
+          case 12:
+          case "end":
+            return _context7.stop();
+        }
+      }, _callee7, this, [[3, 8]]);
     }));
     function restoreSession() {
       return _restoreSession.apply(this, arguments);
@@ -1037,7 +1102,9 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_Provider) {
                   }
                   throw new ProviderError('Pairing failed', 4900);
                 case 23:
-                  _accounts = ((_pairResult$session = pairResult.session) == null || (_pairResult$session = _pairResult$session.namespaces) == null || (_pairResult$session = _pairResult$session["eip155"]) == null ? void 0 : _pairResult$session.accounts) || [];
+                  _accounts = (((_pairResult$session = pairResult.session) == null || (_pairResult$session = _pairResult$session.namespaces) == null || (_pairResult$session = _pairResult$session["eip155"]) == null ? void 0 : _pairResult$session.accounts) || []).map(function (account) {
+                    return account.includes(':') ? account.split(':')[2] || '' : account;
+                  });
                   _this.accounts = _accounts;
                   _this.emit('accountsChanged', {
                     accounts: _accounts
@@ -1085,7 +1152,9 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_Provider) {
                   _this.setStorageValue('pairingToken', '');
                   _this.setStorageValue('connectUrl', '');
                   _this.setStorageValue('connectUrlBrowser', '');
-                  _accounts2 = ((_pairResult$session2 = _pairResult.session) == null || (_pairResult$session2 = _pairResult$session2.namespaces) == null || (_pairResult$session2 = _pairResult$session2["eip155"]) == null ? void 0 : _pairResult$session2.accounts) || [];
+                  _accounts2 = (((_pairResult$session2 = _pairResult.session) == null || (_pairResult$session2 = _pairResult$session2.namespaces) == null || (_pairResult$session2 = _pairResult$session2["eip155"]) == null ? void 0 : _pairResult$session2.accounts) || []).map(function (account) {
+                    return account.includes(':') ? account.split(':')[2] || '' : account;
+                  });
                   _this.accounts = _accounts2;
                   _this.emit('accountsChanged', {
                     accounts: _accounts2

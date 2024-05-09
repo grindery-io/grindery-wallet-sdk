@@ -60,8 +60,11 @@ export class GrinderyWalletProvider extends Provider
                 throw new ProviderError('Pairing failed', 4900);
               }
 
-              const accounts =
-                pairResult.session?.namespaces?.[`eip155`]?.accounts || [];
+              const accounts = (
+                pairResult.session?.namespaces?.[`eip155`]?.accounts || []
+              ).map(account =>
+                account.includes(':') ? account.split(':')[2] || '' : account
+              );
               this.accounts = accounts;
               this.emit('accountsChanged', { accounts });
               return [];
@@ -100,8 +103,11 @@ export class GrinderyWalletProvider extends Provider
             this.setStorageValue('pairingToken', '');
             this.setStorageValue('connectUrl', '');
             this.setStorageValue('connectUrlBrowser', '');
-            const accounts =
-              pairResult.session?.namespaces?.[`eip155`]?.accounts || [];
+            const accounts = (
+              pairResult.session?.namespaces?.[`eip155`]?.accounts || []
+            ).map(account =>
+              account.includes(':') ? account.split(':')[2] || '' : account
+            );
             this.accounts = accounts;
             this.emit('accountsChanged', { accounts });
             return accounts;
