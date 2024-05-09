@@ -551,12 +551,12 @@ var ProviderLocalStorage = /*#__PURE__*/function (_ProviderEventEmitter) {
 }(ProviderEventEmitter);
 
 /**
- * @summary The provider class
+ * @summary The provider base class
  * @since 0.1.0
  * @extends ProviderLocalStorage
  */
-var Provider = /*#__PURE__*/function (_ProviderLocalStorage) {
-  function Provider() {
+var ProviderBase = /*#__PURE__*/function (_ProviderLocalStorage) {
+  function ProviderBase() {
     var _this;
     _this = _ProviderLocalStorage.call(this) || this;
     /**
@@ -580,21 +580,14 @@ var Provider = /*#__PURE__*/function (_ProviderLocalStorage) {
      */
     _this.accounts = [];
     _this.injectProvider();
-    window.addEventListener('load', function () {
-      _this.emit('connect', {
-        chainId: _this.getChain()
-      });
-      _this.restorePairing();
-      _this.restoreSession();
-    });
     return _this;
   }
   /**
    * @public
    * @returns {boolean} True if the provider is connected to the server.
    */
-  _inheritsLoose(Provider, _ProviderLocalStorage);
-  var _proto = Provider.prototype;
+  _inheritsLoose(ProviderBase, _ProviderLocalStorage);
+  var _proto = ProviderBase.prototype;
   _proto.isConnected = function isConnected() {
     return !!this.chainId;
   }
@@ -685,23 +678,14 @@ var Provider = /*#__PURE__*/function (_ProviderLocalStorage) {
     return request;
   }()
   /**
-   * @summary Registers the provider methods.
-   * @protected
-   * @param {ProviderMethods} methods A map of supported provider methods.
-   * @returns {void}
-   */
-  ;
-  _proto.registerProviderMethods = function registerProviderMethods(methods) {
-    this.methods = methods;
-  }
-  /**
    * @summary Sends a provider request to the Grindery RPC API and waits for the result.
-   * @protected
+   * @public
    * @param {GrinderyRpcProviderRequestMethodName} method Provider request method name
    * @param {Array} params Provider request parameters
    * @param {number} timeout Optional. The time in milliseconds to wait for the request result. Default is 30000.
    * @returns The result of the provider request
-   */;
+   */
+  ;
   _proto.sendAndWaitGrinderyRpcProviderRequest =
   /*#__PURE__*/
   function () {
@@ -730,13 +714,22 @@ var Provider = /*#__PURE__*/function (_ProviderLocalStorage) {
     return sendAndWaitGrinderyRpcProviderRequest;
   }()
   /**
+   * @summary Registers the provider methods.
+   * @protected
+   * @param {ProviderMethods} methods A map of supported provider methods.
+   * @returns {void}
+   */
+  ;
+  _proto.registerProviderMethods = function registerProviderMethods(methods) {
+    this.methods = methods;
+  }
+  /**
    * @summary Sends a provider request to the Grindery RPC API.
    * @protected
    * @param {GrinderyRpcProviderRequestMethodName} method Provider request method name
    * @param {Array} params Provider request parameters
    * @returns {ProviderRequestResult} The request token to use in the `waitGrinderyRpcProviderRequest` method
-   */
-  ;
+   */;
   _proto.sendGrinderyRpcProviderRequest =
   /*#__PURE__*/
   function () {
@@ -908,118 +901,10 @@ var Provider = /*#__PURE__*/function (_ProviderLocalStorage) {
     return errorResponse;
   }
   /**
-   * @summary Restores the pairing process if pairing token is stored in the local storage
-   * @private
-   * @returns {void}
-   */;
-  _proto.restorePairing =
-  /*#__PURE__*/
-  function () {
-    var _restorePairing = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee6() {
-      var pairingToken, sessionId, _pairResult$session, pairResult, accounts;
-      return _regeneratorRuntime().wrap(function _callee6$(_context6) {
-        while (1) switch (_context6.prev = _context6.next) {
-          case 0:
-            pairingToken = this.getStorageValue('pairingToken');
-            sessionId = this.getStorageValue('sessionId');
-            if (!(pairingToken && !sessionId)) {
-              _context6.next = 21;
-              break;
-            }
-            _context6.prev = 3;
-            this.emit('restorePairing', {
-              connectUrl: this.getStorageValue('connectUrl'),
-              connectUrlBrowser: this.getStorageValue('connectUrlBrowser')
-            });
-            _context6.next = 7;
-            return this.sendGrinderyRpcApiRequest('checkout_waitForPairingResult', {
-              pairingToken: pairingToken
-            });
-          case 7:
-            pairResult = _context6.sent;
-            this.clearStorage();
-            this.setStorageValue('sessionId', pairResult.session.sessionId);
-            if (pairResult.session.sessionId) {
-              _context6.next = 12;
-              break;
-            }
-            throw new ProviderError('Pairing failed', 4900);
-          case 12:
-            accounts = (((_pairResult$session = pairResult.session) == null || (_pairResult$session = _pairResult$session.namespaces) == null || (_pairResult$session = _pairResult$session["eip155"]) == null ? void 0 : _pairResult$session.accounts) || []).map(function (account) {
-              return account.includes(':') ? account.split(':')[2] || '' : account;
-            });
-            this.accounts = accounts;
-            this.emit('accountsChanged', {
-              accounts: accounts
-            });
-            _context6.next = 21;
-            break;
-          case 17:
-            _context6.prev = 17;
-            _context6.t0 = _context6["catch"](3);
-            this.accounts = [];
-            this.clearStorage();
-          case 21:
-          case "end":
-            return _context6.stop();
-        }
-      }, _callee6, this, [[3, 17]]);
-    }));
-    function restorePairing() {
-      return _restorePairing.apply(this, arguments);
-    }
-    return restorePairing;
-  }()
-  /**
-   * @summary Restores the session if session Id is stored in the local storage
-   * @private
-   * @returns {void}
-   */
-  ;
-  _proto.restoreSession =
-  /*#__PURE__*/
-  function () {
-    var _restoreSession = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee7() {
-      var pairingToken, sessionId;
-      return _regeneratorRuntime().wrap(function _callee7$(_context7) {
-        while (1) switch (_context7.prev = _context7.next) {
-          case 0:
-            pairingToken = this.getStorageValue('pairingToken');
-            sessionId = this.getStorageValue('sessionId');
-            if (!(sessionId && !pairingToken)) {
-              _context7.next = 12;
-              break;
-            }
-            _context7.prev = 3;
-            _context7.next = 6;
-            return this.request({
-              method: 'eth_requestAccounts'
-            });
-          case 6:
-            _context7.next = 12;
-            break;
-          case 8:
-            _context7.prev = 8;
-            _context7.t0 = _context7["catch"](3);
-            this.accounts = [];
-            this.clearStorage();
-          case 12:
-          case "end":
-            return _context7.stop();
-        }
-      }, _callee7, this, [[3, 8]]);
-    }));
-    function restoreSession() {
-      return _restoreSession.apply(this, arguments);
-    }
-    return restoreSession;
-  }()
-  /**
    * @summary Injects the provider into the window object
    * @private
    * @returns {void}
-   */
-  ;
+   */;
   _proto.injectProvider = function injectProvider() {
     if (!window.ethereum) {
       window.ethereum = this;
@@ -1031,18 +916,18 @@ var Provider = /*#__PURE__*/function (_ProviderLocalStorage) {
       }
     }
   };
-  return Provider;
+  return ProviderBase;
 }(ProviderLocalStorage);
 
 /**
  * @summary The Grindery Wallet Ethereum Injected Provider Class.
- * @extends Provider
+ * @extends ProviderBase
  * @implements ProviderInterface
  */
-var GrinderyWalletProvider = /*#__PURE__*/function (_Provider) {
+var GrinderyWalletProvider = /*#__PURE__*/function (_ProviderBase) {
   function GrinderyWalletProvider() {
     var _this;
-    _this = _Provider.call(this) || this;
+    _this = _ProviderBase.call(this) || this;
     /**
      * @summary Indicates that the provider is a Grindery Wallet.
      */
@@ -1257,11 +1142,126 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_Provider) {
         }()
       }
     });
+    window.addEventListener('load', function () {
+      _this.emit('connect', {
+        chainId: _this.getChain()
+      });
+      _this.restorePairing();
+      _this.restoreSession();
+    });
     return _this;
   }
-  _inheritsLoose(GrinderyWalletProvider, _Provider);
+  /**
+   * @summary Restores the pairing process if pairing token is stored in the local storage
+   * @private
+   * @returns {void}
+   */
+  _inheritsLoose(GrinderyWalletProvider, _ProviderBase);
+  var _proto = GrinderyWalletProvider.prototype;
+  _proto.restorePairing =
+  /*#__PURE__*/
+  function () {
+    var _restorePairing = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5() {
+      var pairingToken, sessionId, _pairResult$session3, pairResult, accounts;
+      return _regeneratorRuntime().wrap(function _callee5$(_context5) {
+        while (1) switch (_context5.prev = _context5.next) {
+          case 0:
+            pairingToken = this.getStorageValue('pairingToken');
+            sessionId = this.getStorageValue('sessionId');
+            if (!(pairingToken && !sessionId)) {
+              _context5.next = 21;
+              break;
+            }
+            _context5.prev = 3;
+            this.emit('restorePairing', {
+              connectUrl: this.getStorageValue('connectUrl'),
+              connectUrlBrowser: this.getStorageValue('connectUrlBrowser')
+            });
+            _context5.next = 7;
+            return this.sendGrinderyRpcApiRequest('checkout_waitForPairingResult', {
+              pairingToken: pairingToken
+            });
+          case 7:
+            pairResult = _context5.sent;
+            this.clearStorage();
+            this.setStorageValue('sessionId', pairResult.session.sessionId);
+            if (pairResult.session.sessionId) {
+              _context5.next = 12;
+              break;
+            }
+            throw new ProviderError('Pairing failed', 4900);
+          case 12:
+            accounts = (((_pairResult$session3 = pairResult.session) == null || (_pairResult$session3 = _pairResult$session3.namespaces) == null || (_pairResult$session3 = _pairResult$session3["eip155"]) == null ? void 0 : _pairResult$session3.accounts) || []).map(function (account) {
+              return account.includes(':') ? account.split(':')[2] || '' : account;
+            });
+            this.accounts = accounts;
+            this.emit('accountsChanged', {
+              accounts: accounts
+            });
+            _context5.next = 21;
+            break;
+          case 17:
+            _context5.prev = 17;
+            _context5.t0 = _context5["catch"](3);
+            this.accounts = [];
+            this.clearStorage();
+          case 21:
+          case "end":
+            return _context5.stop();
+        }
+      }, _callee5, this, [[3, 17]]);
+    }));
+    function restorePairing() {
+      return _restorePairing.apply(this, arguments);
+    }
+    return restorePairing;
+  }()
+  /**
+   * @summary Restores the session if session Id is stored in the local storage
+   * @private
+   * @returns {void}
+   */
+  ;
+  _proto.restoreSession =
+  /*#__PURE__*/
+  function () {
+    var _restoreSession = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee6() {
+      var pairingToken, sessionId;
+      return _regeneratorRuntime().wrap(function _callee6$(_context6) {
+        while (1) switch (_context6.prev = _context6.next) {
+          case 0:
+            pairingToken = this.getStorageValue('pairingToken');
+            sessionId = this.getStorageValue('sessionId');
+            if (!(sessionId && !pairingToken)) {
+              _context6.next = 12;
+              break;
+            }
+            _context6.prev = 3;
+            _context6.next = 6;
+            return this.request({
+              method: 'eth_requestAccounts'
+            });
+          case 6:
+            _context6.next = 12;
+            break;
+          case 8:
+            _context6.prev = 8;
+            _context6.t0 = _context6["catch"](3);
+            this.accounts = [];
+            this.clearStorage();
+          case 12:
+          case "end":
+            return _context6.stop();
+        }
+      }, _callee6, this, [[3, 8]]);
+    }));
+    function restoreSession() {
+      return _restoreSession.apply(this, arguments);
+    }
+    return restoreSession;
+  }();
   return GrinderyWalletProvider;
-}(Provider);
+}(ProviderBase);
 
 /**
  * @summary The Grindery Wallet SDK class

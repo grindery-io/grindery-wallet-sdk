@@ -2,11 +2,11 @@ import { ProviderError } from './ProviderError';
 import { ProviderLocalStorage } from './ProviderLocalStorage';
 import { GrinderyRpcMethodName, GrinderyRpcProviderRequestMethodName, ProviderMethods, ProviderRequestResult, RequestArguments, RequestArgumentsParams } from './types';
 /**
- * @summary The provider class
+ * @summary The provider base class
  * @since 0.1.0
  * @extends ProviderLocalStorage
  */
-export declare class Provider extends ProviderLocalStorage {
+export declare class ProviderBase extends ProviderLocalStorage {
     constructor();
     /**
      * @public
@@ -45,6 +45,15 @@ export declare class Provider extends ProviderLocalStorage {
      */
     request<T>({ method, params }: RequestArguments): Promise<T>;
     /**
+     * @summary Sends a provider request to the Grindery RPC API and waits for the result.
+     * @public
+     * @param {GrinderyRpcProviderRequestMethodName} method Provider request method name
+     * @param {Array} params Provider request parameters
+     * @param {number} timeout Optional. The time in milliseconds to wait for the request result. Default is 30000.
+     * @returns The result of the provider request
+     */
+    sendAndWaitGrinderyRpcProviderRequest<T>(method: GrinderyRpcProviderRequestMethodName, params?: readonly unknown[], timeout?: number): Promise<T>;
+    /**
      * @summary The application ID.
      * @protected
      */
@@ -71,15 +80,6 @@ export declare class Provider extends ProviderLocalStorage {
      * @returns {void}
      */
     protected registerProviderMethods(methods: ProviderMethods): void;
-    /**
-     * @summary Sends a provider request to the Grindery RPC API and waits for the result.
-     * @protected
-     * @param {GrinderyRpcProviderRequestMethodName} method Provider request method name
-     * @param {Array} params Provider request parameters
-     * @param {number} timeout Optional. The time in milliseconds to wait for the request result. Default is 30000.
-     * @returns The result of the provider request
-     */
-    protected sendAndWaitGrinderyRpcProviderRequest<T>(method: GrinderyRpcProviderRequestMethodName, params?: readonly unknown[], timeout?: number): Promise<T>;
     /**
      * @summary Sends a provider request to the Grindery RPC API.
      * @protected
@@ -111,18 +111,6 @@ export declare class Provider extends ProviderLocalStorage {
      * @returns {ProviderError} The provider error
      */
     protected createProviderRpcError(error?: unknown): ProviderError;
-    /**
-     * @summary Restores the pairing process if pairing token is stored in the local storage
-     * @private
-     * @returns {void}
-     */
-    private restorePairing;
-    /**
-     * @summary Restores the session if session Id is stored in the local storage
-     * @private
-     * @returns {void}
-     */
-    private restoreSession;
     /**
      * @summary Injects the provider into the window object
      * @private

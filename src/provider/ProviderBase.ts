@@ -4,28 +4,21 @@ import {
   GrinderyRpcMethodName,
   GrinderyRpcProviderRequestMethodName,
   ProviderMethods,
-  ProviderPairingResult,
   ProviderRequestResult,
   RequestArguments,
   RequestArgumentsParams,
 } from './types';
 
 /**
- * @summary The provider class
+ * @summary The provider base class
  * @since 0.1.0
  * @extends ProviderLocalStorage
  */
-export class Provider extends ProviderLocalStorage {
+export class ProviderBase extends ProviderLocalStorage {
   constructor() {
     super();
 
     this.injectProvider();
-
-    window.addEventListener('load', () => {
-      this.emit('connect', { chainId: this.getChain() });
-      this.restorePairing();
-      this.restoreSession();
-    });
   }
 
   /**
@@ -99,6 +92,26 @@ export class Provider extends ProviderLocalStorage {
   }
 
   /**
+   * @summary Sends a provider request to the Grindery RPC API and waits for the result.
+   * @public
+   * @param {GrinderyRpcProviderRequestMethodName} method Provider request method name
+   * @param {Array} params Provider request parameters
+   * @param {number} timeout Optional. The time in milliseconds to wait for the request result. Default is 30000.
+   * @returns The result of the provider request
+   */
+  public async sendAndWaitGrinderyRpcProviderRequest<T>(
+    method: GrinderyRpcProviderRequestMethodName,
+    params?: readonly unknown[],
+    timeout?: number
+  ): Promise<T> {
+    const request = await this.sendGrinderyRpcProviderRequest(method, params);
+    return await this.waitGrinderyRpcProviderRequest(
+      request.requestToken,
+      timeout
+    );
+  }
+
+  /**
    * @summary The application ID.
    * @protected
    */
@@ -130,26 +143,6 @@ export class Provider extends ProviderLocalStorage {
    */
   protected registerProviderMethods(methods: ProviderMethods): void {
     this.methods = methods;
-  }
-
-  /**
-   * @summary Sends a provider request to the Grindery RPC API and waits for the result.
-   * @protected
-   * @param {GrinderyRpcProviderRequestMethodName} method Provider request method name
-   * @param {Array} params Provider request parameters
-   * @param {number} timeout Optional. The time in milliseconds to wait for the request result. Default is 30000.
-   * @returns The result of the provider request
-   */
-  protected async sendAndWaitGrinderyRpcProviderRequest<T>(
-    method: GrinderyRpcProviderRequestMethodName,
-    params?: readonly unknown[],
-    timeout?: number
-  ): Promise<T> {
-    const request = await this.sendGrinderyRpcProviderRequest(method, params);
-    return await this.waitGrinderyRpcProviderRequest(
-      request.requestToken,
-      timeout
-    );
   }
 
   /**
@@ -267,68 +260,6 @@ export class Provider extends ProviderLocalStorage {
       errorResponse.code = 4900;
     }
     return errorResponse;
-  }
-
-  /**
-   * @summary Restores the pairing process if pairing token is stored in the local storage
-   * @private
-   * @returns {void}
-   */
-  private async restorePairing(): Promise<void> {
-    const pairingToken = this.getStorageValue('pairingToken');
-    const sessionId = this.getStorageValue('sessionId');
-    if (pairingToken && !sessionId) {
-      try {
-        this.emit('restorePairing', {
-          connectUrl: this.getStorageValue('connectUrl'),
-          connectUrlBrowser: this.getStorageValue('connectUrlBrowser'),
-        });
-
-        const pairResult = await this.sendGrinderyRpcApiRequest<
-          ProviderPairingResult
-        >('checkout_waitForPairingResult', {
-          pairingToken,
-        });
-
-        this.clearStorage();
-        this.setStorageValue('sessionId', pairResult.session.sessionId);
-
-        if (!pairResult.session.sessionId) {
-          throw new ProviderError('Pairing failed', 4900);
-        }
-
-        const accounts = (
-          pairResult.session?.namespaces?.[`eip155`]?.accounts || []
-        ).map(account =>
-          account.includes(':') ? account.split(':')[2] || '' : account
-        );
-        this.accounts = accounts;
-        this.emit('accountsChanged', { accounts });
-      } catch (error) {
-        this.accounts = [];
-        this.clearStorage();
-      }
-    }
-  }
-
-  /**
-   * @summary Restores the session if session Id is stored in the local storage
-   * @private
-   * @returns {void}
-   */
-  private async restoreSession(): Promise<void> {
-    const pairingToken = this.getStorageValue('pairingToken');
-    const sessionId = this.getStorageValue('sessionId');
-    if (sessionId && !pairingToken) {
-      try {
-        await this.request<string[]>({
-          method: 'eth_requestAccounts',
-        });
-      } catch (error) {
-        this.accounts = [];
-        this.clearStorage();
-      }
-    }
   }
 
   /**
