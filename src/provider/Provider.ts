@@ -144,7 +144,10 @@ export class Provider extends ProviderLocalStorage {
     timeout?: number
   ): Promise<T> {
     const request = await this.sendGrinderyRpcProviderRequest(method, params);
-    return this.waitGrinderyRpcProviderRequest(request.requestToken, timeout);
+    return await this.waitGrinderyRpcProviderRequest(
+      request.requestToken,
+      timeout
+    );
   }
 
   /**
