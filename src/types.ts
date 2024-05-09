@@ -1,101 +1,64 @@
 import { EventEmitter } from './classes/EventEmitter';
 import { ProviderError } from './classes/ProviderError';
+import {
+  GrinderyRpcMethodNames,
+  GrinderyRpcProviderRequestMethodNames,
+  ProviderEvents,
+  ProviderStorageKeys,
+} from './enums';
+
+export type ChainId = string;
+export type PairingToken = string;
+export type ConnectUrl = string;
+export type ConnectUrlBrowser = string;
+export type ShortToken = string;
+export type SessionId = string;
+export type Address = string;
+export type RequestToken = string;
 
 export interface ProviderConnectInfo {
-  readonly chainId: string;
+  readonly chainId: ChainId;
 }
 
 export type RequestArgumentsParams = readonly unknown[] | object;
 
-export type ProviderMethodEthRequestAccountsParams = {
-  userId?: string;
-} & RequestArgumentsParams;
-
 export interface RequestArguments {
-  readonly method: string;
+  readonly method: GrinderyRpcProviderRequestMethodNames;
   readonly params?: RequestArgumentsParams;
 }
 
-export interface ProviderMethods {
-  [name: string]: {
+export type ProviderMethods = {
+  [name in GrinderyRpcProviderRequestMethodName]: {
     sessionRequired?: boolean;
     pairingTokenRequired?: boolean;
     execute: (params?: RequestArgumentsParams) => Promise<unknown>;
   };
-}
+};
 
 export interface ProviderMessage {
   type: string;
   data: unknown;
 }
 
-export interface AppData {
-  uri: string;
-  name?: string;
-  icon?: string;
-}
-
-export interface AppUser {
-  id: string;
-}
-
-export interface ProviderInterface extends EventEmitter {
-  request<T>(args: RequestArguments): Promise<T>;
-  on(event: 'connect', listener: (info: ProviderConnectInfo) => void): this;
-  on(event: 'disconnect', listener: (error: ProviderError) => void): this;
-  on(event: 'chainChanged', listener: (chainId: string) => void): this;
-  on(event: 'accountsChanged', listener: (accounts: string[]) => void): this;
-  on(event: 'message', listener: (message: ProviderMessage) => void): this;
-  removeListener(
-    event: 'connect',
-    listener: (info: ProviderConnectInfo) => void
-  ): this;
-  removeListener(
-    event: 'disconnect',
-    listener: (error: ProviderError) => void
-  ): this;
-  removeListener(
-    event: 'chainChanged',
-    listener: (chainId: string) => void
-  ): this;
-  removeListener(
-    event: 'accountsChanged',
-    listener: (accounts: string[]) => void
-  ): this;
-  removeListener(
-    event: 'message',
-    listener: (message: ProviderMessage) => void
-  ): this;
-}
-
-export type ProviderStorageKey =
-  | 'pairingToken'
-  | 'sessionId'
-  | 'connectUrl'
-  | 'connectUrlBrowser'
-  | 'shortToken';
+export type ProviderStorageKey = keyof typeof ProviderStorageKeys;
 
 export type ProviderStorage = {
-  [key in ProviderStorageKey]?: string;
+  [key in ProviderStorageKeys]?: string;
 };
 
 export interface ProviderRequestPairingResult {
-  pairingToken: string;
-  connectUrl: string;
-  connectUrlBrowser: string;
-  shortToken: string;
+  pairingToken: PairingToken;
+  connectUrl: ConnectUrl;
+  connectUrlBrowser: ConnectUrlBrowser;
+  shortToken: ShortToken;
 }
 
-export type GrinderyRpcMethodName =
-  | 'checkout_requestPairing'
-  | 'checkout_waitForPairingResult'
-  | 'checkout_request'
-  | 'checkout_waitForRequestResult';
+export type GrinderyRpcMethodName = keyof typeof GrinderyRpcMethodNames;
 
 export interface ProviderPairingResult {
   session: {
     expiry: number;
-    sessionId: string;
+    sessionId: SessionId;
     namespaces: {
       [key: string]: {
         accounts: string[];
@@ -107,11 +70,54 @@ export interface ProviderPairingResult {
   };
 }
 
-export type GrinderyRpcProviderRequestMethodName =
-  | 'eth_accounts'
-  | 'personal_sign'
-  | 'eth_sendTransaction';
+export type GrinderyRpcProviderRequestMethodName = keyof typeof GrinderyRpcProviderRequestMethodNames;
 
 export interface ProviderRequestResult {
-  requestToken: string;
+  requestToken: RequestToken;
+}
+
+export type ProviderEvent = keyof typeof ProviderEvents;
+
+export interface ProviderInterface extends EventEmitter {
+  request<T>(args: RequestArguments): Promise<T>;
+  on(
+    event: ProviderEvents.connect,
+    listener: (info: ProviderConnectInfo) => void
+  ): this;
+  on(
+    event: ProviderEvents.disconnect,
+    listener: (error: ProviderError) => void
+  ): this;
+  on(
+    event: ProviderEvents.chainChanged,
+    listener: (chainId: ChainId) => void
+  ): this;
+  on(
+    event: ProviderEvents.accountsChanged,
+    listener: (accounts: string[]) => void
+  ): this;
+  on(
+    event: ProviderEvents.message,
+    listener: (message: ProviderMessage) => void
+  ): this;
+  removeListener(
+    event: ProviderEvents.connect,
+    listener: (info: ProviderConnectInfo) => void
+  ): this;
+  removeListener(
+    event: ProviderEvents.disconnect,
+    listener: (error: ProviderError) => void
+  ): this;
+  removeListener(
+    event: ProviderEvents.chainChanged,
+    listener: (chainId: ChainId) => void
+  ): this;
+  removeListener(
+    event: ProviderEvents.accountsChanged,
+    listener: (accounts: string[]) => void
+  ): this;
+  removeListener(
+    event: ProviderEvents.message,
+    listener: (message: ProviderMessage) => void
+  ): this;
 }

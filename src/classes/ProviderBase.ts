@@ -1,13 +1,21 @@
 import { ProviderLocalStorage } from './LocalStorage';
 import {
+  Address,
+  ChainId,
   GrinderyRpcMethodName,
   GrinderyRpcProviderRequestMethodName,
   ProviderMethods,
   ProviderRequestResult,
   RequestArguments,
   RequestArgumentsParams,
+  RequestToken,
 } from '../types';
 import { ProviderError } from './ProviderError';
+import {
+  GrinderyRpcMethodNames,
+  ProviderEvents,
+  ProviderStorageKeys,
+} from '../enums';
 
 /**
  * @summary The provider base class
@@ -34,7 +42,10 @@ export class ProviderBase extends ProviderLocalStorage {
    * @returns {boolean} True if the provider is connected to the server and the Grindery Wallet.
    */
   public isWalletConnected(): boolean {
-    return this.isConnected() && !!this.getStorageValue('sessionId');
+    return (
+      this.isConnected() &&
+      !!this.getStorageValue(ProviderStorageKeys.sessionId)
+    );
   }
 
   /**
@@ -42,24 +53,27 @@ export class ProviderBase extends ProviderLocalStorage {
    * @returns {boolean} True if the provider is connected to the server and the Grindery Wallet pairing is in progress (pending).
    */
   public isWalletConnectionPending(): boolean {
-    return this.isConnected() && !!this.getStorageValue('pairingToken');
+    return (
+      this.isConnected() &&
+      !!this.getStorageValue(ProviderStorageKeys.pairingToken)
+    );
   }
 
   /**
    * @summary Gets the connected chain ID in hex format
    * @public
-   * @returns {string} The chain ID in hex format
+   * @returns {ChainId} The chain ID in hex format
    */
-  public getChain(): string {
+  public getChain(): ChainId {
     return `0x${parseFloat(this.chainId.split(':')[1]).toString(16)}`;
   }
 
   /**
    * @summary Gets the connected user's wallet address
    * @public
-   * @returns {string} The ethereum wallet address
+   * @returns {Address} The ethereum wallet address
    */
-  public getAddress(): string {
+  public getAddress(): Address {
     return this.accounts[0] || '';
   }
 
@@ -73,8 +87,14 @@ export class ProviderBase extends ProviderLocalStorage {
    */
   public async request<T>({ method, params }: RequestArguments): Promise<T> {
     if (!this.chainId) {
-      this.emit('disconnect', new ProviderError('Disconnected', 4900));
+      this.emit(
+        ProviderEvents.disconnect,
+        new ProviderError('Disconnected', 4900)
+      );
       throw new ProviderError('Disconnected', 4900);
+    }
+    if (!this.methods) {
+      throw new ProviderError('Unsupported Method', 4200);
     }
     if (!this.methods[method]) {
       throw new ProviderError('Unsupported Method', 4200);
@@ -121,19 +141,19 @@ export class ProviderBase extends ProviderLocalStorage {
    * @summary The chain ID in CAIP-2 format; e.g. "eip155:1".
    * @protected
    */
-  protected chainId: string = 'eip155:137';
+  protected chainId: ChainId = 'eip155:137';
 
   /**
    * @summary The list of supported provider methods.
    * @protected
    */
-  protected methods: ProviderMethods = {};
+  protected methods?: ProviderMethods;
 
   /**
    * @summary The user's wallet addresses list.
    * @protected
    */
-  protected accounts: string[] = [];
+  protected accounts: Address[] = [];
 
   /**
    * @summary Registers the provider methods.
@@ -156,14 +176,14 @@ export class ProviderBase extends ProviderLocalStorage {
     method: GrinderyRpcProviderRequestMethodName,
     params?: readonly unknown[]
   ): Promise<ProviderRequestResult> {
-    if (!this.getStorageValue('sessionId')) {
+    if (!this.getStorageValue(ProviderStorageKeys.sessionId)) {
       throw new ProviderError('Unauthorized', 4900);
     }
     try {
       return await this.sendGrinderyRpcApiRequest<ProviderRequestResult>(
-        'checkout_request',
+        GrinderyRpcMethodNames.checkout_request,
         {
-          sessionId: this.getStorageValue('sessionId'),
+          sessionId: this.getStorageValue(ProviderStorageKeys.sessionId),
           scope: this.chainId,
           request: {
             method,
@@ -179,20 +199,20 @@ export class ProviderBase extends ProviderLocalStorage {
   /**
    * @summary Waits for the result of the provider request.
    * @protected
-   * @param {string} requestToken A token to identify provider request. Recieved in the results of `sendGrinderyRpcProviderRequest` method.
+   * @param {RequestToken} requestToken A token to identify provider request. Recieved in the results of `sendGrinderyRpcProviderRequest` method.
    * @param {number} timeout Optional. The time in milliseconds to wait for the request result. Default is 30000.
    * @returns The result of the provider request
    */
   protected async waitGrinderyRpcProviderRequest<T>(
-    requestToken: string,
+    requestToken: RequestToken,
     timeout?: number
   ): Promise<T> {
-    if (!this.getStorageValue('sessionId')) {
+    if (!this.getStorageValue(ProviderStorageKeys.sessionId)) {
       throw new ProviderError('Unauthorized', 4900);
     }
     try {
       return await this.sendGrinderyRpcApiRequest<T>(
-        'checkout_waitForRequestResult',
+        GrinderyRpcMethodNames.checkout_waitForRequestResult,
         {
           requestToken,
           timeout,

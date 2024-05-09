@@ -1,3 +1,5 @@
+import { ProviderEvent } from '../types';
+
 /**
  * @summary A class for emitting provider events
  * @since 0.1.0
@@ -7,7 +9,7 @@ export class EventEmitter {
    * @summary A map of events and their listeners
    * @public
    */
-  public events: Map<string, Array<Function>>;
+  public events: Map<ProviderEvent, Array<Function>>;
 
   constructor() {
     this.events = new Map();
@@ -20,7 +22,7 @@ export class EventEmitter {
    * @param {Function} callback Callback function
    * @returns {EventEmitter} The instance of the class itself
    */
-  public on(event: string, callback: Function) {
+  public on(event: ProviderEvent, callback: Function) {
     if (!this.events.has(event)) {
       this.events.set(event, []);
     }
@@ -35,7 +37,7 @@ export class EventEmitter {
    * @param {Function} callback Callback function
    * @returns {EventEmitter} The instance of the class itself
    */
-  public removeListener(event: string, callback: Function) {
+  public removeListener(event: ProviderEvent, callback: Function) {
     if (this.events.has(event)) {
       const callbacks = this.events.get(event)!.filter(cb => cb !== callback);
       this.events.set(event, callbacks);
@@ -50,7 +52,7 @@ export class EventEmitter {
    * @param data Event data
    * @returns {EventEmitter} The instance of the class itself
    */
-  protected emit(event: string, ...data: any[]) {
+  protected emit(event: ProviderEvent, ...data: any[]) {
     if (this.events.has(event)) {
       console.log('[Grindery.WalletSDK] > Event:', event, data);
       this.events.get(event)!.forEach(callback => {

@@ -1,3 +1,4 @@
+import { ProviderEvent } from '../types';
 import { GrinderyWalletProvider } from './GrinderyWalletProvider';
 /**
  * @summary The Grindery Wallet SDK class
@@ -57,7 +58,7 @@ export declare class GrinderyWalletSDK {
      * @param {Function} callback Callback function
      * @returns {EventEmitter} The instance of the class itself
      */
-    on(event: string, callback: Function): this;
+    on(event: ProviderEvent, callback: Function): this;
     /**
      * @summary Removes a listener from the event
      * @public
@@ -65,11 +66,17 @@ export declare class GrinderyWalletSDK {
      * @param {Function} callback Callback function
      * @returns {EventEmitter} The instance of the class itself
      */
-    removeListener(event: string, callback: Function): this;
+    removeListener(event: ProviderEvent, callback: Function): this;
     /**
      * @summary Gets the Grindery Wallet ethereum provider
      * @returns {GrinderyWalletProvider} The Grindery Wallet ethereum provider
      */
     private getWeb3Provider;
+    /**
+     * @summary Handles the pairing request, by opening the Grindery Wallet
+     * @private
+     * @param ProviderRequestPairingResult
+     * @returns {void}
+     */
     private handlePairing;
 }

@@ -6,7 +6,7 @@ const shortenAddress = address => {
     : address;
 };
 
-const renderUsername = target => {
+const showUsername = target => {
   const WebApp = window && window.Telegram && window.Telegram.WebApp;
   if (WebApp) {
     const user = WebApp && WebApp.initDataUnsafe && WebApp.initDataUnsafe.user;
@@ -19,7 +19,44 @@ const renderUsername = target => {
   }
 };
 
-const renderReloadButton = target => {
+const showConnectButton = target => {
+  if (!target) {
+    return;
+  }
+  target.innerHTML = `
+      <button class="py-2 px-4 bg-blue-500 text-white rounded-xl connect disabled:opacity-50">
+          Connect Grindery Wallet
+      </button>
+      `;
+  const button = target.querySelector('button');
+  if (button) {
+    button.addEventListener('click', event => {
+      onConnectButtonClick(event, button, target);
+    });
+  }
+};
+
+const showConnectedWallet = (address, target) => {
+  if (!target || !address) {
+    return;
+  }
+  target.innerHTML = `
+        <p class="text-center mb-4">Grindery Wallet Connected!</p>
+        <p class="text-center mb-4">${shortenAddress(address)}</p>
+        <div class="mt-6">
+            <button id="personal_sign" class="py-2 px-4 bg-blue-500 text-white rounded-xl disabled:opacity-50">
+            Sign message
+            </button>
+        </div>
+        <div class="mt-4">
+            <button id="eth_sendTransaction" class="py-2 px-4 bg-blue-500 text-white rounded-xl disabled:opacity-50">
+            Send transaction
+            </button>
+        </div>
+      `;
+};
+
+const showReloadButton = target => {
   if (!target) {
     return;
   }
@@ -35,29 +72,10 @@ const onConnectButtonClick = (e, button, target) => {
   button.innerHTML = 'Connecting...';
   button.disabled = true;
 
-  WalletSDK.on('pairing', data => onPairing(data, target));
-
   WalletSDK.connect().catch(error => {
     console.error('eth_requestAccounts', error);
-    renderReloadButton(target);
+    showReloadButton(target);
   });
-};
-
-const renderConnectButton = target => {
-  if (!target) {
-    return;
-  }
-  target.innerHTML = `
-      <button class="py-2 px-4 bg-blue-500 text-white rounded-xl connect disabled:opacity-50">
-          Connect Grindery Wallet
-      </button>
-      `;
-  const button = target.querySelector('button');
-  if (button) {
-    button.addEventListener('click', event => {
-      onConnectButtonClick(event, button, target);
-    });
-  }
 };
 
 const onSignButtonClick = (e, button, address) => {
@@ -90,26 +108,6 @@ const onSendTxButtonClick = (e, button, address) => {
       button.innerHTML = 'Send transaction';
       alert('Error: ' + error.message);
     });
-};
-
-const renderConnectedWallet = (address, target) => {
-  if (!target || !address) {
-    return;
-  }
-  target.innerHTML = `
-        <p class="text-center mb-4">Grindery Wallet Connected!</p>
-        <p class="text-center mb-4">${shortenAddress(address)}</p>
-        <div class="mt-6">
-            <button id="personal_sign" class="py-2 px-4 bg-blue-500 text-white rounded-xl disabled:opacity-50">
-            Sign message
-            </button>
-        </div>
-        <div class="mt-4">
-            <button id="eth_sendTransaction" class="py-2 px-4 bg-blue-500 text-white rounded-xl disabled:opacity-50">
-            Send transaction
-            </button>
-        </div>
-      `;
 };
 
 const listenWalletButtonsClicks = (address, target) => {
@@ -156,19 +154,19 @@ const onAccountsChanged = ({ accounts }, target) => {
     return;
   }
   if (accounts.length > 0) {
-    renderConnectedWallet(accounts[0], target);
+    showConnectedWallet(accounts[0], target);
     listenWalletButtonsClicks(accounts[0], target);
   } else {
-    renderConnectButton(target);
+    showConnectButton(target);
   }
 };
 
 const onDisconnect = (data, target) => {
-  renderConnectButton(target);
+  showConnectButton(target);
 };
 
 const listenProviderEvents = target => {
-  WalletSDK.on('restorePairing', data => onPairing(data, target));
+  WalletSDK.on('pair', data => onPairing(data, target));
   WalletSDK.on('accountsChanged', data => onAccountsChanged(data, target));
   WalletSDK.on('disconnect', data => onDisconnect(data, target));
 };
@@ -176,8 +174,8 @@ const listenProviderEvents = target => {
 const onProviderConnect = () => {
   const targetEl = document.getElementById('sdk-example');
   listenProviderEvents(targetEl);
-  renderUsername(targetEl);
-  renderConnectButton(targetEl);
+  showUsername(targetEl);
+  showConnectButton(targetEl);
 };
 
 const init = () => {

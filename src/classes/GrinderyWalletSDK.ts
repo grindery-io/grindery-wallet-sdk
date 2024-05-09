@@ -1,4 +1,8 @@
-import { ProviderRequestPairingResult } from '../types';
+import {
+  GrinderyRpcProviderRequestMethodNames,
+  ProviderEvents,
+} from '../enums';
+import { ProviderEvent, ProviderRequestPairingResult } from '../types';
 import { GrinderyWalletProvider } from './GrinderyWalletProvider';
 
 /**
@@ -14,7 +18,7 @@ export class GrinderyWalletSDK {
 
   constructor() {
     this.provider = this.getWeb3Provider();
-    this.provider.on('pairing', this.handlePairing);
+    this.provider.on(ProviderEvents.pair, this.handlePairing);
   }
 
   /**
@@ -40,7 +44,9 @@ export class GrinderyWalletSDK {
    * @since 0.1.0
    */
   public async connect(): Promise<string[]> {
-    return await this.provider.request({ method: 'eth_requestAccounts' });
+    return await this.provider.request({
+      method: GrinderyRpcProviderRequestMethodNames.eth_requestAccounts,
+    });
   }
 
   /**
@@ -59,7 +65,7 @@ export class GrinderyWalletSDK {
     data?: string;
   }): Promise<string[]> {
     return await this.provider.request<string[]>({
-      method: 'eth_sendTransaction',
+      method: GrinderyRpcProviderRequestMethodNames.eth_sendTransaction,
       params: [params],
     });
   }
@@ -73,7 +79,7 @@ export class GrinderyWalletSDK {
    */
   public async signMessage(message: string): Promise<string> {
     return await this.provider.request<string>({
-      method: 'personal_sign',
+      method: GrinderyRpcProviderRequestMethodNames.personal_sign,
       params: [message, this.provider.getAddress()],
     });
   }
@@ -85,7 +91,7 @@ export class GrinderyWalletSDK {
    * @param {Function} callback Callback function
    * @returns {EventEmitter} The instance of the class itself
    */
-  public on(event: string, callback: Function) {
+  public on(event: ProviderEvent, callback: Function) {
     this.provider.on(event, callback);
     return this;
   }
@@ -97,7 +103,7 @@ export class GrinderyWalletSDK {
    * @param {Function} callback Callback function
    * @returns {EventEmitter} The instance of the class itself
    */
-  public removeListener(event: string, callback: Function) {
+  public removeListener(event: ProviderEvent, callback: Function) {
     this.provider.removeListener(event, callback);
     return this;
   }
@@ -124,6 +130,12 @@ export class GrinderyWalletSDK {
     return provider;
   }
 
+  /**
+   * @summary Handles the pairing request, by opening the Grindery Wallet
+   * @private
+   * @param ProviderRequestPairingResult
+   * @returns {void}
+   */
   private handlePairing({
     shortToken,
     connectUrlBrowser,

@@ -1,4 +1,9 @@
 import {
+  GrinderyRpcMethodNames,
+  GrinderyRpcProviderRequestMethodNames,
+  ProviderStorageKeys,
+} from '../enums';
+import {
   ProviderInterface,
   ProviderPairingResult,
   ProviderRequestPairingResult,
@@ -29,14 +34,14 @@ export class GrinderyWalletProvider extends ProviderBase
           if (this.isWalletConnected()) {
             try {
               const accounts = await this.request<string[]>({
-                method: 'eth_accounts',
+                method: GrinderyRpcProviderRequestMethodNames.eth_accounts,
                 params: params || [],
               });
               this.accounts = accounts;
               this.emit('accountsChanged', { accounts });
               return accounts;
             } catch (error) {
-              this.setStorageValue('sessionId', '');
+              this.setStorageValue(ProviderStorageKeys.sessionId, '');
               // skip failed request and continue with pairing
             }
           }
@@ -44,12 +49,17 @@ export class GrinderyWalletProvider extends ProviderBase
             try {
               const pairResult = await this.sendGrinderyRpcApiRequest<
                 ProviderPairingResult
-              >('checkout_waitForPairingResult', {
-                pairingToken: this.getStorageValue('pairingToken'),
+              >(GrinderyRpcMethodNames.checkout_waitForPairingResult, {
+                pairingToken: this.getStorageValue(
+                  ProviderStorageKeys.pairingToken
+                ),
               });
 
               this.clearStorage();
-              this.setStorageValue('sessionId', pairResult.session.sessionId);
+              this.setStorageValue(
+                ProviderStorageKeys.sessionId,
+                pairResult.session.sessionId
+              );
 
               if (!pairResult.session.sessionId) {
                 throw new ProviderError('Pairing failed', 4900);
@@ -71,36 +81,53 @@ export class GrinderyWalletProvider extends ProviderBase
           try {
             const result = await this.sendGrinderyRpcApiRequest<
               ProviderRequestPairingResult
-            >('checkout_requestPairing', { appId: this.appId });
+            >(GrinderyRpcMethodNames.checkout_requestPairing, {
+              appId: this.appId,
+            });
 
             if (!result.pairingToken || !result.connectUrl) {
               throw new ProviderError('Pairing failed', 4900);
             }
 
-            this.setStorageValue('pairingToken', result.pairingToken);
-            this.setStorageValue('connectUrl', result.connectUrl);
-            this.setStorageValue('connectUrlBrowser', result.connectUrlBrowser);
-            this.setStorageValue('shortToken', result.shortToken);
-            this.emit('pairing', {
+            this.setStorageValue(
+              ProviderStorageKeys.pairingToken,
+              result.pairingToken
+            );
+            this.setStorageValue(
+              ProviderStorageKeys.connectUrl,
+              result.connectUrl
+            );
+            this.setStorageValue(
+              ProviderStorageKeys.connectUrlBrowser,
+              result.connectUrlBrowser
+            );
+            this.setStorageValue(
+              ProviderStorageKeys.shortToken,
+              result.shortToken
+            );
+            this.emit('pair', {
               shortToken: result.shortToken,
               connectUrl: result.connectUrl,
               connectUrlBrowser: result.connectUrlBrowser,
             });
             const pairResult = await this.sendGrinderyRpcApiRequest<
               ProviderPairingResult
-            >('checkout_waitForPairingResult', {
+            >(GrinderyRpcMethodNames.checkout_waitForPairingResult, {
               pairingToken: result.pairingToken,
             });
 
-            this.setStorageValue('sessionId', pairResult.session.sessionId);
+            this.setStorageValue(
+              ProviderStorageKeys.sessionId,
+              pairResult.session.sessionId
+            );
 
             if (!pairResult.session.sessionId) {
               throw new ProviderError('Pairing failed', 4900);
             }
-            this.setStorageValue('pairingToken', '');
-            this.setStorageValue('connectUrl', '');
-            this.setStorageValue('connectUrlBrowser', '');
-            this.setStorageValue('shortToken', '');
+            this.setStorageValue(ProviderStorageKeys.pairingToken, '');
+            this.setStorageValue(ProviderStorageKeys.connectUrl, '');
+            this.setStorageValue(ProviderStorageKeys.connectUrlBrowser, '');
+            this.setStorageValue(ProviderStorageKeys.shortToken, '');
             const accounts = (
               pairResult.session?.namespaces?.[`eip155`]?.accounts || []
             ).map(account =>
@@ -114,14 +141,14 @@ export class GrinderyWalletProvider extends ProviderBase
           }
         },
       },
-      eth_accounts: {
+      [GrinderyRpcProviderRequestMethodNames.eth_accounts]: {
         sessionRequired: true,
         execute: async (params?: RequestArgumentsParams): Promise<string[]> => {
           try {
             const accounts = await this.sendAndWaitGrinderyRpcProviderRequest<
               string[]
             >(
-              'eth_accounts',
+              GrinderyRpcProviderRequestMethodNames.eth_accounts,
               params ? (Array.isArray(params) ? params : [params]) : []
             );
             this.accounts = accounts;
@@ -132,22 +159,22 @@ export class GrinderyWalletProvider extends ProviderBase
           }
         },
       },
-      eth_sendTransaction: {
+      [GrinderyRpcProviderRequestMethodNames.eth_sendTransaction]: {
         sessionRequired: true,
         execute: async (params?: RequestArgumentsParams): Promise<string[]> => {
           return await this.sendAndWaitGrinderyRpcProviderRequest<string[]>(
-            'eth_sendTransaction',
+            GrinderyRpcProviderRequestMethodNames.eth_sendTransaction,
             params ? (Array.isArray(params) ? params : [params]) : []
           );
         },
       },
-      personal_sign: {
+      [GrinderyRpcProviderRequestMethodNames.personal_sign]: {
         sessionRequired: true,
         execute: async (
           params?: Partial<RequestArgumentsParams>
         ): Promise<string> => {
           return await this.sendAndWaitGrinderyRpcProviderRequest(
-            'personal_sign',
+            GrinderyRpcProviderRequestMethodNames.personal_sign,
             params ? (Array.isArray(params) ? params : [params]) : []
           );
         },
@@ -167,18 +194,21 @@ export class GrinderyWalletProvider extends ProviderBase
    * @returns {void}
    */
   private async restorePairing(): Promise<void> {
-    const pairingToken = this.getStorageValue('pairingToken');
-    const sessionId = this.getStorageValue('sessionId');
+    const pairingToken = this.getStorageValue(ProviderStorageKeys.pairingToken);
+    const sessionId = this.getStorageValue(ProviderStorageKeys.sessionId);
     if (pairingToken && !sessionId) {
       try {
         const pairResult = await this.sendGrinderyRpcApiRequest<
           ProviderPairingResult
-        >('checkout_waitForPairingResult', {
+        >(GrinderyRpcMethodNames.checkout_waitForPairingResult, {
           pairingToken,
         });
 
         this.clearStorage();
-        this.setStorageValue('sessionId', pairResult.session.sessionId);
+        this.setStorageValue(
+          ProviderStorageKeys.sessionId,
+          pairResult.session.sessionId
+        );
 
         if (!pairResult.session.sessionId) {
           throw new ProviderError('Pairing failed', 4900);
@@ -204,12 +234,12 @@ export class GrinderyWalletProvider extends ProviderBase
    * @returns {void}
    */
   private async restoreSession(): Promise<void> {
-    const pairingToken = this.getStorageValue('pairingToken');
-    const sessionId = this.getStorageValue('sessionId');
+    const pairingToken = this.getStorageValue(ProviderStorageKeys.pairingToken);
+    const sessionId = this.getStorageValue(ProviderStorageKeys.sessionId);
     if (sessionId && !pairingToken) {
       try {
         await this.request<string[]>({
-          method: 'eth_requestAccounts',
+          method: GrinderyRpcProviderRequestMethodNames.eth_requestAccounts,
         });
       } catch (error) {
         this.accounts = [];

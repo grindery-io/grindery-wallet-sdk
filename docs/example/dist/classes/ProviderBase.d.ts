@@ -1,5 +1,5 @@
 import { ProviderLocalStorage } from './LocalStorage';
-import { GrinderyRpcMethodName, GrinderyRpcProviderRequestMethodName, ProviderMethods, ProviderRequestResult, RequestArguments, RequestArgumentsParams } from '../types';
+import { Address, ChainId, GrinderyRpcMethodName, GrinderyRpcProviderRequestMethodName, ProviderMethods, ProviderRequestResult, RequestArguments, RequestArgumentsParams, RequestToken } from '../types';
 import { ProviderError } from './ProviderError';
 /**
  * @summary The provider base class
@@ -26,15 +26,15 @@ export declare class ProviderBase extends ProviderLocalStorage {
     /**
      * @summary Gets the connected chain ID in hex format
      * @public
-     * @returns {string} The chain ID in hex format
+     * @returns {ChainId} The chain ID in hex format
      */
-    getChain(): string;
+    getChain(): ChainId;
     /**
      * @summary Gets the connected user's wallet address
      * @public
-     * @returns {string} The ethereum wallet address
+     * @returns {Address} The ethereum wallet address
      */
-    getAddress(): string;
+    getAddress(): Address;
     /**
      * @summary Sends a request to the provider
      * @public
@@ -62,17 +62,17 @@ export declare class ProviderBase extends ProviderLocalStorage {
      * @summary The chain ID in CAIP-2 format; e.g. "eip155:1".
      * @protected
      */
-    protected chainId: string;
+    protected chainId: ChainId;
     /**
      * @summary The list of supported provider methods.
      * @protected
      */
-    protected methods: ProviderMethods;
+    protected methods?: ProviderMethods;
     /**
      * @summary The user's wallet addresses list.
      * @protected
      */
-    protected accounts: string[];
+    protected accounts: Address[];
     /**
      * @summary Registers the provider methods.
      * @protected
@@ -91,11 +91,11 @@ export declare class ProviderBase extends ProviderLocalStorage {
     /**
      * @summary Waits for the result of the provider request.
      * @protected
-     * @param {string} requestToken A token to identify provider request. Recieved in the results of `sendGrinderyRpcProviderRequest` method.
+     * @param {RequestToken} requestToken A token to identify provider request. Recieved in the results of `sendGrinderyRpcProviderRequest` method.
      * @param {number} timeout Optional. The time in milliseconds to wait for the request result. Default is 30000.
      * @returns The result of the provider request
      */
-    protected waitGrinderyRpcProviderRequest<T>(requestToken: string, timeout?: number): Promise<T>;
+    protected waitGrinderyRpcProviderRequest<T>(requestToken: RequestToken, timeout?: number): Promise<T>;
     /**
      * @summary Sends a request to the Grindery Walletconnect RPC API.
      * @protected
