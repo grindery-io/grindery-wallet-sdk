@@ -46,29 +46,7 @@ export type ProviderStorage = {
   [key in ProviderStorageKeys]?: string;
 };
 
-export interface ProviderRequestPairingResult {
-  pairingToken: PairingToken;
-  connectUrl: ConnectUrl;
-  connectUrlBrowser: ConnectUrlBrowser;
-  shortToken: ShortToken;
-}
-
 export type GrinderyRpcMethodName = keyof typeof GrinderyRpcMethodNames;
-
-export interface ProviderPairingResult {
-  session: {
-    expiry: number;
-    sessionId: SessionId;
-    namespaces: {
-      [key: string]: {
-        accounts: string[];
-        chains: string[];
-        events: string[];
-        methods: string[];
-      };
-    };
-  };
-}
 
 export type GrinderyRpcProviderRequestMethodName = keyof typeof GrinderyRpcProviderRequestMethodNames;
 
@@ -77,6 +55,46 @@ export interface ProviderRequestResult {
 }
 
 export type ProviderEvent = keyof typeof ProviderEvents;
+
+export namespace GrinderyRpcProviderRequestResults {
+  export type eth_accounts = Address[];
+  export type eth_requestAccounts = Address[];
+  export type personal_sign = string;
+  export type eth_sendTransaction = string;
+}
+
+export namespace GrinderyRpcApiRequestResults {
+  export type checkout_waitForPairingResult = {
+    session: {
+      expiry: number;
+      sessionId: SessionId;
+      namespaces: {
+        [key: string]: {
+          accounts: string[];
+          chains: string[];
+          events: string[];
+          methods: string[];
+        };
+      };
+    };
+  };
+  export type checkout_requestPairing = {
+    pairingToken: PairingToken;
+    connectUrl: ConnectUrl;
+    connectUrlBrowser: ConnectUrlBrowser;
+    shortToken: ShortToken;
+  };
+
+  export type checkout_request = {
+    requestToken: RequestToken;
+  };
+
+  export type checkout_waitForRequestResult =
+    | GrinderyRpcProviderRequestResults.eth_accounts
+    | GrinderyRpcProviderRequestResults.eth_requestAccounts
+    | GrinderyRpcProviderRequestResults.personal_sign
+    | GrinderyRpcProviderRequestResults.eth_sendTransaction;
+}
 
 export interface ProviderInterface extends WalletProviderEventEmitter {
   request<T>(args: RequestArguments): Promise<T>;

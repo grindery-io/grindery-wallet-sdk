@@ -134,7 +134,7 @@ const onPairing = (data, target) => {
   }
   const redirectUrl = data.shortToken
     ? `https://walletconnect.grindery.com/connect/wc?uri=${data.shortToken}`
-    : data.connectUrlBrowser || data.data.connectUrl || '';
+    : data.connectUrlBrowser || data.connectUrl || '';
   if (redirectUrl) {
     target.innerHTML = `
     <p class="text-center mb-4">Approve wallet connection in Grindery Bot</p>
@@ -149,7 +149,7 @@ const onPairing = (data, target) => {
   }
 };
 
-const onAccountsChanged = ({ accounts }, target) => {
+const onAccountsChanged = (accounts, target) => {
   if (!target) {
     return;
   }
@@ -161,7 +161,7 @@ const onAccountsChanged = ({ accounts }, target) => {
   }
 };
 
-const onDisconnect = (data, target) => {
+const onDisconnect = (_, target) => {
   showConnectButton(target);
 };
 

@@ -73,6 +73,7 @@ export declare class WalletProvider extends WalletProviderLocalStorage {
      * @protected
      */
     protected accounts: Address[];
+    protected setAccounts(accounts: Address[]): Address[];
     /**
      * @summary Registers the provider methods.
      * @protected

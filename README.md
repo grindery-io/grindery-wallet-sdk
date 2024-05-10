@@ -27,7 +27,7 @@ Grindery Wallet SDK enables your dapp to provide a seamless user experience for 
     - [connect](#sdk-events_connect)
     - [disconnect](#sdk-events_disconnect)
     - [accountsChanged](#sdk-events_accountschanged)
-    - [pairing](#sdk-events_pairing)
+    - [pair](#sdk-events_pair)
 - [Advanced usage](#advanced-usage)
   - [Injected Ethereum Provider](#injected-ethereum-provider)
     - [eth_requestAccounts](#method_eth_requestaccounts)
@@ -257,16 +257,15 @@ window.Grindery.WalletSDK.removeListener('connect', data => {
 - [connect](#sdk-events_connect)
 - [disconnect](#sdk-events_disconnect)
 - [accountsChanged](#sdk-events_accountschanged)
-- [pairing](#sdk-events_pairing)
+- [pair](#sdk-events_pair)
 
 ### <a id="sdk-events_connect">`connect`</a>
 
 Event emitted when Wallet SDK is connected to the server and able to submit requests. We recommend listening to this event to determine when the SDK is connected.
 
-**Event data:**
+**Event data:** Object. Information about current SDK connection.
 
-- `ConnectInfo` Object. Information about current SDK connection.
-  - `chainId` String. Id of the currently connected blockchain in hex format.
+- `chainId` String. Id of the currently connected blockchain in hex format.
 
 **Example code:**
 
@@ -282,9 +281,7 @@ window.Grindery.WalletSDK.on('connect', data => {
 
 Event emitted when Wallet SDK disconnected from the server and unable to submit requests.
 
-**Event data:**
-
-- `error` Object. Error object.
+**Event data:** Provider Error object.
 
 **Example code:**
 
@@ -300,9 +297,7 @@ window.Grindery.WalletSDK.on('disconnect', data => {
 
 Event emitted when connected wallet address changes.
 
-**Event data:**
-
-- `addresses` Array of Strings. Array of the wallet addresses.
+**Event data:** Array of Strings. Array of the wallet addresses.
 
 **Example code:**
 
@@ -314,16 +309,17 @@ window.Grindery.WalletSDK.on('accountsChanged', data => {
 
 ---
 
-### <a id="sdk-events_pairing">`pairing`</a>
+### <a id="sdk-events_pair">`pair`</a>
 
 Event emitted when SDK requests the wallet connection.
 
 > SDK will try to automatically redirect user to the connection page when `WalletSDK.connect()` method is called. However we recommend to listen for this event to get the connection page URL and show it to the user.
 
-**Event data:**
+**Event data:** Object:
 
 - `connectUrl` String. Telegram URI.
 - `connectUrlBrowser` String. Browser URL.
+- `shortToken` String. Connection token.
 
 **Example code:**
 

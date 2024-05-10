@@ -2,7 +2,7 @@ import {
   GrinderyRpcProviderRequestMethodNames,
   ProviderEvents,
 } from '../enums';
-import { ProviderEvent, ProviderRequestPairingResult } from '../types';
+import { GrinderyRpcApiRequestResults, ProviderEvent } from '../types';
 import { GrinderyWalletProvider } from '../provider/GrinderyWalletProvider';
 
 /**
@@ -139,7 +139,7 @@ export class GrinderyWalletSDK {
   private handlePairing({
     shortToken,
     connectUrlBrowser,
-  }: ProviderRequestPairingResult): void {
+  }: GrinderyRpcApiRequestResults.checkout_requestPairing): void {
     const WebApp = window.Telegram?.WebApp;
     const redirectUrl = `https://walletconnect.grindery.com/connect/wc?uri=${shortToken}`;
     if (

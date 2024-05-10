@@ -2,6 +2,7 @@ import { WalletProviderLocalStorage } from './WalletProviderLocalStorage';
 import {
   Address,
   ChainId,
+  GrinderyRpcApiRequestResults,
   GrinderyRpcMethodName,
   GrinderyRpcProviderRequestMethodName,
   ProviderMethods,
@@ -58,7 +59,8 @@ export class WalletProvider extends WalletProviderLocalStorage {
   public isWalletConnectionPending(): boolean {
     return (
       this.isConnected() &&
-      !!this.getStorageValue(ProviderStorageKeys.pairingToken)
+      !!this.getStorageValue(ProviderStorageKeys.pairingToken) &&
+      !this.getStorageValue(ProviderStorageKeys.sessionId)
     );
   }
 
@@ -152,6 +154,14 @@ export class WalletProvider extends WalletProviderLocalStorage {
    */
   protected accounts: Address[] = [];
 
+  protected setAccounts(accounts: Address[]): Address[] {
+    if (JSON.stringify(accounts) !== JSON.stringify(this.accounts)) {
+      this.emit(ProviderEvents.accountsChanged, accounts);
+    }
+    this.accounts = accounts;
+    return this.accounts;
+  }
+
   /**
    * @summary Registers the provider methods.
    * @protected
@@ -177,17 +187,16 @@ export class WalletProvider extends WalletProviderLocalStorage {
       throw WalletProviderErrors.Unauthorized;
     }
     try {
-      return await this.sendGrinderyRpcApiRequest<ProviderRequestResult>(
-        GrinderyRpcMethodNames.checkout_request,
-        {
-          sessionId: this.getStorageValue(ProviderStorageKeys.sessionId),
-          scope: this.chainId,
-          request: {
-            method,
-            params,
-          },
-        }
-      );
+      return await this.sendGrinderyRpcApiRequest<
+        GrinderyRpcApiRequestResults.checkout_request
+      >(GrinderyRpcMethodNames.checkout_request, {
+        sessionId: this.getStorageValue(ProviderStorageKeys.sessionId),
+        scope: this.chainId,
+        request: {
+          method,
+          params,
+        },
+      });
     } catch (error) {
       throw this.createProviderRpcError(error);
     }

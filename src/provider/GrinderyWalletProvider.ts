@@ -5,9 +5,9 @@ import {
   ProviderStorageKeys,
 } from '../enums';
 import {
+  GrinderyRpcApiRequestResults,
+  GrinderyRpcProviderRequestResults,
   ProviderInterface,
-  ProviderPairingResult,
-  ProviderRequestPairingResult,
   RequestArgumentsParams,
 } from '../types';
 import { WalletProvider } from './WalletProvider';
@@ -31,16 +31,17 @@ export class GrinderyWalletProvider extends WalletProvider
     this.registerProviderMethods({
       [GrinderyRpcProviderRequestMethodNames.eth_requestAccounts]: {
         sessionRequired: false,
-        execute: async (params?: RequestArgumentsParams): Promise<string[]> => {
+        execute: async (
+          params?: RequestArgumentsParams
+        ): Promise<GrinderyRpcProviderRequestResults.eth_requestAccounts> => {
           if (this.isWalletConnected()) {
             try {
-              const accounts = await this.request<string[]>({
+              return await this.request<
+                GrinderyRpcProviderRequestResults.eth_accounts
+              >({
                 method: GrinderyRpcProviderRequestMethodNames.eth_accounts,
                 params: params || [],
               });
-              this.accounts = accounts;
-              this.emit(ProviderEvents.accountsChanged, { accounts });
-              return accounts;
             } catch (error) {
               this.setStorageValue(ProviderStorageKeys.sessionId, '');
               // skip failed request and continue with pairing
@@ -49,7 +50,7 @@ export class GrinderyWalletProvider extends WalletProvider
           if (this.isWalletConnectionPending()) {
             try {
               const pairResult = await this.sendGrinderyRpcApiRequest<
-                ProviderPairingResult
+                GrinderyRpcApiRequestResults.checkout_waitForPairingResult
               >(GrinderyRpcMethodNames.checkout_waitForPairingResult, {
                 pairingToken: this.getStorageValue(
                   ProviderStorageKeys.pairingToken
@@ -66,14 +67,12 @@ export class GrinderyWalletProvider extends WalletProvider
                 throw WalletProviderErrors.PairingFailed;
               }
 
-              const accounts = (
-                pairResult.session?.namespaces?.[`eip155`]?.accounts || []
-              ).map(account =>
-                account.includes(':') ? account.split(':')[2] || '' : account
-              );
-              this.accounts = accounts;
-              this.emit(ProviderEvents.accountsChanged, { accounts });
-              return [];
+              return await this.request<
+                GrinderyRpcProviderRequestResults.eth_accounts
+              >({
+                method: GrinderyRpcProviderRequestMethodNames.eth_accounts,
+                params: params || [],
+              });
             } catch (error) {
               this.clearStorage();
               // skip failed request and continue with pairing
@@ -81,7 +80,7 @@ export class GrinderyWalletProvider extends WalletProvider
           }
           try {
             const result = await this.sendGrinderyRpcApiRequest<
-              ProviderRequestPairingResult
+              GrinderyRpcApiRequestResults.checkout_requestPairing
             >(GrinderyRpcMethodNames.checkout_requestPairing, {
               appId: this.appId,
             });
@@ -112,7 +111,7 @@ export class GrinderyWalletProvider extends WalletProvider
               connectUrlBrowser: result.connectUrlBrowser,
             });
             const pairResult = await this.sendGrinderyRpcApiRequest<
-              ProviderPairingResult
+              GrinderyRpcApiRequestResults.checkout_waitForPairingResult
             >(GrinderyRpcMethodNames.checkout_waitForPairingResult, {
               pairingToken: result.pairingToken,
             });
@@ -129,14 +128,11 @@ export class GrinderyWalletProvider extends WalletProvider
             this.setStorageValue(ProviderStorageKeys.connectUrl, '');
             this.setStorageValue(ProviderStorageKeys.connectUrlBrowser, '');
             this.setStorageValue(ProviderStorageKeys.shortToken, '');
-            const accounts = (
-              pairResult.session?.namespaces?.[`eip155`]?.accounts || []
-            ).map(account =>
-              account.includes(':') ? account.split(':')[2] || '' : account
-            );
-            this.accounts = accounts;
-            this.emit(ProviderEvents.accountsChanged, { accounts });
-            return accounts;
+
+            return await this.request({
+              method: GrinderyRpcProviderRequestMethodNames.eth_accounts,
+              params: params || [],
+            });
           } catch (error) {
             throw this.createProviderRpcError(error);
           }
@@ -144,17 +140,16 @@ export class GrinderyWalletProvider extends WalletProvider
       },
       [GrinderyRpcProviderRequestMethodNames.eth_accounts]: {
         sessionRequired: true,
-        execute: async (params?: RequestArgumentsParams): Promise<string[]> => {
+        execute: async (
+          params?: RequestArgumentsParams
+        ): Promise<GrinderyRpcProviderRequestResults.eth_accounts> => {
           try {
-            const accounts = await this.sendAndWaitGrinderyRpcProviderRequest<
-              string[]
-            >(
-              GrinderyRpcProviderRequestMethodNames.eth_accounts,
-              params ? (Array.isArray(params) ? params : [params]) : []
+            return this.setAccounts(
+              await this.sendAndWaitGrinderyRpcProviderRequest(
+                GrinderyRpcProviderRequestMethodNames.eth_accounts,
+                params ? (Array.isArray(params) ? params : [params]) : []
+              )
             );
-            this.accounts = accounts;
-            this.emit(ProviderEvents.accountsChanged, { accounts });
-            return accounts;
           } catch (error) {
             throw this.createProviderRpcError(error);
           }
@@ -162,8 +157,10 @@ export class GrinderyWalletProvider extends WalletProvider
       },
       [GrinderyRpcProviderRequestMethodNames.eth_sendTransaction]: {
         sessionRequired: true,
-        execute: async (params?: RequestArgumentsParams): Promise<string[]> => {
-          return await this.sendAndWaitGrinderyRpcProviderRequest<string[]>(
+        execute: async (
+          params?: RequestArgumentsParams
+        ): Promise<GrinderyRpcProviderRequestResults.eth_sendTransaction> => {
+          return await this.sendAndWaitGrinderyRpcProviderRequest(
             GrinderyRpcProviderRequestMethodNames.eth_sendTransaction,
             params ? (Array.isArray(params) ? params : [params]) : []
           );
@@ -173,7 +170,7 @@ export class GrinderyWalletProvider extends WalletProvider
         sessionRequired: true,
         execute: async (
           params?: Partial<RequestArgumentsParams>
-        ): Promise<string> => {
+        ): Promise<GrinderyRpcProviderRequestResults.personal_sign> => {
           return await this.sendAndWaitGrinderyRpcProviderRequest(
             GrinderyRpcProviderRequestMethodNames.personal_sign,
             params ? (Array.isArray(params) ? params : [params]) : []
@@ -183,7 +180,7 @@ export class GrinderyWalletProvider extends WalletProvider
     });
 
     window.addEventListener('load', () => {
-      this.emit(ProviderEvents.connect, { chainId: this.getChain() });
+      this.emit(ProviderEvents.connect, this.getChain());
       this.restorePairing();
       this.restoreSession();
     });
@@ -200,7 +197,7 @@ export class GrinderyWalletProvider extends WalletProvider
     if (pairingToken && !sessionId) {
       try {
         const pairResult = await this.sendGrinderyRpcApiRequest<
-          ProviderPairingResult
+          GrinderyRpcApiRequestResults.checkout_waitForPairingResult
         >(GrinderyRpcMethodNames.checkout_waitForPairingResult, {
           pairingToken,
         });
@@ -220,10 +217,9 @@ export class GrinderyWalletProvider extends WalletProvider
         ).map(account =>
           account.includes(':') ? account.split(':')[2] || '' : account
         );
-        this.accounts = accounts;
-        this.emit(ProviderEvents.accountsChanged, { accounts });
+        this.setAccounts(accounts);
       } catch (error) {
-        this.accounts = [];
+        this.setAccounts([]);
         this.clearStorage();
       }
     }
@@ -243,7 +239,7 @@ export class GrinderyWalletProvider extends WalletProvider
           method: GrinderyRpcProviderRequestMethodNames.eth_requestAccounts,
         });
       } catch (error) {
-        this.accounts = [];
+        this.setAccounts([]);
         this.clearStorage();
       }
     }
