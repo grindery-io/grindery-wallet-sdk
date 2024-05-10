@@ -1,6 +1,7 @@
 import {
   GrinderyRpcMethodNames,
   GrinderyRpcProviderRequestMethodNames,
+  ProviderEvents,
   ProviderStorageKeys,
 } from '../enums';
 import {
@@ -10,7 +11,7 @@ import {
   RequestArgumentsParams,
 } from '../types';
 import { WalletProvider } from './WalletProvider';
-import { WalletProviderError } from './WalletProviderError';
+import { WalletProviderErrors } from './WalletProviderError';
 
 /**
  * @summary The Grindery Wallet Ethereum Injected Provider Class.
@@ -28,7 +29,7 @@ export class GrinderyWalletProvider extends WalletProvider
     super();
 
     this.registerProviderMethods({
-      eth_requestAccounts: {
+      [GrinderyRpcProviderRequestMethodNames.eth_requestAccounts]: {
         sessionRequired: false,
         execute: async (params?: RequestArgumentsParams): Promise<string[]> => {
           if (this.isWalletConnected()) {
@@ -38,7 +39,7 @@ export class GrinderyWalletProvider extends WalletProvider
                 params: params || [],
               });
               this.accounts = accounts;
-              this.emit('accountsChanged', { accounts });
+              this.emit(ProviderEvents.accountsChanged, { accounts });
               return accounts;
             } catch (error) {
               this.setStorageValue(ProviderStorageKeys.sessionId, '');
@@ -62,7 +63,7 @@ export class GrinderyWalletProvider extends WalletProvider
               );
 
               if (!pairResult.session.sessionId) {
-                throw new WalletProviderError('Pairing failed', 4900);
+                throw WalletProviderErrors.PairingFailed;
               }
 
               const accounts = (
@@ -71,7 +72,7 @@ export class GrinderyWalletProvider extends WalletProvider
                 account.includes(':') ? account.split(':')[2] || '' : account
               );
               this.accounts = accounts;
-              this.emit('accountsChanged', { accounts });
+              this.emit(ProviderEvents.accountsChanged, { accounts });
               return [];
             } catch (error) {
               this.clearStorage();
@@ -86,7 +87,7 @@ export class GrinderyWalletProvider extends WalletProvider
             });
 
             if (!result.pairingToken || !result.connectUrl) {
-              throw new WalletProviderError('Pairing failed', 4900);
+              throw WalletProviderErrors.PairingFailed;
             }
 
             this.setStorageValue(
@@ -105,7 +106,7 @@ export class GrinderyWalletProvider extends WalletProvider
               ProviderStorageKeys.shortToken,
               result.shortToken
             );
-            this.emit('pair', {
+            this.emit(ProviderEvents.pair, {
               shortToken: result.shortToken,
               connectUrl: result.connectUrl,
               connectUrlBrowser: result.connectUrlBrowser,
@@ -122,7 +123,7 @@ export class GrinderyWalletProvider extends WalletProvider
             );
 
             if (!pairResult.session.sessionId) {
-              throw new WalletProviderError('Pairing failed', 4900);
+              throw WalletProviderErrors.PairingFailed;
             }
             this.setStorageValue(ProviderStorageKeys.pairingToken, '');
             this.setStorageValue(ProviderStorageKeys.connectUrl, '');
@@ -134,7 +135,7 @@ export class GrinderyWalletProvider extends WalletProvider
               account.includes(':') ? account.split(':')[2] || '' : account
             );
             this.accounts = accounts;
-            this.emit('accountsChanged', { accounts });
+            this.emit(ProviderEvents.accountsChanged, { accounts });
             return accounts;
           } catch (error) {
             throw this.createProviderRpcError(error);
@@ -152,7 +153,7 @@ export class GrinderyWalletProvider extends WalletProvider
               params ? (Array.isArray(params) ? params : [params]) : []
             );
             this.accounts = accounts;
-            this.emit('accountsChanged', { accounts });
+            this.emit(ProviderEvents.accountsChanged, { accounts });
             return accounts;
           } catch (error) {
             throw this.createProviderRpcError(error);
@@ -182,7 +183,7 @@ export class GrinderyWalletProvider extends WalletProvider
     });
 
     window.addEventListener('load', () => {
-      this.emit('connect', { chainId: this.getChain() });
+      this.emit(ProviderEvents.connect, { chainId: this.getChain() });
       this.restorePairing();
       this.restoreSession();
     });
@@ -211,7 +212,7 @@ export class GrinderyWalletProvider extends WalletProvider
         );
 
         if (!pairResult.session.sessionId) {
-          throw new WalletProviderError('Pairing failed', 4900);
+          throw WalletProviderErrors.PairingFailed;
         }
 
         const accounts = (
@@ -220,7 +221,7 @@ export class GrinderyWalletProvider extends WalletProvider
           account.includes(':') ? account.split(':')[2] || '' : account
         );
         this.accounts = accounts;
-        this.emit('accountsChanged', { accounts });
+        this.emit(ProviderEvents.accountsChanged, { accounts });
       } catch (error) {
         this.accounts = [];
         this.clearStorage();

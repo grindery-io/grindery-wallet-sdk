@@ -9,3 +9,10 @@ export declare class WalletProviderError extends Error {
     data?: unknown;
     constructor(message: string, code?: number, data?: unknown);
 }
+export declare const WalletProviderErrors: {
+    PairingFailed: WalletProviderError;
+    Disconnected: WalletProviderError;
+    UnsupportedMethod: WalletProviderError;
+    Unauthorized: WalletProviderError;
+    NoResult: WalletProviderError;
+};

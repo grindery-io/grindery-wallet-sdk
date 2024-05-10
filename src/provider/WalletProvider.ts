@@ -10,7 +10,10 @@ import {
   RequestArgumentsParams,
   RequestToken,
 } from '../types';
-import { WalletProviderError } from './WalletProviderError';
+import {
+  WalletProviderError,
+  WalletProviderErrors,
+} from './WalletProviderError';
 import {
   GrinderyRpcMethodNames,
   ProviderEvents,
@@ -87,22 +90,19 @@ export class WalletProvider extends WalletProviderLocalStorage {
    */
   public async request<T>({ method, params }: RequestArguments): Promise<T> {
     if (!this.chainId) {
-      this.emit(
-        ProviderEvents.disconnect,
-        new WalletProviderError('Disconnected', 4900)
-      );
-      throw new WalletProviderError('Disconnected', 4900);
+      this.emit(ProviderEvents.disconnect, WalletProviderErrors.Disconnected);
+      throw WalletProviderErrors.Disconnected;
     }
     if (!this.methods) {
-      throw new WalletProviderError('Unsupported Method', 4200);
+      throw WalletProviderErrors.UnsupportedMethod;
     }
     if (!this.methods[method]) {
-      throw new WalletProviderError('Unsupported Method', 4200);
+      throw WalletProviderErrors.UnsupportedMethod;
     }
 
     try {
       if (this.methods[method].sessionRequired && !this.isWalletConnected()) {
-        throw new WalletProviderError('Unauthorized', 4900);
+        throw WalletProviderErrors.Unauthorized;
       }
 
       return (await this.methods[method].execute(params)) as T;
@@ -177,7 +177,7 @@ export class WalletProvider extends WalletProviderLocalStorage {
     params?: readonly unknown[]
   ): Promise<ProviderRequestResult> {
     if (!this.getStorageValue(ProviderStorageKeys.sessionId)) {
-      throw new WalletProviderError('Unauthorized', 4900);
+      throw WalletProviderErrors.Unauthorized;
     }
     try {
       return await this.sendGrinderyRpcApiRequest<ProviderRequestResult>(
@@ -208,7 +208,7 @@ export class WalletProvider extends WalletProviderLocalStorage {
     timeout?: number
   ): Promise<T> {
     if (!this.getStorageValue(ProviderStorageKeys.sessionId)) {
-      throw new WalletProviderError('Unauthorized', 4900);
+      throw WalletProviderErrors.Unauthorized;
     }
     try {
       return await this.sendGrinderyRpcApiRequest<T>(
@@ -252,7 +252,7 @@ export class WalletProvider extends WalletProviderLocalStorage {
         throw new WalletProviderError(data.error.message, data.error.code);
       }
       if (!data.result) {
-        throw new WalletProviderError('No result', 4900);
+        throw WalletProviderErrors.NoResult;
       }
       return data.result;
     } catch (error) {
@@ -269,15 +269,19 @@ export class WalletProvider extends WalletProviderLocalStorage {
   protected createProviderRpcError(error?: unknown): WalletProviderError {
     let errorResponse: WalletProviderError;
     if (error instanceof WalletProviderError) {
-      errorResponse = new WalletProviderError(error.message || 'Unknown error');
-      errorResponse.code = error.code || 4900;
-      errorResponse.data = error.data;
+      errorResponse = new WalletProviderError(
+        error.message || 'Unknown error',
+        error.code || 4900,
+        error.data
+      );
     } else if (error instanceof Error) {
-      errorResponse = new WalletProviderError(error.message || 'Unknown error');
-      errorResponse.code = 4900;
+      errorResponse = new WalletProviderError(
+        error.message || 'Unknown error',
+        4900,
+        error
+      );
     } else {
-      errorResponse = new WalletProviderError('Unknown error');
-      errorResponse.code = 4900;
+      errorResponse = new WalletProviderError('Unknown error', 4900, error);
     }
     return errorResponse;
   }

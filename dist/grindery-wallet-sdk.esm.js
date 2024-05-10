@@ -584,6 +584,13 @@ var WalletProviderError = /*#__PURE__*/function (_Error) {
   _inheritsLoose(WalletProviderError, _Error);
   return WalletProviderError;
 }( /*#__PURE__*/_wrapNativeSuper(Error));
+var WalletProviderErrors = {
+  PairingFailed: /*#__PURE__*/new WalletProviderError('Pairing failed', 4900),
+  Disconnected: /*#__PURE__*/new WalletProviderError('Disconnected', 4900),
+  UnsupportedMethod: /*#__PURE__*/new WalletProviderError('Unsupported Method', 4200),
+  Unauthorized: /*#__PURE__*/new WalletProviderError('Unauthorized', 4900),
+  NoResult: /*#__PURE__*/new WalletProviderError('No result', 4900)
+};
 
 /**
  * @summary The base wallet provider class
@@ -672,27 +679,27 @@ var WalletProvider = /*#__PURE__*/function (_WalletProviderLocalS) {
               _context.next = 4;
               break;
             }
-            this.emit(ProviderEvents.disconnect, new WalletProviderError('Disconnected', 4900));
-            throw new WalletProviderError('Disconnected', 4900);
+            this.emit(ProviderEvents.disconnect, WalletProviderErrors.Disconnected);
+            throw WalletProviderErrors.Disconnected;
           case 4:
             if (this.methods) {
               _context.next = 6;
               break;
             }
-            throw new WalletProviderError('Unsupported Method', 4200);
+            throw WalletProviderErrors.UnsupportedMethod;
           case 6:
             if (this.methods[method]) {
               _context.next = 8;
               break;
             }
-            throw new WalletProviderError('Unsupported Method', 4200);
+            throw WalletProviderErrors.UnsupportedMethod;
           case 8:
             _context.prev = 8;
             if (!(this.methods[method].sessionRequired && !this.isWalletConnected())) {
               _context.next = 11;
               break;
             }
-            throw new WalletProviderError('Unauthorized', 4900);
+            throw WalletProviderErrors.Unauthorized;
           case 11:
             _context.next = 13;
             return this.methods[method].execute(params);
@@ -777,7 +784,7 @@ var WalletProvider = /*#__PURE__*/function (_WalletProviderLocalS) {
               _context3.next = 2;
               break;
             }
-            throw new WalletProviderError('Unauthorized', 4900);
+            throw WalletProviderErrors.Unauthorized;
           case 2:
             _context3.prev = 2;
             _context3.next = 5;
@@ -825,7 +832,7 @@ var WalletProvider = /*#__PURE__*/function (_WalletProviderLocalS) {
               _context4.next = 2;
               break;
             }
-            throw new WalletProviderError('Unauthorized', 4900);
+            throw WalletProviderErrors.Unauthorized;
           case 2:
             _context4.prev = 2;
             _context4.next = 5;
@@ -896,7 +903,7 @@ var WalletProvider = /*#__PURE__*/function (_WalletProviderLocalS) {
               _context5.next = 11;
               break;
             }
-            throw new WalletProviderError('No result', 4900);
+            throw WalletProviderErrors.NoResult;
           case 11:
             return _context5.abrupt("return", data.result);
           case 14:
@@ -924,15 +931,11 @@ var WalletProvider = /*#__PURE__*/function (_WalletProviderLocalS) {
   _proto.createProviderRpcError = function createProviderRpcError(error) {
     var errorResponse;
     if (error instanceof WalletProviderError) {
-      errorResponse = new WalletProviderError(error.message || 'Unknown error');
-      errorResponse.code = error.code || 4900;
-      errorResponse.data = error.data;
+      errorResponse = new WalletProviderError(error.message || 'Unknown error', error.code || 4900, error.data);
     } else if (error instanceof Error) {
-      errorResponse = new WalletProviderError(error.message || 'Unknown error');
-      errorResponse.code = 4900;
+      errorResponse = new WalletProviderError(error.message || 'Unknown error', 4900, error);
     } else {
-      errorResponse = new WalletProviderError('Unknown error');
-      errorResponse.code = 4900;
+      errorResponse = new WalletProviderError('Unknown error', 4900, error);
     }
     return errorResponse;
   }
@@ -969,134 +972,132 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_WalletProvider) {
      * @summary Indicates that the provider is a Grindery Wallet.
      */
     _this.isGrinderyWallet = true;
-    _this.registerProviderMethods((_this$registerProvide = {
-      eth_requestAccounts: {
-        sessionRequired: false,
-        execute: function () {
-          var _execute = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(params) {
-            var accounts, _pairResult$session, pairResult, _accounts, _pairResult$session2, result, _pairResult, _accounts2;
-            return _regeneratorRuntime().wrap(function _callee$(_context) {
-              while (1) switch (_context.prev = _context.next) {
-                case 0:
-                  if (!_this.isWalletConnected()) {
-                    _context.next = 13;
-                    break;
-                  }
-                  _context.prev = 1;
-                  _context.next = 4;
-                  return _this.request({
-                    method: GrinderyRpcProviderRequestMethodNames.eth_accounts,
-                    params: params || []
-                  });
-                case 4:
-                  accounts = _context.sent;
-                  _this.accounts = accounts;
-                  _this.emit('accountsChanged', {
-                    accounts: accounts
-                  });
-                  return _context.abrupt("return", accounts);
-                case 10:
-                  _context.prev = 10;
-                  _context.t0 = _context["catch"](1);
-                  _this.setStorageValue(ProviderStorageKeys.sessionId, '');
-                  // skip failed request and continue with pairing
-                case 13:
-                  if (!_this.isWalletConnectionPending()) {
-                    _context.next = 31;
-                    break;
-                  }
-                  _context.prev = 14;
-                  _context.next = 17;
-                  return _this.sendGrinderyRpcApiRequest(GrinderyRpcMethodNames.checkout_waitForPairingResult, {
-                    pairingToken: _this.getStorageValue(ProviderStorageKeys.pairingToken)
-                  });
-                case 17:
-                  pairResult = _context.sent;
-                  _this.clearStorage();
-                  _this.setStorageValue(ProviderStorageKeys.sessionId, pairResult.session.sessionId);
-                  if (pairResult.session.sessionId) {
-                    _context.next = 22;
-                    break;
-                  }
-                  throw new WalletProviderError('Pairing failed', 4900);
-                case 22:
-                  _accounts = (((_pairResult$session = pairResult.session) == null || (_pairResult$session = _pairResult$session.namespaces) == null || (_pairResult$session = _pairResult$session["eip155"]) == null ? void 0 : _pairResult$session.accounts) || []).map(function (account) {
-                    return account.includes(':') ? account.split(':')[2] || '' : account;
-                  });
-                  _this.accounts = _accounts;
-                  _this.emit('accountsChanged', {
-                    accounts: _accounts
-                  });
-                  return _context.abrupt("return", []);
-                case 28:
-                  _context.prev = 28;
-                  _context.t1 = _context["catch"](14);
-                  _this.clearStorage();
-                  // skip failed request and continue with pairing
-                case 31:
-                  _context.prev = 31;
-                  _context.next = 34;
-                  return _this.sendGrinderyRpcApiRequest(GrinderyRpcMethodNames.checkout_requestPairing, {
-                    appId: _this.appId
-                  });
-                case 34:
-                  result = _context.sent;
-                  if (!(!result.pairingToken || !result.connectUrl)) {
-                    _context.next = 37;
-                    break;
-                  }
-                  throw new WalletProviderError('Pairing failed', 4900);
-                case 37:
-                  _this.setStorageValue(ProviderStorageKeys.pairingToken, result.pairingToken);
-                  _this.setStorageValue(ProviderStorageKeys.connectUrl, result.connectUrl);
-                  _this.setStorageValue(ProviderStorageKeys.connectUrlBrowser, result.connectUrlBrowser);
-                  _this.setStorageValue(ProviderStorageKeys.shortToken, result.shortToken);
-                  _this.emit('pair', {
-                    shortToken: result.shortToken,
-                    connectUrl: result.connectUrl,
-                    connectUrlBrowser: result.connectUrlBrowser
-                  });
-                  _context.next = 44;
-                  return _this.sendGrinderyRpcApiRequest(GrinderyRpcMethodNames.checkout_waitForPairingResult, {
-                    pairingToken: result.pairingToken
-                  });
-                case 44:
-                  _pairResult = _context.sent;
-                  _this.setStorageValue(ProviderStorageKeys.sessionId, _pairResult.session.sessionId);
-                  if (_pairResult.session.sessionId) {
-                    _context.next = 48;
-                    break;
-                  }
-                  throw new WalletProviderError('Pairing failed', 4900);
-                case 48:
-                  _this.setStorageValue(ProviderStorageKeys.pairingToken, '');
-                  _this.setStorageValue(ProviderStorageKeys.connectUrl, '');
-                  _this.setStorageValue(ProviderStorageKeys.connectUrlBrowser, '');
-                  _this.setStorageValue(ProviderStorageKeys.shortToken, '');
-                  _accounts2 = (((_pairResult$session2 = _pairResult.session) == null || (_pairResult$session2 = _pairResult$session2.namespaces) == null || (_pairResult$session2 = _pairResult$session2["eip155"]) == null ? void 0 : _pairResult$session2.accounts) || []).map(function (account) {
-                    return account.includes(':') ? account.split(':')[2] || '' : account;
-                  });
-                  _this.accounts = _accounts2;
-                  _this.emit('accountsChanged', {
-                    accounts: _accounts2
-                  });
-                  return _context.abrupt("return", _accounts2);
-                case 58:
-                  _context.prev = 58;
-                  _context.t2 = _context["catch"](31);
-                  throw _this.createProviderRpcError(_context.t2);
-                case 61:
-                case "end":
-                  return _context.stop();
-              }
-            }, _callee, null, [[1, 10], [14, 28], [31, 58]]);
-          }));
-          function execute(_x) {
-            return _execute.apply(this, arguments);
-          }
-          return execute;
-        }()
-      }
+    _this.registerProviderMethods((_this$registerProvide = {}, _this$registerProvide[GrinderyRpcProviderRequestMethodNames.eth_requestAccounts] = {
+      sessionRequired: false,
+      execute: function () {
+        var _execute = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(params) {
+          var accounts, _pairResult$session, pairResult, _accounts, _pairResult$session2, result, _pairResult, _accounts2;
+          return _regeneratorRuntime().wrap(function _callee$(_context) {
+            while (1) switch (_context.prev = _context.next) {
+              case 0:
+                if (!_this.isWalletConnected()) {
+                  _context.next = 13;
+                  break;
+                }
+                _context.prev = 1;
+                _context.next = 4;
+                return _this.request({
+                  method: GrinderyRpcProviderRequestMethodNames.eth_accounts,
+                  params: params || []
+                });
+              case 4:
+                accounts = _context.sent;
+                _this.accounts = accounts;
+                _this.emit(ProviderEvents.accountsChanged, {
+                  accounts: accounts
+                });
+                return _context.abrupt("return", accounts);
+              case 10:
+                _context.prev = 10;
+                _context.t0 = _context["catch"](1);
+                _this.setStorageValue(ProviderStorageKeys.sessionId, '');
+                // skip failed request and continue with pairing
+              case 13:
+                if (!_this.isWalletConnectionPending()) {
+                  _context.next = 31;
+                  break;
+                }
+                _context.prev = 14;
+                _context.next = 17;
+                return _this.sendGrinderyRpcApiRequest(GrinderyRpcMethodNames.checkout_waitForPairingResult, {
+                  pairingToken: _this.getStorageValue(ProviderStorageKeys.pairingToken)
+                });
+              case 17:
+                pairResult = _context.sent;
+                _this.clearStorage();
+                _this.setStorageValue(ProviderStorageKeys.sessionId, pairResult.session.sessionId);
+                if (pairResult.session.sessionId) {
+                  _context.next = 22;
+                  break;
+                }
+                throw WalletProviderErrors.PairingFailed;
+              case 22:
+                _accounts = (((_pairResult$session = pairResult.session) == null || (_pairResult$session = _pairResult$session.namespaces) == null || (_pairResult$session = _pairResult$session["eip155"]) == null ? void 0 : _pairResult$session.accounts) || []).map(function (account) {
+                  return account.includes(':') ? account.split(':')[2] || '' : account;
+                });
+                _this.accounts = _accounts;
+                _this.emit(ProviderEvents.accountsChanged, {
+                  accounts: _accounts
+                });
+                return _context.abrupt("return", []);
+              case 28:
+                _context.prev = 28;
+                _context.t1 = _context["catch"](14);
+                _this.clearStorage();
+                // skip failed request and continue with pairing
+              case 31:
+                _context.prev = 31;
+                _context.next = 34;
+                return _this.sendGrinderyRpcApiRequest(GrinderyRpcMethodNames.checkout_requestPairing, {
+                  appId: _this.appId
+                });
+              case 34:
+                result = _context.sent;
+                if (!(!result.pairingToken || !result.connectUrl)) {
+                  _context.next = 37;
+                  break;
+                }
+                throw WalletProviderErrors.PairingFailed;
+              case 37:
+                _this.setStorageValue(ProviderStorageKeys.pairingToken, result.pairingToken);
+                _this.setStorageValue(ProviderStorageKeys.connectUrl, result.connectUrl);
+                _this.setStorageValue(ProviderStorageKeys.connectUrlBrowser, result.connectUrlBrowser);
+                _this.setStorageValue(ProviderStorageKeys.shortToken, result.shortToken);
+                _this.emit(ProviderEvents.pair, {
+                  shortToken: result.shortToken,
+                  connectUrl: result.connectUrl,
+                  connectUrlBrowser: result.connectUrlBrowser
+                });
+                _context.next = 44;
+                return _this.sendGrinderyRpcApiRequest(GrinderyRpcMethodNames.checkout_waitForPairingResult, {
+                  pairingToken: result.pairingToken
+                });
+              case 44:
+                _pairResult = _context.sent;
+                _this.setStorageValue(ProviderStorageKeys.sessionId, _pairResult.session.sessionId);
+                if (_pairResult.session.sessionId) {
+                  _context.next = 48;
+                  break;
+                }
+                throw WalletProviderErrors.PairingFailed;
+              case 48:
+                _this.setStorageValue(ProviderStorageKeys.pairingToken, '');
+                _this.setStorageValue(ProviderStorageKeys.connectUrl, '');
+                _this.setStorageValue(ProviderStorageKeys.connectUrlBrowser, '');
+                _this.setStorageValue(ProviderStorageKeys.shortToken, '');
+                _accounts2 = (((_pairResult$session2 = _pairResult.session) == null || (_pairResult$session2 = _pairResult$session2.namespaces) == null || (_pairResult$session2 = _pairResult$session2["eip155"]) == null ? void 0 : _pairResult$session2.accounts) || []).map(function (account) {
+                  return account.includes(':') ? account.split(':')[2] || '' : account;
+                });
+                _this.accounts = _accounts2;
+                _this.emit(ProviderEvents.accountsChanged, {
+                  accounts: _accounts2
+                });
+                return _context.abrupt("return", _accounts2);
+              case 58:
+                _context.prev = 58;
+                _context.t2 = _context["catch"](31);
+                throw _this.createProviderRpcError(_context.t2);
+              case 61:
+              case "end":
+                return _context.stop();
+            }
+          }, _callee, null, [[1, 10], [14, 28], [31, 58]]);
+        }));
+        function execute(_x) {
+          return _execute.apply(this, arguments);
+        }
+        return execute;
+      }()
     }, _this$registerProvide[GrinderyRpcProviderRequestMethodNames.eth_accounts] = {
       sessionRequired: true,
       execute: function () {
@@ -1111,7 +1112,7 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_WalletProvider) {
               case 3:
                 accounts = _context2.sent;
                 _this.accounts = accounts;
-                _this.emit('accountsChanged', {
+                _this.emit(ProviderEvents.accountsChanged, {
                   accounts: accounts
                 });
                 return _context2.abrupt("return", accounts);
@@ -1176,7 +1177,7 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_WalletProvider) {
       }()
     }, _this$registerProvide));
     window.addEventListener('load', function () {
-      _this.emit('connect', {
+      _this.emit(ProviderEvents.connect, {
         chainId: _this.getChain()
       });
       _this.restorePairing();
@@ -1218,13 +1219,13 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_WalletProvider) {
               _context5.next = 11;
               break;
             }
-            throw new WalletProviderError('Pairing failed', 4900);
+            throw WalletProviderErrors.PairingFailed;
           case 11:
             accounts = (((_pairResult$session3 = pairResult.session) == null || (_pairResult$session3 = _pairResult$session3.namespaces) == null || (_pairResult$session3 = _pairResult$session3["eip155"]) == null ? void 0 : _pairResult$session3.accounts) || []).map(function (account) {
               return account.includes(':') ? account.split(':')[2] || '' : account;
             });
             this.accounts = accounts;
-            this.emit('accountsChanged', {
+            this.emit(ProviderEvents.accountsChanged, {
               accounts: accounts
             });
             _context5.next = 20;
