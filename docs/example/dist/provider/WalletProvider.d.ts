@@ -67,7 +67,7 @@ export declare class WalletProvider extends WalletProviderLocalStorage {
      * @summary The list of supported provider methods.
      * @protected
      */
-    protected methods?: ProviderMethods;
+    protected methods: Partial<ProviderMethods>;
     /**
      * @summary The user's wallet addresses list.
      * @protected
@@ -79,7 +79,7 @@ export declare class WalletProvider extends WalletProviderLocalStorage {
      * @param {ProviderMethods} methods A map of supported provider methods.
      * @returns {void}
      */
-    protected registerProviderMethods(methods: ProviderMethods): void;
+    protected registerProviderMethods(methods: Partial<ProviderMethods>): void;
     /**
      * @summary Sends a provider request to the Grindery RPC API.
      * @protected

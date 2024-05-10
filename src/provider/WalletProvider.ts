@@ -93,19 +93,16 @@ export class WalletProvider extends WalletProviderLocalStorage {
       this.emit(ProviderEvents.disconnect, WalletProviderErrors.Disconnected);
       throw WalletProviderErrors.Disconnected;
     }
-    if (!this.methods) {
-      throw WalletProviderErrors.UnsupportedMethod;
-    }
     if (!this.methods[method]) {
       throw WalletProviderErrors.UnsupportedMethod;
     }
 
     try {
-      if (this.methods[method].sessionRequired && !this.isWalletConnected()) {
+      if (this.methods[method]?.sessionRequired && !this.isWalletConnected()) {
         throw WalletProviderErrors.Unauthorized;
       }
 
-      return (await this.methods[method].execute(params)) as T;
+      return (await this.methods[method]?.execute(params)) as T;
     } catch (error) {
       throw this.createProviderRpcError(error);
     }
@@ -147,7 +144,7 @@ export class WalletProvider extends WalletProviderLocalStorage {
    * @summary The list of supported provider methods.
    * @protected
    */
-  protected methods?: ProviderMethods;
+  protected methods: Partial<ProviderMethods> = {};
 
   /**
    * @summary The user's wallet addresses list.
@@ -161,7 +158,7 @@ export class WalletProvider extends WalletProviderLocalStorage {
    * @param {ProviderMethods} methods A map of supported provider methods.
    * @returns {void}
    */
-  protected registerProviderMethods(methods: ProviderMethods): void {
+  protected registerProviderMethods(methods: Partial<ProviderMethods>): void {
     this.methods = methods;
   }
 

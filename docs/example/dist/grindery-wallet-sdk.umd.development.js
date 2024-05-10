@@ -617,6 +617,11 @@
        */
       _this.chainId = 'eip155:137';
       /**
+       * @summary The list of supported provider methods.
+       * @protected
+       */
+      _this.methods = {};
+      /**
        * @summary The user's wallet addresses list.
        * @protected
        */
@@ -675,7 +680,7 @@
     /*#__PURE__*/
     function () {
       var _request = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(_ref) {
-        var method, params;
+        var method, params, _this$methods$method, _this$methods$method2;
         return _regeneratorRuntime().wrap(function _callee$(_context) {
           while (1) switch (_context.prev = _context.next) {
             case 0:
@@ -687,38 +692,32 @@
               this.emit(ProviderEvents.disconnect, WalletProviderErrors.Disconnected);
               throw WalletProviderErrors.Disconnected;
             case 4:
-              if (this.methods) {
+              if (this.methods[method]) {
                 _context.next = 6;
                 break;
               }
               throw WalletProviderErrors.UnsupportedMethod;
             case 6:
-              if (this.methods[method]) {
-                _context.next = 8;
-                break;
-              }
-              throw WalletProviderErrors.UnsupportedMethod;
-            case 8:
-              _context.prev = 8;
-              if (!(this.methods[method].sessionRequired && !this.isWalletConnected())) {
-                _context.next = 11;
+              _context.prev = 6;
+              if (!((_this$methods$method = this.methods[method]) != null && _this$methods$method.sessionRequired && !this.isWalletConnected())) {
+                _context.next = 9;
                 break;
               }
               throw WalletProviderErrors.Unauthorized;
+            case 9:
+              _context.next = 11;
+              return (_this$methods$method2 = this.methods[method]) == null ? void 0 : _this$methods$method2.execute(params);
             case 11:
-              _context.next = 13;
-              return this.methods[method].execute(params);
-            case 13:
               return _context.abrupt("return", _context.sent);
-            case 16:
-              _context.prev = 16;
-              _context.t0 = _context["catch"](8);
+            case 14:
+              _context.prev = 14;
+              _context.t0 = _context["catch"](6);
               throw this.createProviderRpcError(_context.t0);
-            case 19:
+            case 17:
             case "end":
               return _context.stop();
           }
-        }, _callee, this, [[8, 16]]);
+        }, _callee, this, [[6, 14]]);
       }));
       function request(_x) {
         return _request.apply(this, arguments);
