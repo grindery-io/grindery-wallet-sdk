@@ -493,7 +493,7 @@ var WalletProviderEventEmitter = /*#__PURE__*/function () {
       data[_key - 1] = arguments[_key];
     }
     if (this.events.has(event)) {
-      console.log('[Grindery.WalletSDK] > Event:', event, data);
+      console.log('[Grindery.WalletSDK] > Event:', event, data[0]);
       this.events.get(event).forEach(function (callback) {
         callback.apply(void 0, data);
       });

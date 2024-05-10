@@ -54,7 +54,7 @@ export class WalletProviderEventEmitter {
    */
   protected emit(event: ProviderEvent, ...data: any[]) {
     if (this.events.has(event)) {
-      console.log('[Grindery.WalletSDK] > Event:', event, data);
+      console.log('[Grindery.WalletSDK] > Event:', event, data[0]);
       this.events.get(event)!.forEach(callback => {
         callback(...data);
       });
