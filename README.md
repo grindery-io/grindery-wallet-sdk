@@ -220,7 +220,7 @@ async () => {
 
 ---
 
-### <a id="sdk-methods_connect">WalletSDK.disconnect()</a>
+### <a id="sdk-methods_disconnect">WalletSDK.disconnect()</a>
 
 Disconnects app from the Grindery Wallet.
 
