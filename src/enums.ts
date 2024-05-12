@@ -13,6 +13,7 @@ export enum ProviderStorageKeys {
   connectUrl = 'connectUrl',
   connectUrlBrowser = 'connectUrlBrowser',
   shortToken = 'shortToken',
+  clientId = 'clientId',
 }
 
 /**

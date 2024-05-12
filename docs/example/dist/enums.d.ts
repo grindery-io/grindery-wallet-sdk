@@ -11,7 +11,8 @@ export declare enum ProviderStorageKeys {
     sessionId = "sessionId",
     connectUrl = "connectUrl",
     connectUrlBrowser = "connectUrlBrowser",
-    shortToken = "shortToken"
+    shortToken = "shortToken",
+    clientId = "clientId"
 }
 /**
  * @summary The Grindery RPC API method names

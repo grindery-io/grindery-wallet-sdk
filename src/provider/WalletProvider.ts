@@ -161,7 +161,9 @@ export class WalletProvider extends WalletProviderLocalStorage {
    * @summary Client id
    * @protected
    */
-  protected clientId: string = uuid();
+  protected clientId: string =
+    this.getStorageValue('clientId') ||
+    this.setStorageValue('clientId', uuid());
 
   /**
    * @summary The list of supported provider methods.

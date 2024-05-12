@@ -428,6 +428,7 @@ var ProviderStorageKeys;
   ProviderStorageKeys["connectUrl"] = "connectUrl";
   ProviderStorageKeys["connectUrlBrowser"] = "connectUrlBrowser";
   ProviderStorageKeys["shortToken"] = "shortToken";
+  ProviderStorageKeys["clientId"] = "clientId";
 })(ProviderStorageKeys || (ProviderStorageKeys = {}));
 /**
  * @summary The Grindery RPC API method names
@@ -451,6 +452,17 @@ var GrinderyRpcProviderRequestMethodNames;
   GrinderyRpcProviderRequestMethodNames["eth_sendTransaction"] = "eth_sendTransaction";
   GrinderyRpcProviderRequestMethodNames["gws_disconnect"] = "gws_disconnect";
 })(GrinderyRpcProviderRequestMethodNames || (GrinderyRpcProviderRequestMethodNames = {}));
+
+/**
+ * @summary Generates a Version 4 (pseudorandom) UUID
+ * @returns {string} The UUID
+ */
+var uuid = function uuid() {
+  var d = '';
+  while (d.length < 32) d += Math.random().toString(16).substr(2);
+  var vr = (parseInt(d.substr(16, 1), 16) & 0x3 | 0x8).toString(16);
+  return d.substr(0, 8) + "-" + d.substr(8, 4) + "-4" + d.substr(13, 3) + "-" + vr + d.substr(17, 3) + "-" + d.substr(20, 12);
+};
 
 /**
  * @summary A class for emitting provider events
@@ -546,6 +558,7 @@ var WalletProviderLocalStorage = /*#__PURE__*/function (_WalletProviderEventE) {
     var storage = this.getStorage();
     storage[key] = value;
     this.saveStorage(storage);
+    return value;
   }
   /**
    * @summary Clears the storage
@@ -553,7 +566,9 @@ var WalletProviderLocalStorage = /*#__PURE__*/function (_WalletProviderEventE) {
    * @returns {void}
    */;
   _proto.clearStorage = function clearStorage() {
-    this.saveStorage({});
+    this.saveStorage({
+      clientId: this.getStorage().clientId || uuid()
+    });
   }
   /**
    * @summary Gets the provider storage
@@ -604,17 +619,6 @@ var WalletProviderErrors = {
 };
 
 /**
- * @summary Generates a Version 4 (pseudorandom) UUID
- * @returns {string} The UUID
- */
-var uuid = function uuid() {
-  var d = '';
-  while (d.length < 32) d += Math.random().toString(16).substr(2);
-  var vr = (parseInt(d.substr(16, 1), 16) & 0x3 | 0x8).toString(16);
-  return d.substr(0, 8) + "-" + d.substr(8, 4) + "-4" + d.substr(13, 3) + "-" + vr + d.substr(17, 3) + "-" + d.substr(20, 12);
-};
-
-/**
  * @summary The base wallet provider class
  * @since 0.1.0
  * @extends WalletProviderLocalStorage
@@ -637,7 +641,7 @@ var WalletProvider = /*#__PURE__*/function (_WalletProviderLocalS) {
      * @summary Client id
      * @protected
      */
-    _this.clientId = uuid();
+    _this.clientId = _this.getStorageValue('clientId') || _this.setStorageValue('clientId', uuid());
     /**
      * @summary The list of supported provider methods.
      * @protected

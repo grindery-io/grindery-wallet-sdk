@@ -1,4 +1,5 @@
 import { ProviderStorage, ProviderStorageKey } from '../types';
+import { uuid } from '../utils/uuid';
 import { WalletProviderEventEmitter } from './WalletProviderEventEmitter';
 
 const LOCALSTORAGE_KEY = 'GrinderyWalletProvider';
@@ -27,10 +28,11 @@ export class WalletProviderLocalStorage extends WalletProviderEventEmitter {
    * @param {string} value The value to set
    * @returns {void}
    */
-  protected setStorageValue(key: ProviderStorageKey, value: string): void {
+  protected setStorageValue(key: ProviderStorageKey, value: string): string {
     const storage = this.getStorage();
     storage[key] = value;
     this.saveStorage(storage);
+    return value;
   }
 
   /**
@@ -39,7 +41,9 @@ export class WalletProviderLocalStorage extends WalletProviderEventEmitter {
    * @returns {void}
    */
   protected clearStorage(): void {
-    this.saveStorage({});
+    this.saveStorage({
+      clientId: this.getStorage().clientId || uuid(),
+    });
   }
 
   /**

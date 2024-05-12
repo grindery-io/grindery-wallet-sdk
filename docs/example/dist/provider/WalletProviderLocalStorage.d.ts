@@ -20,7 +20,7 @@ export declare class WalletProviderLocalStorage extends WalletProviderEventEmitt
      * @param {string} value The value to set
      * @returns {void}
      */
-    protected setStorageValue(key: ProviderStorageKey, value: string): void;
+    protected setStorageValue(key: ProviderStorageKey, value: string): string;
     /**
      * @summary Clears the storage
      * @protected
