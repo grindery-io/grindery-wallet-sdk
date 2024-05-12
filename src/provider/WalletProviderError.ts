@@ -21,4 +21,5 @@ export const WalletProviderErrors = {
   UnsupportedMethod: new WalletProviderError('Unsupported Method', 4200),
   Unauthorized: new WalletProviderError('Unauthorized', 4900),
   NoResult: new WalletProviderError('No result', 4900),
+  NoAppId: new WalletProviderError('App ID is required', 4900),
 };

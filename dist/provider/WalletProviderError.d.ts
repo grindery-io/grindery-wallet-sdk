@@ -15,4 +15,5 @@ export declare const WalletProviderErrors: {
     UnsupportedMethod: WalletProviderError;
     Unauthorized: WalletProviderError;
     NoResult: WalletProviderError;
+    NoAppId: WalletProviderError;
 };

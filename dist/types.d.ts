@@ -45,7 +45,7 @@ export declare namespace GrinderyRpcProviderRequestResults {
     type eth_sendTransaction = string;
 }
 export declare namespace GrinderyRpcApiRequestResults {
-    type checkout_waitForPairingResult = {
+    type waitForPairingResult = {
         session: {
             expiry: number;
             sessionId: SessionId;
@@ -59,16 +59,17 @@ export declare namespace GrinderyRpcApiRequestResults {
             };
         };
     };
-    type checkout_requestPairing = {
+    type requestPairing = {
         pairingToken: PairingToken;
         connectUrl: ConnectUrl;
         connectUrlBrowser: ConnectUrlBrowser;
         shortToken: ShortToken;
     };
-    type checkout_request = {
+    type request = {
         requestToken: RequestToken;
     };
-    type checkout_waitForRequestResult = GrinderyRpcProviderRequestResults.eth_accounts | GrinderyRpcProviderRequestResults.eth_requestAccounts | GrinderyRpcProviderRequestResults.personal_sign | GrinderyRpcProviderRequestResults.eth_sendTransaction;
+    type waitForRequestResult = GrinderyRpcProviderRequestResults.eth_accounts | GrinderyRpcProviderRequestResults.eth_requestAccounts | GrinderyRpcProviderRequestResults.personal_sign | GrinderyRpcProviderRequestResults.eth_sendTransaction;
+    type disconnect = boolean;
 }
 export interface ProviderInterface extends WalletProviderEventEmitter {
     request<T>(args: RequestArguments): Promise<T>;
@@ -82,4 +83,7 @@ export interface ProviderInterface extends WalletProviderEventEmitter {
     removeListener(event: ProviderEvents.chainChanged, listener: (chainId: ChainId) => void): this;
     removeListener(event: ProviderEvents.accountsChanged, listener: (accounts: Address[]) => void): this;
     removeListener(event: ProviderEvents.message, listener: (message: ProviderMessage) => void): this;
+}
+export interface GrinderyWalletSDKConfig {
+    appId: string;
 }

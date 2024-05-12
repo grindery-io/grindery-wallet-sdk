@@ -18,7 +18,11 @@ Grindery Wallet SDK enables your dapp to provide a seamless user experience for 
   - [Properties](#sdk-properties)
     - [provider](#sdk-props_provider)
   - [Methods](#sdk-methods)
+    - [isConnected()](#sdk-methods_isconnected)
+    - [isWalletConnected()](#sdk-methods_iswalletconnected)
+    - [setAppId()](#sdk-methods_setappid)
     - [connect()](#sdk-methods_connect)
+    - [disconnect()](#sdk-methods_disconnect)
     - [sendTransaction()](#sdk-methods_sendtransaction)
     - [signMessage()](#sdk-methods_signmessage)
     - [on()](#sdk-methods_on)
@@ -43,6 +47,14 @@ See an example implementation here: [https://grindery-io.github.io/grindery-wall
 
 # Installing SDK
 
+## Obtain App ID
+
+Go to the [Grindery Bot](https://t.me/GrinderyAIBot) and use `/checkout_registerapp` command to obtain an App Id.
+
+App Id is required, as it allows Grindery Wallet users to recognize reqests made from your app.
+
+> For demo and testing you can use Demo App Id: `763d2695-d237-45fe-bfe8-2e4e26ff707b`
+
 ## Browser
 
 ### CDN
@@ -50,7 +62,10 @@ See an example implementation here: [https://grindery-io.github.io/grindery-wall
 Place the script tag before the closing `</head>` tag, using this code:
 
 ```html
-<script src="https://grindery-io.github.io/grindery-wallet-sdk/example/dist/grindery-wallet-sdk.umd.production.min.js"></script>
+<script
+  data-app-id="your-app-id"
+  src="https://grindery-io.github.io/grindery-wallet-sdk/example/dist/grindery-wallet-sdk.umd.production.min.js"
+></script>
 ```
 
 ### Download
@@ -62,7 +77,10 @@ Extract downloaded archive and copy `dist/grindery-wallet-sdk.umd.production.min
 Place the script tag before the closing `</head>` tag, using this code:
 
 ```html
-<script src="grindery-wallet-sdk.umd.production.min.js"></script>
+<script
+  data-app-id="your-app-id"
+  src="grindery-wallet-sdk.umd.production.min.js"
+></script>
 ```
 
 > If you are building a [Telegram Mini App](https://core.telegram.org/bots/webapps) - make sure to put Grindery script tag AFTER Telegram script.
@@ -89,11 +107,28 @@ Include module in your code:
 
 ```js
 import 'grindery-wallet-sdk';
+
+// set app id
+window.Grindery.WalletSDK.setAppId('your-app-id');
+```
+
+Alternatively you can set the app id before importing the sdk via `window.Grindery` object. This can be useful to share the app id between multiple Grindery scripts:
+
+```js
+window.Grindery.appId = 'your-app-id';
+```
+
+Then later in your code include the sdk:
+
+```js
+import 'grindery-wallet-sdk';
 ```
 
 # Basic usage
 
 Once the script is loaded, a `window.Grindery.WalletSDK` object will become available.
+
+> Make sure to configre your app id before calling SDK methods. See here how to obtain an app id.
 
 ## SDK properties
 
@@ -109,7 +144,11 @@ const provider = window.Grindery.WalletSDK.provider;
 
 ## SDK methods
 
+- [isConnected()](#sdk-methods_isconnected)
+- [isWalletConnected()](#sdk-methods_iswalletconnected)
+- [setAppId()](#sdk-methods_setappid)
 - [connect()](#sdk-methods_connect)
+- [disconnect()](#sdk-methods_disconnect)
 - [sendTransaction()](#sdk-methods_sendtransaction)
 - [signMessage()](#sdk-methods_signmessage)
 - [on()](#sdk-methods_on)
@@ -147,6 +186,22 @@ const isWalletConnected = window.Grindery.WalletSDK.isWalletConnected();
 
 ---
 
+### <a id="sdk-methods_setappid">WalletSDK.setAppId()</a>
+
+Sets the App Id. See [app id obtaining](#obtain-app-id) section for details.
+
+**Arguments:** String. App id.
+
+**Returns:** App id
+
+**Example code:**
+
+```js
+const appId = window.Grindery.WalletSDK.setAppId('your-app-id');
+```
+
+---
+
 ### <a id="sdk-methods_connect">WalletSDK.connect()</a>
 
 Initiate connection with the Grindery Wallet. User will be redirected to the Grindery Bot to confirm connection.
@@ -161,6 +216,24 @@ Initiate connection with the Grindery Wallet. User will be redirected to the Gri
 async () => {
   const [address] = await window.Grindery.WalletSDK.connect();
 };
+```
+
+---
+
+### <a id="sdk-methods_connect">WalletSDK.disconnect()</a>
+
+Disconnects app from the Grindery Wallet.
+
+**Arguments:** none
+
+**Returns:** Empty promise resolving when the app is disconnected from the wallet.
+
+**Example code:**
+
+```js
+window.Grindery.WalletSDK.disconnect().then(() => {
+  console.log('disconnected');
+});
 ```
 
 ---

@@ -20,6 +20,7 @@ import {
   ProviderEvents,
   ProviderStorageKeys,
 } from '../enums';
+import { uuid } from '../utils/uuid';
 
 /**
  * @summary The base wallet provider class
@@ -83,6 +84,17 @@ export class WalletProvider extends WalletProviderLocalStorage {
   }
 
   /**
+   * @summary Sets the application ID
+   * @public
+   * @param {string} appId The application ID
+   * @returns {string} The application ID
+   */
+  public setAppId(appId: string): string {
+    this.appId = appId;
+    return this.appId;
+  }
+
+  /**
    * @summary Sends a request to the provider
    * @public
    * @param {RequestArguments} args Request arguments
@@ -91,6 +103,9 @@ export class WalletProvider extends WalletProviderLocalStorage {
    * @returns {T} The result of the request
    */
   public async request<T>({ method, params }: RequestArguments): Promise<T> {
+    /*if (!this.appId) {
+      throw WalletProviderErrors.NoAppId;
+    }*/
     if (!this.chainId) {
       this.emit(ProviderEvents.disconnect, WalletProviderErrors.Disconnected);
       throw WalletProviderErrors.Disconnected;
@@ -134,13 +149,19 @@ export class WalletProvider extends WalletProviderLocalStorage {
    * @summary The application ID.
    * @protected
    */
-  protected appId: string = document.title || 'Grindery Wallet Provider';
+  protected appId: string = '';
 
   /**
    * @summary The chain ID in CAIP-2 format; e.g. "eip155:1".
    * @protected
    */
   protected chainId: ChainId = 'eip155:137';
+
+  /**
+   * @summary Client id
+   * @protected
+   */
+  protected clientId: string = uuid();
 
   /**
    * @summary The list of supported provider methods.
@@ -186,10 +207,11 @@ export class WalletProvider extends WalletProviderLocalStorage {
     if (!this.getStorageValue(ProviderStorageKeys.sessionId)) {
       throw WalletProviderErrors.Unauthorized;
     }
+
     try {
       return await this.sendGrinderyRpcApiRequest<
-        GrinderyRpcApiRequestResults.checkout_request
-      >(GrinderyRpcMethodNames.checkout_request, {
+        GrinderyRpcApiRequestResults.request
+      >(GrinderyRpcMethodNames.request, {
         sessionId: this.getStorageValue(ProviderStorageKeys.sessionId),
         scope: this.chainId,
         request: {
@@ -218,7 +240,7 @@ export class WalletProvider extends WalletProviderLocalStorage {
     }
     try {
       return await this.sendGrinderyRpcApiRequest<T>(
-        GrinderyRpcMethodNames.checkout_waitForRequestResult,
+        GrinderyRpcMethodNames.waitForRequestResult,
         {
           requestToken,
           timeout,
@@ -249,7 +271,7 @@ export class WalletProvider extends WalletProviderLocalStorage {
         body: JSON.stringify({
           jsonrpc: '2.0',
           id: 1,
-          method,
+          method: `gws_${method}`,
           params: params || [],
         }),
       });

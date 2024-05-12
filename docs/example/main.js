@@ -53,6 +53,11 @@ const showConnectedWallet = (address, target) => {
             Send transaction
             </button>
         </div>
+        <div class="mt-4">
+            <button id="gws_disconnect" class="py-2 px-4 bg-red-500 text-white rounded-xl disabled:opacity-50">
+              Disconnect wallet
+            </button>
+        </div>
       `;
 };
 
@@ -73,9 +78,22 @@ const onConnectButtonClick = (e, button, target) => {
   button.disabled = true;
 
   WalletSDK.connect().catch(error => {
-    console.error('eth_requestAccounts', error);
+    console.error('connect', error);
     showReloadButton(target);
   });
+};
+
+const onDisconnectButtonClick = (e, button, target) => {
+  button.innerHTML = 'Connecting...';
+  button.disabled = true;
+
+  WalletSDK.disconnect()
+    .then(() => {
+      showConnectButton(target);
+    })
+    .catch(error => {
+      console.error('disconnect', error);
+    });
 };
 
 const onSignButtonClick = (e, button, address) => {
@@ -116,6 +134,7 @@ const listenWalletButtonsClicks = (address, target) => {
   }
   const signButton = target.querySelector('#personal_sign');
   const sendButton = target.querySelector('#eth_sendTransaction');
+  const disconnectButton = target.querySelector('#gws_disconnect');
   if (signButton) {
     signButton.addEventListener('click', event =>
       onSignButtonClick(event, signButton, address)
@@ -124,6 +143,11 @@ const listenWalletButtonsClicks = (address, target) => {
   if (sendButton) {
     sendButton.addEventListener('click', event =>
       onSendTxButtonClick(event, sendButton, address)
+    );
+  }
+  if (disconnectButton) {
+    disconnectButton.addEventListener('click', event =>
+      onDisconnectButtonClick(event, disconnectButton, target)
     );
   }
 };

@@ -50,8 +50,8 @@ export class GrinderyWalletProvider extends WalletProvider
           if (this.isWalletConnectionPending()) {
             try {
               const pairResult = await this.sendGrinderyRpcApiRequest<
-                GrinderyRpcApiRequestResults.checkout_waitForPairingResult
-              >(GrinderyRpcMethodNames.checkout_waitForPairingResult, {
+                GrinderyRpcApiRequestResults.waitForPairingResult
+              >(GrinderyRpcMethodNames.waitForPairingResult, {
                 pairingToken: this.getStorageValue(
                   ProviderStorageKeys.pairingToken
                 ),
@@ -80,9 +80,10 @@ export class GrinderyWalletProvider extends WalletProvider
           }
           try {
             const result = await this.sendGrinderyRpcApiRequest<
-              GrinderyRpcApiRequestResults.checkout_requestPairing
-            >(GrinderyRpcMethodNames.checkout_requestPairing, {
+              GrinderyRpcApiRequestResults.requestPairing
+            >(GrinderyRpcMethodNames.requestPairing, {
               appId: this.appId,
+              clientId: this.clientId,
             });
 
             if (!result.pairingToken || !result.connectUrl) {
@@ -111,8 +112,8 @@ export class GrinderyWalletProvider extends WalletProvider
               connectUrlBrowser: result.connectUrlBrowser,
             });
             const pairResult = await this.sendGrinderyRpcApiRequest<
-              GrinderyRpcApiRequestResults.checkout_waitForPairingResult
-            >(GrinderyRpcMethodNames.checkout_waitForPairingResult, {
+              GrinderyRpcApiRequestResults.waitForPairingResult
+            >(GrinderyRpcMethodNames.waitForPairingResult, {
               pairingToken: result.pairingToken,
             });
 
@@ -177,6 +178,27 @@ export class GrinderyWalletProvider extends WalletProvider
           );
         },
       },
+      [GrinderyRpcProviderRequestMethodNames.gws_disconnect]: {
+        sessionRequired: true,
+        execute: async (): Promise<GrinderyRpcApiRequestResults.disconnect> => {
+          try {
+            const result = await this.sendGrinderyRpcApiRequest<
+              GrinderyRpcApiRequestResults.disconnect
+            >(GrinderyRpcMethodNames.disconnect, {
+              sessionToken: this.getStorageValue(ProviderStorageKeys.sessionId),
+            });
+            this.emit(
+              ProviderEvents.disconnect,
+              WalletProviderErrors.Disconnected
+            );
+            this.clearStorage();
+            this.setAccounts([]);
+            return result;
+          } catch (error) {
+            throw this.createProviderRpcError(error);
+          }
+        },
+      },
     });
 
     window.addEventListener('load', () => {
@@ -197,8 +219,8 @@ export class GrinderyWalletProvider extends WalletProvider
     if (pairingToken && !sessionId) {
       try {
         const pairResult = await this.sendGrinderyRpcApiRequest<
-          GrinderyRpcApiRequestResults.checkout_waitForPairingResult
-        >(GrinderyRpcMethodNames.checkout_waitForPairingResult, {
+          GrinderyRpcApiRequestResults.waitForPairingResult
+        >(GrinderyRpcMethodNames.waitForPairingResult, {
           pairingToken,
         });
 

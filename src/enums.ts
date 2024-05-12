@@ -15,16 +15,24 @@ export enum ProviderStorageKeys {
   shortToken = 'shortToken',
 }
 
+/**
+ * @summary The Grindery RPC API method names
+ */
 export enum GrinderyRpcMethodNames {
-  checkout_requestPairing = 'checkout_requestPairing',
-  checkout_waitForPairingResult = 'checkout_waitForPairingResult',
-  checkout_request = 'checkout_request',
-  checkout_waitForRequestResult = 'checkout_waitForRequestResult',
+  requestPairing = 'requestPairing',
+  waitForPairingResult = 'waitForPairingResult',
+  request = 'request',
+  waitForRequestResult = 'waitForRequestResult',
+  'disconnect' = 'disconnect',
 }
 
+/**
+ * @summary The Grindery wallet provider method names
+ */
 export enum GrinderyRpcProviderRequestMethodNames {
   eth_requestAccounts = 'eth_requestAccounts',
   eth_accounts = 'eth_accounts',
   personal_sign = 'personal_sign',
   eth_sendTransaction = 'eth_sendTransaction',
+  gws_disconnect = 'gws_disconnect',
 }

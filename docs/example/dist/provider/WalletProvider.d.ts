@@ -36,6 +36,13 @@ export declare class WalletProvider extends WalletProviderLocalStorage {
      */
     getAddress(): Address;
     /**
+     * @summary Sets the application ID
+     * @public
+     * @param {string} appId The application ID
+     * @returns {string} The application ID
+     */
+    setAppId(appId: string): string;
+    /**
      * @summary Sends a request to the provider
      * @public
      * @param {RequestArguments} args Request arguments
@@ -63,6 +70,11 @@ export declare class WalletProvider extends WalletProviderLocalStorage {
      * @protected
      */
     protected chainId: ChainId;
+    /**
+     * @summary Client id
+     * @protected
+     */
+    protected clientId: string;
     /**
      * @summary The list of supported provider methods.
      * @protected

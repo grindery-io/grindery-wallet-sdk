@@ -4,6 +4,7 @@ declare global {
         Telegram?: any;
         ethereum?: any;
         Grindery?: {
+            appId?: string;
             WalletSDK?: GrinderyWalletSDK;
         };
     }

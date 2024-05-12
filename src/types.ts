@@ -64,7 +64,7 @@ export namespace GrinderyRpcProviderRequestResults {
 }
 
 export namespace GrinderyRpcApiRequestResults {
-  export type checkout_waitForPairingResult = {
+  export type waitForPairingResult = {
     session: {
       expiry: number;
       sessionId: SessionId;
@@ -78,22 +78,24 @@ export namespace GrinderyRpcApiRequestResults {
       };
     };
   };
-  export type checkout_requestPairing = {
+  export type requestPairing = {
     pairingToken: PairingToken;
     connectUrl: ConnectUrl;
     connectUrlBrowser: ConnectUrlBrowser;
     shortToken: ShortToken;
   };
 
-  export type checkout_request = {
+  export type request = {
     requestToken: RequestToken;
   };
 
-  export type checkout_waitForRequestResult =
+  export type waitForRequestResult =
     | GrinderyRpcProviderRequestResults.eth_accounts
     | GrinderyRpcProviderRequestResults.eth_requestAccounts
     | GrinderyRpcProviderRequestResults.personal_sign
     | GrinderyRpcProviderRequestResults.eth_sendTransaction;
+
+  export type disconnect = boolean;
 }
 
 export interface ProviderInterface extends WalletProviderEventEmitter {
@@ -138,4 +140,8 @@ export interface ProviderInterface extends WalletProviderEventEmitter {
     event: ProviderEvents.message,
     listener: (message: ProviderMessage) => void
   ): this;
+}
+
+export interface GrinderyWalletSDKConfig {
+  appId: string;
 }

@@ -2,7 +2,11 @@ import {
   GrinderyRpcProviderRequestMethodNames,
   ProviderEvents,
 } from '../enums';
-import { GrinderyRpcApiRequestResults, ProviderEvent } from '../types';
+import {
+  GrinderyRpcApiRequestResults,
+  GrinderyWalletSDKConfig,
+  ProviderEvent,
+} from '../types';
 import { GrinderyWalletProvider } from '../provider/GrinderyWalletProvider';
 
 /**
@@ -16,8 +20,9 @@ export class GrinderyWalletSDK {
    */
   public provider: GrinderyWalletProvider;
 
-  constructor() {
+  constructor({ appId }: GrinderyWalletSDKConfig) {
     this.provider = this.getWeb3Provider();
+    this.setAppId(appId);
     this.provider.on(ProviderEvents.pair, this.handlePairing);
   }
 
@@ -47,6 +52,29 @@ export class GrinderyWalletSDK {
     return await this.provider.request({
       method: GrinderyRpcProviderRequestMethodNames.eth_requestAccounts,
     });
+  }
+
+  /**
+   * @summary Disconnects Grindery Wallet
+   * @public
+   * @returns {Promise<boolean>} True if wallet is disconnected
+   * @since 0.1.0
+   */
+  public async disconnect(): Promise<boolean> {
+    return await this.provider.request({
+      method: GrinderyRpcProviderRequestMethodNames.gws_disconnect,
+    });
+  }
+
+  /**
+   * @summary Sets the app id
+   * @public
+   * @since 0.1.0
+   * @param {string} appId The app id
+   * @returns {void}
+   */
+  public setAppId(appId: string): void {
+    this.provider.setAppId(appId);
   }
 
   /**
@@ -139,7 +167,7 @@ export class GrinderyWalletSDK {
   private handlePairing({
     shortToken,
     connectUrlBrowser,
-  }: GrinderyRpcApiRequestResults.checkout_requestPairing): void {
+  }: GrinderyRpcApiRequestResults.requestPairing): void {
     const WebApp = window.Telegram?.WebApp;
     const redirectUrl = `https://walletconnect.grindery.com/connect/wc?uri=${shortToken}`;
     if (

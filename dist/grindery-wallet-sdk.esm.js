@@ -427,19 +427,27 @@ var ProviderStorageKeys;
   ProviderStorageKeys["connectUrlBrowser"] = "connectUrlBrowser";
   ProviderStorageKeys["shortToken"] = "shortToken";
 })(ProviderStorageKeys || (ProviderStorageKeys = {}));
+/**
+ * @summary The Grindery RPC API method names
+ */
 var GrinderyRpcMethodNames;
 (function (GrinderyRpcMethodNames) {
-  GrinderyRpcMethodNames["checkout_requestPairing"] = "checkout_requestPairing";
-  GrinderyRpcMethodNames["checkout_waitForPairingResult"] = "checkout_waitForPairingResult";
-  GrinderyRpcMethodNames["checkout_request"] = "checkout_request";
-  GrinderyRpcMethodNames["checkout_waitForRequestResult"] = "checkout_waitForRequestResult";
+  GrinderyRpcMethodNames["requestPairing"] = "requestPairing";
+  GrinderyRpcMethodNames["waitForPairingResult"] = "waitForPairingResult";
+  GrinderyRpcMethodNames["request"] = "request";
+  GrinderyRpcMethodNames["waitForRequestResult"] = "waitForRequestResult";
+  GrinderyRpcMethodNames["disconnect"] = "disconnect";
 })(GrinderyRpcMethodNames || (GrinderyRpcMethodNames = {}));
+/**
+ * @summary The Grindery wallet provider method names
+ */
 var GrinderyRpcProviderRequestMethodNames;
 (function (GrinderyRpcProviderRequestMethodNames) {
   GrinderyRpcProviderRequestMethodNames["eth_requestAccounts"] = "eth_requestAccounts";
   GrinderyRpcProviderRequestMethodNames["eth_accounts"] = "eth_accounts";
   GrinderyRpcProviderRequestMethodNames["personal_sign"] = "personal_sign";
   GrinderyRpcProviderRequestMethodNames["eth_sendTransaction"] = "eth_sendTransaction";
+  GrinderyRpcProviderRequestMethodNames["gws_disconnect"] = "gws_disconnect";
 })(GrinderyRpcProviderRequestMethodNames || (GrinderyRpcProviderRequestMethodNames = {}));
 
 /**
@@ -589,7 +597,19 @@ var WalletProviderErrors = {
   Disconnected: /*#__PURE__*/new WalletProviderError('Disconnected', 4900),
   UnsupportedMethod: /*#__PURE__*/new WalletProviderError('Unsupported Method', 4200),
   Unauthorized: /*#__PURE__*/new WalletProviderError('Unauthorized', 4900),
-  NoResult: /*#__PURE__*/new WalletProviderError('No result', 4900)
+  NoResult: /*#__PURE__*/new WalletProviderError('No result', 4900),
+  NoAppId: /*#__PURE__*/new WalletProviderError('App ID is required', 4900)
+};
+
+/**
+ * @summary Generates a Version 4 (pseudorandom) UUID
+ * @returns {string} The UUID
+ */
+var uuid = function uuid() {
+  var d = '';
+  while (d.length < 32) d += Math.random().toString(16).substr(2);
+  var vr = (parseInt(d.substr(16, 1), 16) & 0x3 | 0x8).toString(16);
+  return d.substr(0, 8) + "-" + d.substr(8, 4) + "-4" + d.substr(13, 3) + "-" + vr + d.substr(17, 3) + "-" + d.substr(20, 12);
 };
 
 /**
@@ -605,12 +625,17 @@ var WalletProvider = /*#__PURE__*/function (_WalletProviderLocalS) {
      * @summary The application ID.
      * @protected
      */
-    _this.appId = document.title || 'Grindery Wallet Provider';
+    _this.appId = '';
     /**
      * @summary The chain ID in CAIP-2 format; e.g. "eip155:1".
      * @protected
      */
     _this.chainId = 'eip155:137';
+    /**
+     * @summary Client id
+     * @protected
+     */
+    _this.clientId = uuid();
     /**
      * @summary The list of supported provider methods.
      * @protected
@@ -662,6 +687,16 @@ var WalletProvider = /*#__PURE__*/function (_WalletProviderLocalS) {
    */;
   _proto.getAddress = function getAddress() {
     return this.accounts[0] || '';
+  }
+  /**
+   * @summary Sets the application ID
+   * @public
+   * @param {string} appId The application ID
+   * @returns {string} The application ID
+   */;
+  _proto.setAppId = function setAppId(appId) {
+    this.appId = appId;
+    return this.appId;
   }
   /**
    * @summary Sends a request to the provider
@@ -793,7 +828,7 @@ var WalletProvider = /*#__PURE__*/function (_WalletProviderLocalS) {
           case 2:
             _context3.prev = 2;
             _context3.next = 5;
-            return this.sendGrinderyRpcApiRequest(GrinderyRpcMethodNames.checkout_request, {
+            return this.sendGrinderyRpcApiRequest(GrinderyRpcMethodNames.request, {
               sessionId: this.getStorageValue(ProviderStorageKeys.sessionId),
               scope: this.chainId,
               request: {
@@ -841,7 +876,7 @@ var WalletProvider = /*#__PURE__*/function (_WalletProviderLocalS) {
           case 2:
             _context4.prev = 2;
             _context4.next = 5;
-            return this.sendGrinderyRpcApiRequest(GrinderyRpcMethodNames.checkout_waitForRequestResult, {
+            return this.sendGrinderyRpcApiRequest(GrinderyRpcMethodNames.waitForRequestResult, {
               requestToken: requestToken,
               timeout: timeout
             });
@@ -888,7 +923,7 @@ var WalletProvider = /*#__PURE__*/function (_WalletProviderLocalS) {
               body: JSON.stringify({
                 jsonrpc: '2.0',
                 id: 1,
-                method: method,
+                method: "gws_" + method,
                 params: params || []
               })
             });
@@ -1009,7 +1044,7 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_WalletProvider) {
                 }
                 _context.prev = 11;
                 _context.next = 14;
-                return _this.sendGrinderyRpcApiRequest(GrinderyRpcMethodNames.checkout_waitForPairingResult, {
+                return _this.sendGrinderyRpcApiRequest(GrinderyRpcMethodNames.waitForPairingResult, {
                   pairingToken: _this.getStorageValue(ProviderStorageKeys.pairingToken)
                 });
               case 14:
@@ -1037,8 +1072,9 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_WalletProvider) {
               case 27:
                 _context.prev = 27;
                 _context.next = 30;
-                return _this.sendGrinderyRpcApiRequest(GrinderyRpcMethodNames.checkout_requestPairing, {
-                  appId: _this.appId
+                return _this.sendGrinderyRpcApiRequest(GrinderyRpcMethodNames.requestPairing, {
+                  appId: _this.appId,
+                  clientId: _this.clientId
                 });
               case 30:
                 result = _context.sent;
@@ -1058,7 +1094,7 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_WalletProvider) {
                   connectUrlBrowser: result.connectUrlBrowser
                 });
                 _context.next = 40;
-                return _this.sendGrinderyRpcApiRequest(GrinderyRpcMethodNames.checkout_waitForPairingResult, {
+                return _this.sendGrinderyRpcApiRequest(GrinderyRpcMethodNames.waitForPairingResult, {
                   pairingToken: result.pairingToken
                 });
               case 40:
@@ -1169,6 +1205,40 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_WalletProvider) {
         }
         return execute;
       }()
+    }, _this$registerProvide[GrinderyRpcProviderRequestMethodNames.gws_disconnect] = {
+      sessionRequired: true,
+      execute: function () {
+        var _execute5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5() {
+          var result;
+          return _regeneratorRuntime().wrap(function _callee5$(_context5) {
+            while (1) switch (_context5.prev = _context5.next) {
+              case 0:
+                _context5.prev = 0;
+                _context5.next = 3;
+                return _this.sendGrinderyRpcApiRequest(GrinderyRpcMethodNames.disconnect, {
+                  sessionToken: _this.getStorageValue(ProviderStorageKeys.sessionId)
+                });
+              case 3:
+                result = _context5.sent;
+                _this.emit(ProviderEvents.disconnect, WalletProviderErrors.Disconnected);
+                _this.clearStorage();
+                _this.setAccounts([]);
+                return _context5.abrupt("return", result);
+              case 10:
+                _context5.prev = 10;
+                _context5.t0 = _context5["catch"](0);
+                throw _this.createProviderRpcError(_context5.t0);
+              case 13:
+              case "end":
+                return _context5.stop();
+            }
+          }, _callee5, null, [[0, 10]]);
+        }));
+        function execute() {
+          return _execute5.apply(this, arguments);
+        }
+        return execute;
+      }()
     }, _this$registerProvide));
     window.addEventListener('load', function () {
       _this.emit(ProviderEvents.connect, _this.getChain());
@@ -1187,28 +1257,28 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_WalletProvider) {
   _proto.restorePairing =
   /*#__PURE__*/
   function () {
-    var _restorePairing = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5() {
+    var _restorePairing = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee6() {
       var pairingToken, sessionId, _pairResult$session, pairResult, accounts;
-      return _regeneratorRuntime().wrap(function _callee5$(_context5) {
-        while (1) switch (_context5.prev = _context5.next) {
+      return _regeneratorRuntime().wrap(function _callee6$(_context6) {
+        while (1) switch (_context6.prev = _context6.next) {
           case 0:
             pairingToken = this.getStorageValue(ProviderStorageKeys.pairingToken);
             sessionId = this.getStorageValue(ProviderStorageKeys.sessionId);
             if (!(pairingToken && !sessionId)) {
-              _context5.next = 19;
+              _context6.next = 19;
               break;
             }
-            _context5.prev = 3;
-            _context5.next = 6;
-            return this.sendGrinderyRpcApiRequest(GrinderyRpcMethodNames.checkout_waitForPairingResult, {
+            _context6.prev = 3;
+            _context6.next = 6;
+            return this.sendGrinderyRpcApiRequest(GrinderyRpcMethodNames.waitForPairingResult, {
               pairingToken: pairingToken
             });
           case 6:
-            pairResult = _context5.sent;
+            pairResult = _context6.sent;
             this.clearStorage();
             this.setStorageValue(ProviderStorageKeys.sessionId, pairResult.session.sessionId);
             if (pairResult.session.sessionId) {
-              _context5.next = 11;
+              _context6.next = 11;
               break;
             }
             throw WalletProviderErrors.PairingFailed;
@@ -1217,18 +1287,18 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_WalletProvider) {
               return account.includes(':') ? account.split(':')[2] || '' : account;
             });
             this.setAccounts(accounts);
-            _context5.next = 19;
+            _context6.next = 19;
             break;
           case 15:
-            _context5.prev = 15;
-            _context5.t0 = _context5["catch"](3);
+            _context6.prev = 15;
+            _context6.t0 = _context6["catch"](3);
             this.setAccounts([]);
             this.clearStorage();
           case 19:
           case "end":
-            return _context5.stop();
+            return _context6.stop();
         }
-      }, _callee5, this, [[3, 15]]);
+      }, _callee6, this, [[3, 15]]);
     }));
     function restorePairing() {
       return _restorePairing.apply(this, arguments);
@@ -1244,35 +1314,35 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_WalletProvider) {
   _proto.restoreSession =
   /*#__PURE__*/
   function () {
-    var _restoreSession = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee6() {
+    var _restoreSession = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee7() {
       var pairingToken, sessionId;
-      return _regeneratorRuntime().wrap(function _callee6$(_context6) {
-        while (1) switch (_context6.prev = _context6.next) {
+      return _regeneratorRuntime().wrap(function _callee7$(_context7) {
+        while (1) switch (_context7.prev = _context7.next) {
           case 0:
             pairingToken = this.getStorageValue(ProviderStorageKeys.pairingToken);
             sessionId = this.getStorageValue(ProviderStorageKeys.sessionId);
             if (!(sessionId && !pairingToken)) {
-              _context6.next = 12;
+              _context7.next = 12;
               break;
             }
-            _context6.prev = 3;
-            _context6.next = 6;
+            _context7.prev = 3;
+            _context7.next = 6;
             return this.request({
               method: GrinderyRpcProviderRequestMethodNames.eth_requestAccounts
             });
           case 6:
-            _context6.next = 12;
+            _context7.next = 12;
             break;
           case 8:
-            _context6.prev = 8;
-            _context6.t0 = _context6["catch"](3);
+            _context7.prev = 8;
+            _context7.t0 = _context7["catch"](3);
             this.setAccounts([]);
             this.clearStorage();
           case 12:
           case "end":
-            return _context6.stop();
+            return _context7.stop();
         }
-      }, _callee6, this, [[3, 8]]);
+      }, _callee7, this, [[3, 8]]);
     }));
     function restoreSession() {
       return _restoreSession.apply(this, arguments);
@@ -1287,8 +1357,10 @@ var GrinderyWalletProvider = /*#__PURE__*/function (_WalletProvider) {
  * @since 0.1.0
  */
 var GrinderyWalletSDK = /*#__PURE__*/function () {
-  function GrinderyWalletSDK() {
+  function GrinderyWalletSDK(_ref) {
+    var appId = _ref.appId;
     this.provider = this.getWeb3Provider();
+    this.setAppId(appId);
     this.provider.on(ProviderEvents.pair, this.handlePairing);
   }
   /**
@@ -1337,27 +1409,22 @@ var GrinderyWalletSDK = /*#__PURE__*/function () {
     return connect;
   }()
   /**
-   * @summary Sends a transaction request to the Grindery Wallet
+   * @summary Disconnects Grindery Wallet
    * @public
+   * @returns {Promise<boolean>} True if wallet is disconnected
    * @since 0.1.0
-   * @param {object} params The transaction parameters
-   * @param {string} params.to The recipient address
-   * @param {string} [params.value] The amount to send in wei
-   * @param {string} [params.data] The data to send
-   * @returns {Promise<string[]>} Array with transaction hash string
    */
   ;
-  _proto.sendTransaction =
+  _proto.disconnect =
   /*#__PURE__*/
   function () {
-    var _sendTransaction = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(params) {
+    var _disconnect = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2() {
       return _regeneratorRuntime().wrap(function _callee2$(_context2) {
         while (1) switch (_context2.prev = _context2.next) {
           case 0:
             _context2.next = 2;
             return this.provider.request({
-              method: GrinderyRpcProviderRequestMethodNames.eth_sendTransaction,
-              params: [params]
+              method: GrinderyRpcProviderRequestMethodNames.gws_disconnect
             });
           case 2:
             return _context2.abrupt("return", _context2.sent);
@@ -1366,6 +1433,52 @@ var GrinderyWalletSDK = /*#__PURE__*/function () {
             return _context2.stop();
         }
       }, _callee2, this);
+    }));
+    function disconnect() {
+      return _disconnect.apply(this, arguments);
+    }
+    return disconnect;
+  }()
+  /**
+   * @summary Sets the app id
+   * @public
+   * @since 0.1.0
+   * @param {string} appId The app id
+   * @returns {void}
+   */
+  ;
+  _proto.setAppId = function setAppId(appId) {
+    this.provider.setAppId(appId);
+  }
+  /**
+   * @summary Sends a transaction request to the Grindery Wallet
+   * @public
+   * @since 0.1.0
+   * @param {object} params The transaction parameters
+   * @param {string} params.to The recipient address
+   * @param {string} [params.value] The amount to send in wei
+   * @param {string} [params.data] The data to send
+   * @returns {Promise<string[]>} Array with transaction hash string
+   */;
+  _proto.sendTransaction =
+  /*#__PURE__*/
+  function () {
+    var _sendTransaction = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(params) {
+      return _regeneratorRuntime().wrap(function _callee3$(_context3) {
+        while (1) switch (_context3.prev = _context3.next) {
+          case 0:
+            _context3.next = 2;
+            return this.provider.request({
+              method: GrinderyRpcProviderRequestMethodNames.eth_sendTransaction,
+              params: [params]
+            });
+          case 2:
+            return _context3.abrupt("return", _context3.sent);
+          case 3:
+          case "end":
+            return _context3.stop();
+        }
+      }, _callee3, this);
     }));
     function sendTransaction(_x) {
       return _sendTransaction.apply(this, arguments);
@@ -1383,22 +1496,22 @@ var GrinderyWalletSDK = /*#__PURE__*/function () {
   _proto.signMessage =
   /*#__PURE__*/
   function () {
-    var _signMessage = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(message) {
-      return _regeneratorRuntime().wrap(function _callee3$(_context3) {
-        while (1) switch (_context3.prev = _context3.next) {
+    var _signMessage = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee4(message) {
+      return _regeneratorRuntime().wrap(function _callee4$(_context4) {
+        while (1) switch (_context4.prev = _context4.next) {
           case 0:
-            _context3.next = 2;
+            _context4.next = 2;
             return this.provider.request({
               method: GrinderyRpcProviderRequestMethodNames.personal_sign,
               params: [message, this.provider.getAddress()]
             });
           case 2:
-            return _context3.abrupt("return", _context3.sent);
+            return _context4.abrupt("return", _context4.sent);
           case 3:
           case "end":
-            return _context3.stop();
+            return _context4.stop();
         }
-      }, _callee3, this);
+      }, _callee4, this);
     }));
     function signMessage(_x2) {
       return _signMessage.apply(this, arguments);
@@ -1451,10 +1564,10 @@ var GrinderyWalletSDK = /*#__PURE__*/function () {
    * @param ProviderRequestPairingResult
    * @returns {void}
    */;
-  _proto.handlePairing = function handlePairing(_ref) {
+  _proto.handlePairing = function handlePairing(_ref2) {
     var _window$Telegram;
-    var shortToken = _ref.shortToken,
-      connectUrlBrowser = _ref.connectUrlBrowser;
+    var shortToken = _ref2.shortToken,
+      connectUrlBrowser = _ref2.connectUrlBrowser;
     var WebApp = (_window$Telegram = window.Telegram) == null ? void 0 : _window$Telegram.WebApp;
     var redirectUrl = "https://walletconnect.grindery.com/connect/wc?uri=" + shortToken;
     if (WebApp && WebApp.openTelegramLink && WebApp.platform && WebApp.platform !== 'unknown') {
@@ -1469,14 +1582,39 @@ var GrinderyWalletSDK = /*#__PURE__*/function () {
   return GrinderyWalletSDK;
 }();
 
+/**
+ * @summary Get the app id from the script tag or window object
+ * @returns {string} The app id
+ */
+var getAppId = function getAppId() {
+  var _window$Grindery;
+  var appId = '';
+  var elements = document.querySelectorAll('[data-app-id]');
+  for (var i = 0; i < elements.length; i++) {
+    var element = elements[i];
+    var value = element.getAttribute('data-app-id');
+    var src = element.getAttribute('src');
+    var isGrinderySrc = src && src.includes('grindery-wallet-sdk');
+    if (value && isGrinderySrc) {
+      appId = value;
+    }
+  }
+  if ((_window$Grindery = window.Grindery) != null && _window$Grindery.appId) {
+    appId = window.Grindery.appId;
+  }
+  return appId;
+};
+
 function init() {
   var _window$Grindery;
   if (!((_window$Grindery = window.Grindery) != null && _window$Grindery.WalletSDK) || !(window.Grindery.WalletSDK instanceof GrinderyWalletSDK)) {
     window.Grindery = _extends({}, window.Grindery || {}, {
-      WalletSDK: new GrinderyWalletSDK()
+      WalletSDK: new GrinderyWalletSDK({
+        appId: getAppId()
+      })
     });
   }
 }
-// Initialize the SDK when the page is loaded
+// Initialize the SDK
 init();
 //# sourceMappingURL=grindery-wallet-sdk.esm.js.map

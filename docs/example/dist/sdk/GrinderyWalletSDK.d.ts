@@ -1,4 +1,4 @@
-import { ProviderEvent } from '../types';
+import { GrinderyWalletSDKConfig, ProviderEvent } from '../types';
 import { GrinderyWalletProvider } from '../provider/GrinderyWalletProvider';
 /**
  * @summary The Grindery Wallet SDK class
@@ -10,7 +10,7 @@ export declare class GrinderyWalletSDK {
      * @public
      */
     provider: GrinderyWalletProvider;
-    constructor();
+    constructor({ appId }: GrinderyWalletSDKConfig);
     /**
      * @summary Checks if the provider is connected to the server
      * @returns {boolean} True if the provider is connected to the server.
@@ -28,6 +28,21 @@ export declare class GrinderyWalletSDK {
      * @since 0.1.0
      */
     connect(): Promise<string[]>;
+    /**
+     * @summary Disconnects Grindery Wallet
+     * @public
+     * @returns {Promise<boolean>} True if wallet is disconnected
+     * @since 0.1.0
+     */
+    disconnect(): Promise<boolean>;
+    /**
+     * @summary Sets the app id
+     * @public
+     * @since 0.1.0
+     * @param {string} appId The app id
+     * @returns {void}
+     */
+    setAppId(appId: string): void;
     /**
      * @summary Sends a transaction request to the Grindery Wallet
      * @public

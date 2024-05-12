@@ -1,10 +1,12 @@
 import { GrinderyWalletSDK } from './sdk/GrinderyWalletSDK';
+import { getAppId } from './utils/getAppId';
 
 declare global {
   interface Window {
     Telegram?: any;
     ethereum?: any;
     Grindery?: {
+      appId?: string;
       WalletSDK?: GrinderyWalletSDK;
     };
   }
@@ -17,10 +19,12 @@ function init() {
   ) {
     window.Grindery = {
       ...(window.Grindery || {}),
-      WalletSDK: new GrinderyWalletSDK(),
+      WalletSDK: new GrinderyWalletSDK({
+        appId: getAppId(),
+      }),
     };
   }
 }
 
-// Initialize the SDK when the page is loaded
+// Initialize the SDK
 init();
