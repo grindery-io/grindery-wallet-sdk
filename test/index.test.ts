@@ -1,5 +1,8 @@
+import '../src/index';
+import { GrinderyWalletSDK } from '../src/sdk/GrinderyWalletSDK';
+
 describe('index', () => {
-  it('should return 1', () => {
-    expect(1).toBe(1);
+  it('should inject wallet SDK', () => {
+    expect(window.Grindery?.WalletSDK).toBeInstanceOf(GrinderyWalletSDK);
   });
 });

@@ -1,6 +1,16 @@
 import { ProviderInterface } from '../types';
 import { WalletProvider } from './WalletProvider';
 /**
+ * @summary The Grindery wallet provider method names
+ */
+export declare enum GrinderyWalletProviderMethodNames {
+    eth_requestAccounts = "eth_requestAccounts",
+    eth_accounts = "eth_accounts",
+    personal_sign = "personal_sign",
+    eth_sendTransaction = "eth_sendTransaction",
+    gws_disconnect = "gws_disconnect"
+}
+/**
  * @summary The Grindery Wallet Ethereum Injected Provider Class.
  * @extends WalletProvider
  * @implements ProviderInterface

@@ -3,6 +3,11 @@ import { GrinderyWalletProvider } from '../provider/GrinderyWalletProvider';
 /**
  * @summary The Grindery Wallet SDK class
  * @since 0.1.0
+ *
+ * @example
+ * ```typescript
+ * const grinderyWalletSDK = new GrinderyWalletSDK({ appId: 'your-app-id' });
+ * ```
  */
 export declare class GrinderyWalletSDK {
     /**
@@ -14,6 +19,11 @@ export declare class GrinderyWalletSDK {
     /**
      * @summary Checks if the provider is connected to the server
      * @returns {boolean} True if the provider is connected to the server.
+     *
+     * @example
+     * ```typescript
+     * const isConnected = window.Grindery.WalletSDK.isConnected();
+     * ```
      */
     isConnected(): boolean;
     /**

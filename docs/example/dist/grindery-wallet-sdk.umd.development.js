@@ -1,7 +1,7 @@
 (function (factory) {
   typeof define === 'function' && define.amd ? define(factory) :
   factory();
-}((function () { 'use strict';
+})((function () { 'use strict';
 
   function _construct(t, e, r) {
     if (_isNativeReflectConstruct()) return Reflect.construct.apply(null, arguments);
@@ -415,47 +415,6 @@
     return _wrapNativeSuper(Class);
   }
 
-  var ProviderEvents;
-  (function (ProviderEvents) {
-    ProviderEvents["accountsChanged"] = "accountsChanged";
-    ProviderEvents["pair"] = "pair";
-    ProviderEvents["connect"] = "connect";
-    ProviderEvents["disconnect"] = "disconnect";
-    ProviderEvents["chainChanged"] = "chainChanged";
-    ProviderEvents["message"] = "message";
-  })(ProviderEvents || (ProviderEvents = {}));
-  var ProviderStorageKeys;
-  (function (ProviderStorageKeys) {
-    ProviderStorageKeys["pairingToken"] = "pairingToken";
-    ProviderStorageKeys["sessionId"] = "sessionId";
-    ProviderStorageKeys["connectUrl"] = "connectUrl";
-    ProviderStorageKeys["connectUrlBrowser"] = "connectUrlBrowser";
-    ProviderStorageKeys["shortToken"] = "shortToken";
-    ProviderStorageKeys["clientId"] = "clientId";
-  })(ProviderStorageKeys || (ProviderStorageKeys = {}));
-  /**
-   * @summary The Grindery RPC API method names
-   */
-  var GrinderyRpcMethodNames;
-  (function (GrinderyRpcMethodNames) {
-    GrinderyRpcMethodNames["requestPairing"] = "requestPairing";
-    GrinderyRpcMethodNames["waitForPairingResult"] = "waitForPairingResult";
-    GrinderyRpcMethodNames["request"] = "request";
-    GrinderyRpcMethodNames["waitForRequestResult"] = "waitForRequestResult";
-    GrinderyRpcMethodNames["disconnect"] = "disconnect";
-  })(GrinderyRpcMethodNames || (GrinderyRpcMethodNames = {}));
-  /**
-   * @summary The Grindery wallet provider method names
-   */
-  var GrinderyRpcProviderRequestMethodNames;
-  (function (GrinderyRpcProviderRequestMethodNames) {
-    GrinderyRpcProviderRequestMethodNames["eth_requestAccounts"] = "eth_requestAccounts";
-    GrinderyRpcProviderRequestMethodNames["eth_accounts"] = "eth_accounts";
-    GrinderyRpcProviderRequestMethodNames["personal_sign"] = "personal_sign";
-    GrinderyRpcProviderRequestMethodNames["eth_sendTransaction"] = "eth_sendTransaction";
-    GrinderyRpcProviderRequestMethodNames["gws_disconnect"] = "gws_disconnect";
-  })(GrinderyRpcProviderRequestMethodNames || (GrinderyRpcProviderRequestMethodNames = {}));
-
   /**
    * @summary Generates a Version 4 (pseudorandom) UUID
    * @returns {string} The UUID
@@ -467,12 +426,26 @@
     return d.substr(0, 8) + "-" + d.substr(8, 4) + "-4" + d.substr(13, 3) + "-" + vr + d.substr(17, 3) + "-" + d.substr(20, 12);
   };
 
+  var ProviderEvents;
+  (function (ProviderEvents) {
+    ProviderEvents["accountsChanged"] = "accountsChanged";
+    ProviderEvents["pair"] = "pair";
+    ProviderEvents["connect"] = "connect";
+    ProviderEvents["disconnect"] = "disconnect";
+    ProviderEvents["chainChanged"] = "chainChanged";
+    ProviderEvents["message"] = "message";
+  })(ProviderEvents || (ProviderEvents = {}));
   /**
    * @summary A class for emitting provider events
    * @since 0.1.0
    */
   var WalletProviderEventEmitter = /*#__PURE__*/function () {
     function WalletProviderEventEmitter() {
+      /**
+       * @summary A map of events and their listeners
+       * @public
+       */
+      this.events = void 0;
       this.events = new Map();
     }
     /**
@@ -529,6 +502,15 @@
   }();
 
   var LOCALSTORAGE_KEY = 'GrinderyWalletProvider';
+  var ProviderStorageKeys;
+  (function (ProviderStorageKeys) {
+    ProviderStorageKeys["pairingToken"] = "pairingToken";
+    ProviderStorageKeys["sessionId"] = "sessionId";
+    ProviderStorageKeys["connectUrl"] = "connectUrl";
+    ProviderStorageKeys["connectUrlBrowser"] = "connectUrlBrowser";
+    ProviderStorageKeys["shortToken"] = "shortToken";
+    ProviderStorageKeys["clientId"] = "clientId";
+  })(ProviderStorageKeys || (ProviderStorageKeys = {}));
   /**
    * @summary A local storage class for the provider
    * @since 0.1.0
@@ -605,6 +587,8 @@
       var _this;
       _this = _Error.call(this, message) || this;
       _this.name = 'GrinderyWalletProviderError';
+      _this.code = void 0;
+      _this.data = void 0;
       _this.code = code;
       _this.data = data;
       return _this;
@@ -621,6 +605,17 @@
     NoAppId: /*#__PURE__*/new WalletProviderError('App ID is required', 4900)
   };
 
+  /**
+   * @summary The Grindery RPC API method names
+   */
+  var GrinderyRpcMethodNames;
+  (function (GrinderyRpcMethodNames) {
+    GrinderyRpcMethodNames["requestPairing"] = "requestPairing";
+    GrinderyRpcMethodNames["waitForPairingResult"] = "waitForPairingResult";
+    GrinderyRpcMethodNames["request"] = "request";
+    GrinderyRpcMethodNames["waitForRequestResult"] = "waitForRequestResult";
+    GrinderyRpcMethodNames["disconnect"] = "disconnect";
+  })(GrinderyRpcMethodNames || (GrinderyRpcMethodNames = {}));
   /**
    * @summary The base wallet provider class
    * @since 0.1.0
@@ -1008,6 +1003,17 @@
   }(WalletProviderLocalStorage);
 
   /**
+   * @summary The Grindery wallet provider method names
+   */
+  var GrinderyWalletProviderMethodNames;
+  (function (GrinderyWalletProviderMethodNames) {
+    GrinderyWalletProviderMethodNames["eth_requestAccounts"] = "eth_requestAccounts";
+    GrinderyWalletProviderMethodNames["eth_accounts"] = "eth_accounts";
+    GrinderyWalletProviderMethodNames["personal_sign"] = "personal_sign";
+    GrinderyWalletProviderMethodNames["eth_sendTransaction"] = "eth_sendTransaction";
+    GrinderyWalletProviderMethodNames["gws_disconnect"] = "gws_disconnect";
+  })(GrinderyWalletProviderMethodNames || (GrinderyWalletProviderMethodNames = {}));
+  /**
    * @summary The Grindery Wallet Ethereum Injected Provider Class.
    * @extends WalletProvider
    * @implements ProviderInterface
@@ -1021,7 +1027,7 @@
        * @summary Indicates that the provider is a Grindery Wallet.
        */
       _this.isGrinderyWallet = true;
-      _this.registerProviderMethods((_this$registerProvide = {}, _this$registerProvide[GrinderyRpcProviderRequestMethodNames.eth_requestAccounts] = {
+      _this.registerProviderMethods((_this$registerProvide = {}, _this$registerProvide[GrinderyWalletProviderMethodNames.eth_requestAccounts] = {
         sessionRequired: false,
         execute: function () {
           var _execute = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(params) {
@@ -1036,7 +1042,7 @@
                   _context.prev = 1;
                   _context.next = 4;
                   return _this.request({
-                    method: GrinderyRpcProviderRequestMethodNames.eth_accounts,
+                    method: GrinderyWalletProviderMethodNames.eth_accounts,
                     params: params || []
                   });
                 case 4:
@@ -1068,7 +1074,7 @@
                 case 19:
                   _context.next = 21;
                   return _this.request({
-                    method: GrinderyRpcProviderRequestMethodNames.eth_accounts,
+                    method: GrinderyWalletProviderMethodNames.eth_accounts,
                     params: params || []
                   });
                 case 21:
@@ -1121,7 +1127,7 @@
                   _this.setStorageValue(ProviderStorageKeys.shortToken, '');
                   _context.next = 50;
                   return _this.request({
-                    method: GrinderyRpcProviderRequestMethodNames.eth_accounts,
+                    method: GrinderyWalletProviderMethodNames.eth_accounts,
                     params: params || []
                   });
                 case 50:
@@ -1141,7 +1147,7 @@
           }
           return execute;
         }()
-      }, _this$registerProvide[GrinderyRpcProviderRequestMethodNames.eth_accounts] = {
+      }, _this$registerProvide[GrinderyWalletProviderMethodNames.eth_accounts] = {
         sessionRequired: true,
         execute: function () {
           var _execute2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(params) {
@@ -1151,7 +1157,7 @@
                   _context2.prev = 0;
                   _context2.t0 = _this;
                   _context2.next = 4;
-                  return _this.sendAndWaitGrinderyRpcProviderRequest(GrinderyRpcProviderRequestMethodNames.eth_accounts, params ? Array.isArray(params) ? params : [params] : []);
+                  return _this.sendAndWaitGrinderyRpcProviderRequest(GrinderyWalletProviderMethodNames.eth_accounts, params ? Array.isArray(params) ? params : [params] : []);
                 case 4:
                   _context2.t1 = _context2.sent;
                   return _context2.abrupt("return", _context2.t0.setAccounts.call(_context2.t0, _context2.t1));
@@ -1170,7 +1176,7 @@
           }
           return execute;
         }()
-      }, _this$registerProvide[GrinderyRpcProviderRequestMethodNames.eth_sendTransaction] = {
+      }, _this$registerProvide[GrinderyWalletProviderMethodNames.eth_sendTransaction] = {
         sessionRequired: true,
         execute: function () {
           var _execute3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(params) {
@@ -1178,7 +1184,7 @@
               while (1) switch (_context3.prev = _context3.next) {
                 case 0:
                   _context3.next = 2;
-                  return _this.sendAndWaitGrinderyRpcProviderRequest(GrinderyRpcProviderRequestMethodNames.eth_sendTransaction, params ? Array.isArray(params) ? params : [params] : []);
+                  return _this.sendAndWaitGrinderyRpcProviderRequest(GrinderyWalletProviderMethodNames.eth_sendTransaction, params ? Array.isArray(params) ? params : [params] : []);
                 case 2:
                   return _context3.abrupt("return", _context3.sent);
                 case 3:
@@ -1192,7 +1198,7 @@
           }
           return execute;
         }()
-      }, _this$registerProvide[GrinderyRpcProviderRequestMethodNames.personal_sign] = {
+      }, _this$registerProvide[GrinderyWalletProviderMethodNames.personal_sign] = {
         sessionRequired: true,
         execute: function () {
           var _execute4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee4(params) {
@@ -1200,7 +1206,7 @@
               while (1) switch (_context4.prev = _context4.next) {
                 case 0:
                   _context4.next = 2;
-                  return _this.sendAndWaitGrinderyRpcProviderRequest(GrinderyRpcProviderRequestMethodNames.personal_sign, params ? Array.isArray(params) ? params : [params] : []);
+                  return _this.sendAndWaitGrinderyRpcProviderRequest(GrinderyWalletProviderMethodNames.personal_sign, params ? Array.isArray(params) ? params : [params] : []);
                 case 2:
                   return _context4.abrupt("return", _context4.sent);
                 case 3:
@@ -1214,7 +1220,7 @@
           }
           return execute;
         }()
-      }, _this$registerProvide[GrinderyRpcProviderRequestMethodNames.gws_disconnect] = {
+      }, _this$registerProvide[GrinderyWalletProviderMethodNames.gws_disconnect] = {
         sessionRequired: true,
         execute: function () {
           var _execute5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5() {
@@ -1337,7 +1343,7 @@
               _context7.prev = 3;
               _context7.next = 6;
               return this.request({
-                method: GrinderyRpcProviderRequestMethodNames.eth_requestAccounts
+                method: GrinderyWalletProviderMethodNames.eth_requestAccounts
               });
             case 6:
               _context7.next = 12;
@@ -1364,10 +1370,20 @@
   /**
    * @summary The Grindery Wallet SDK class
    * @since 0.1.0
+   *
+   * @example
+   * ```typescript
+   * const grinderyWalletSDK = new GrinderyWalletSDK({ appId: 'your-app-id' });
+   * ```
    */
   var GrinderyWalletSDK = /*#__PURE__*/function () {
     function GrinderyWalletSDK(_ref) {
       var appId = _ref.appId;
+      /**
+       * @summary The provider instance
+       * @public
+       */
+      this.provider = void 0;
       this.provider = this.getWeb3Provider();
       this.setAppId(appId);
       this.provider.on(ProviderEvents.pair, this.handlePairing);
@@ -1375,6 +1391,11 @@
     /**
      * @summary Checks if the provider is connected to the server
      * @returns {boolean} True if the provider is connected to the server.
+     *
+     * @example
+     * ```typescript
+     * const isConnected = window.Grindery.WalletSDK.isConnected();
+     * ```
      */
     var _proto = GrinderyWalletSDK.prototype;
     _proto.isConnected = function isConnected() {
@@ -1402,7 +1423,7 @@
             case 0:
               _context.next = 2;
               return this.provider.request({
-                method: GrinderyRpcProviderRequestMethodNames.eth_requestAccounts
+                method: GrinderyWalletProviderMethodNames.eth_requestAccounts
               });
             case 2:
               return _context.abrupt("return", _context.sent);
@@ -1433,7 +1454,7 @@
             case 0:
               _context2.next = 2;
               return this.provider.request({
-                method: GrinderyRpcProviderRequestMethodNames.gws_disconnect
+                method: GrinderyWalletProviderMethodNames.gws_disconnect
               });
             case 2:
               return _context2.abrupt("return", _context2.sent);
@@ -1478,7 +1499,7 @@
             case 0:
               _context3.next = 2;
               return this.provider.request({
-                method: GrinderyRpcProviderRequestMethodNames.eth_sendTransaction,
+                method: GrinderyWalletProviderMethodNames.eth_sendTransaction,
                 params: [params]
               });
             case 2:
@@ -1511,7 +1532,7 @@
             case 0:
               _context4.next = 2;
               return this.provider.request({
-                method: GrinderyRpcProviderRequestMethodNames.personal_sign,
+                method: GrinderyWalletProviderMethodNames.personal_sign,
                 params: [message, this.provider.getAddress()]
               });
             case 2:
@@ -1627,5 +1648,5 @@
   // Initialize the SDK
   init();
 
-})));
+}));
 //# sourceMappingURL=grindery-wallet-sdk.umd.development.js.map

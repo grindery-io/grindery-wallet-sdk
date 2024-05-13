@@ -1,11 +1,11 @@
 import { WalletProviderError } from './provider/WalletProviderError';
-import { WalletProviderEventEmitter } from './provider/WalletProviderEventEmitter';
 import {
-  GrinderyRpcMethodNames,
-  GrinderyRpcProviderRequestMethodNames,
   ProviderEvents,
-  ProviderStorageKeys,
-} from './enums';
+  WalletProviderEventEmitter,
+} from './provider/WalletProviderEventEmitter';
+import { GrinderyWalletProviderMethodNames } from './provider/GrinderyWalletProvider';
+import { ProviderStorageKeys } from './provider/WalletProviderLocalStorage';
+import { GrinderyRpcMethodNames } from './provider/WalletProvider';
 
 export type ChainId = string;
 export type PairingToken = string;
@@ -23,7 +23,7 @@ export interface ProviderConnectInfo {
 export type RequestArgumentsParams = readonly unknown[] | object;
 
 export interface RequestArguments {
-  readonly method: GrinderyRpcProviderRequestMethodNames;
+  readonly method: GrinderyWalletProviderMethodNames;
   readonly params?: RequestArgumentsParams;
 }
 
@@ -48,7 +48,8 @@ export type ProviderStorage = {
 
 export type GrinderyRpcMethodName = keyof typeof GrinderyRpcMethodNames;
 
-export type GrinderyRpcProviderRequestMethodName = keyof typeof GrinderyRpcProviderRequestMethodNames;
+export type GrinderyRpcProviderRequestMethodName =
+  keyof typeof GrinderyWalletProviderMethodNames;
 
 export interface ProviderRequestResult {
   requestToken: RequestToken;

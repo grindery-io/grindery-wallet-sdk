@@ -1,17 +1,22 @@
 import {
-  GrinderyRpcProviderRequestMethodNames,
-  ProviderEvents,
-} from '../enums';
-import {
   GrinderyRpcApiRequestResults,
   GrinderyWalletSDKConfig,
   ProviderEvent,
 } from '../types';
-import { GrinderyWalletProvider } from '../provider/GrinderyWalletProvider';
+import {
+  GrinderyWalletProviderMethodNames,
+  GrinderyWalletProvider,
+} from '../provider/GrinderyWalletProvider';
+import { ProviderEvents } from '../provider/WalletProviderEventEmitter';
 
 /**
  * @summary The Grindery Wallet SDK class
  * @since 0.1.0
+ *
+ * @example
+ * ```typescript
+ * const grinderyWalletSDK = new GrinderyWalletSDK({ appId: 'your-app-id' });
+ * ```
  */
 export class GrinderyWalletSDK {
   /**
@@ -29,6 +34,11 @@ export class GrinderyWalletSDK {
   /**
    * @summary Checks if the provider is connected to the server
    * @returns {boolean} True if the provider is connected to the server.
+   *
+   * @example
+   * ```typescript
+   * const isConnected = window.Grindery.WalletSDK.isConnected();
+   * ```
    */
   public isConnected(): boolean {
     return this.provider.isConnected();
@@ -50,7 +60,7 @@ export class GrinderyWalletSDK {
    */
   public async connect(): Promise<string[]> {
     return await this.provider.request({
-      method: GrinderyRpcProviderRequestMethodNames.eth_requestAccounts,
+      method: GrinderyWalletProviderMethodNames.eth_requestAccounts,
     });
   }
 
@@ -62,7 +72,7 @@ export class GrinderyWalletSDK {
    */
   public async disconnect(): Promise<boolean> {
     return await this.provider.request({
-      method: GrinderyRpcProviderRequestMethodNames.gws_disconnect,
+      method: GrinderyWalletProviderMethodNames.gws_disconnect,
     });
   }
 
@@ -93,7 +103,7 @@ export class GrinderyWalletSDK {
     data?: string;
   }): Promise<string[]> {
     return await this.provider.request<string[]>({
-      method: GrinderyRpcProviderRequestMethodNames.eth_sendTransaction,
+      method: GrinderyWalletProviderMethodNames.eth_sendTransaction,
       params: [params],
     });
   }
@@ -107,7 +117,7 @@ export class GrinderyWalletSDK {
    */
   public async signMessage(message: string): Promise<string> {
     return await this.provider.request<string>({
-      method: GrinderyRpcProviderRequestMethodNames.personal_sign,
+      method: GrinderyWalletProviderMethodNames.personal_sign,
       params: [message, this.provider.getAddress()],
     });
   }

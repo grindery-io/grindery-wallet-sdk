@@ -1,23 +1,25 @@
 import { WalletProviderError } from './provider/WalletProviderError';
-import { WalletProviderEventEmitter } from './provider/WalletProviderEventEmitter';
-import { GrinderyRpcMethodNames, GrinderyRpcProviderRequestMethodNames, ProviderEvents, ProviderStorageKeys } from './enums';
-export declare type ChainId = string;
-export declare type PairingToken = string;
-export declare type ConnectUrl = string;
-export declare type ConnectUrlBrowser = string;
-export declare type ShortToken = string;
-export declare type SessionId = string;
-export declare type Address = string;
-export declare type RequestToken = string;
+import { ProviderEvents, WalletProviderEventEmitter } from './provider/WalletProviderEventEmitter';
+import { GrinderyWalletProviderMethodNames } from './provider/GrinderyWalletProvider';
+import { ProviderStorageKeys } from './provider/WalletProviderLocalStorage';
+import { GrinderyRpcMethodNames } from './provider/WalletProvider';
+export type ChainId = string;
+export type PairingToken = string;
+export type ConnectUrl = string;
+export type ConnectUrlBrowser = string;
+export type ShortToken = string;
+export type SessionId = string;
+export type Address = string;
+export type RequestToken = string;
 export interface ProviderConnectInfo {
     readonly chainId: ChainId;
 }
-export declare type RequestArgumentsParams = readonly unknown[] | object;
+export type RequestArgumentsParams = readonly unknown[] | object;
 export interface RequestArguments {
-    readonly method: GrinderyRpcProviderRequestMethodNames;
+    readonly method: GrinderyWalletProviderMethodNames;
     readonly params?: RequestArgumentsParams;
 }
-export declare type ProviderMethods = {
+export type ProviderMethods = {
     [name in GrinderyRpcProviderRequestMethodName]: {
         sessionRequired?: boolean;
         pairingTokenRequired?: boolean;
@@ -28,16 +30,16 @@ export interface ProviderMessage {
     type: string;
     data: unknown;
 }
-export declare type ProviderStorageKey = keyof typeof ProviderStorageKeys;
-export declare type ProviderStorage = {
+export type ProviderStorageKey = keyof typeof ProviderStorageKeys;
+export type ProviderStorage = {
     [key in ProviderStorageKeys]?: string;
 };
-export declare type GrinderyRpcMethodName = keyof typeof GrinderyRpcMethodNames;
-export declare type GrinderyRpcProviderRequestMethodName = keyof typeof GrinderyRpcProviderRequestMethodNames;
+export type GrinderyRpcMethodName = keyof typeof GrinderyRpcMethodNames;
+export type GrinderyRpcProviderRequestMethodName = keyof typeof GrinderyWalletProviderMethodNames;
 export interface ProviderRequestResult {
     requestToken: RequestToken;
 }
-export declare type ProviderEvent = keyof typeof ProviderEvents;
+export type ProviderEvent = keyof typeof ProviderEvents;
 export declare namespace GrinderyRpcProviderRequestResults {
     type eth_accounts = Address[];
     type eth_requestAccounts = Address[];

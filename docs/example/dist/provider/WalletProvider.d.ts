@@ -2,6 +2,16 @@ import { WalletProviderLocalStorage } from './WalletProviderLocalStorage';
 import { Address, ChainId, GrinderyRpcMethodName, GrinderyRpcProviderRequestMethodName, ProviderMethods, ProviderRequestResult, RequestArguments, RequestArgumentsParams, RequestToken } from '../types';
 import { WalletProviderError } from './WalletProviderError';
 /**
+ * @summary The Grindery RPC API method names
+ */
+export declare enum GrinderyRpcMethodNames {
+    requestPairing = "requestPairing",
+    waitForPairingResult = "waitForPairingResult",
+    request = "request",
+    waitForRequestResult = "waitForRequestResult",
+    'disconnect' = "disconnect"
+}
+/**
  * @summary The base wallet provider class
  * @since 0.1.0
  * @extends WalletProviderLocalStorage

@@ -1,5 +1,14 @@
 import { ProviderEvent } from '../types';
 
+export enum ProviderEvents {
+  accountsChanged = 'accountsChanged',
+  pair = 'pair',
+  connect = 'connect',
+  disconnect = 'disconnect',
+  chainChanged = 'chainChanged',
+  message = 'message',
+}
+
 /**
  * @summary A class for emitting provider events
  * @since 0.1.0
@@ -39,7 +48,7 @@ export class WalletProviderEventEmitter {
    */
   public removeListener(event: ProviderEvent, callback: Function) {
     if (this.events.has(event)) {
-      const callbacks = this.events.get(event)!.filter(cb => cb !== callback);
+      const callbacks = this.events.get(event)!.filter((cb) => cb !== callback);
       this.events.set(event, callbacks);
     }
     return this;
@@ -55,7 +64,7 @@ export class WalletProviderEventEmitter {
   protected emit(event: ProviderEvent, ...data: any[]) {
     if (this.events.has(event)) {
       console.log('[Grindery.WalletSDK] > Event:', event, data[0]);
-      this.events.get(event)!.forEach(callback => {
+      this.events.get(event)!.forEach((callback) => {
         callback(...data);
       });
     }

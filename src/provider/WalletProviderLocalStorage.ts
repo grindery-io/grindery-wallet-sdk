@@ -4,6 +4,15 @@ import { WalletProviderEventEmitter } from './WalletProviderEventEmitter';
 
 const LOCALSTORAGE_KEY = 'GrinderyWalletProvider';
 
+export enum ProviderStorageKeys {
+  pairingToken = 'pairingToken',
+  sessionId = 'sessionId',
+  connectUrl = 'connectUrl',
+  connectUrlBrowser = 'connectUrlBrowser',
+  shortToken = 'shortToken',
+  clientId = 'clientId',
+}
+
 /**
  * @summary A local storage class for the provider
  * @since 0.1.0

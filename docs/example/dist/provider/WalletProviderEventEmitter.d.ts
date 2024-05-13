@@ -1,4 +1,12 @@
 import { ProviderEvent } from '../types';
+export declare enum ProviderEvents {
+    accountsChanged = "accountsChanged",
+    pair = "pair",
+    connect = "connect",
+    disconnect = "disconnect",
+    chainChanged = "chainChanged",
+    message = "message"
+}
 /**
  * @summary A class for emitting provider events
  * @since 0.1.0

@@ -10,25 +10,28 @@
     "src"
   ],
   "scripts": {
-    "start": "tsdx watch --format cjs,esm,umd",
-    "build": "tsdx build --format cjs,esm,umd && bash ./build.sh",
-    "test": "tsdx test",
-    "lint": "tsdx lint",
-    "prepare": "tsdx build",
+    "start": "dts watch --format cjs,esm,umd",
+    "build": "dts build --format cjs,esm,umd",
+    "build:example": "npm run build && bash ./build_example.sh",
+    "build:docs": "typedoc && npm run build:example",
+    "test": "dts test",
+    "lint": "dts lint",
+    "prepare": "dts build",
     "size": "size-limit",
     "analyze": "size-limit --why"
   },
   "devDependencies": {
     "@size-limit/preset-small-lib": "^11.1.2",
+    "dts-cli": "^2.0.5",
     "husky": "^9.0.11",
     "size-limit": "^11.1.2",
-    "tsdx": "^0.14.1",
     "tslib": "^2.6.2",
-    "typescript": "^3.9.10"
+    "typedoc": "^0.25.13",
+    "typescript": "^5.4.5"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "tsdx lint"
+      "pre-commit": "dts lint"
     }
   },
   "prettier": {

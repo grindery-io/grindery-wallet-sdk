@@ -1,12 +1,8 @@
-# Grindery Wallet SDK
-
 <img src="https://grindery-io.github.io/grindery-wallet-sdk/cover.png" alt="Grindery Wallet Beta" width="320" />
 
-Grindery Wallet SDK is a library that provides a reliable, secure, and seamless connection from your dapp to the <a href="https://www.grindery.com">Grindery Smart-Wallet</a>.
+**Grindery Wallet SDK** is a JS library that provides a reliable, secure, and seamless connection from your dapp to the <a href="https://www.grindery.com">Grindery Smart-Wallet</a>.
 
-Grindery Wallet SDK enables your dapp to provide a seamless user experience for Grindery users, without relying on third-party libraries. By integrating your dapp using the SDK, millions of Telegram users can connect to their preferred Grindery Smart-Wallet.
-
-> ⚠️ SDK documentation is incomplete, work in progress.
+The SDK enables your dapp to provide a seamless user experience for Grindery users, without relying on third-party libraries. By integrating your dapp using the SDK, millions of Telegram users can connect the dapp to their Grindery Smart-Wallet.
 
 ## Table of Contents:
 
@@ -15,29 +11,12 @@ Grindery Wallet SDK enables your dapp to provide a seamless user experience for 
   - [Browser](#browser)
   - [Node](#node)
 - [Basic usage](#basic-usage)
-  - [Properties](#sdk-properties)
-    - [provider](#sdk-props_provider)
-  - [Methods](#sdk-methods)
-    - [isConnected()](#sdk-methods_isconnected)
-    - [isWalletConnected()](#sdk-methods_iswalletconnected)
-    - [setAppId()](#sdk-methods_setappid)
-    - [connect()](#sdk-methods_connect)
-    - [disconnect()](#sdk-methods_disconnect)
-    - [sendTransaction()](#sdk-methods_sendtransaction)
-    - [signMessage()](#sdk-methods_signmessage)
-    - [on()](#sdk-methods_on)
-    - [removeListener()](#sdk-methods_removelistener)
-  - [Events](#sdk-events)
-    - [connect](#sdk-events_connect)
-    - [disconnect](#sdk-events_disconnect)
-    - [accountsChanged](#sdk-events_accountschanged)
-    - [pair](#sdk-events_pair)
+  - [Server connection](#server-connection)
+  - [Wallet connection](#wallet-connection)
+  - [Sending transactions](#sending-transactions)
+  - [Signing](#signing)
 - [Advanced usage](#advanced-usage)
   - [Injected Ethereum Provider](#injected-ethereum-provider)
-    - [eth_requestAccounts](#method_eth_requestaccounts)
-    - [eth_accounts](#method_eth_accounts)
-    - [eth_sendTransaction](#method_eth_sendtransaction)
-    - [personal_sign](#method_personal_sign)
 - [SDK development and building](#sdk-development-and-building)
 - [License](#license)
 
@@ -49,7 +28,9 @@ See an example implementation here: [https://grindery-io.github.io/grindery-wall
 
 ## Obtain App ID
 
-Go to the [Grindery Bot](https://t.me/GrinderyAIBot) and use `/checkout_registerapp` command to obtain an App Id.
+To interact with Grindery Wallet your app needs to be registered first.
+
+Go to the [Grindery Bot](https://t.me/GrinderyAIBot) and use `/checkout_registerapp` command to register an app obtain an App Id.
 
 App Id is required, as it allows Grindery Wallet users to recognize reqests made from your app.
 
@@ -126,279 +107,81 @@ import 'grindery-wallet-sdk';
 
 # Basic usage
 
-Once the script is loaded, a `window.Grindery.WalletSDK` object will become available.
+Once the script is loaded, a [`window.Grindery.WalletSDK`](/classes/sdk_GrinderyWalletSDK.GrinderyWalletSDK.html) object will become available:
 
-> Make sure to configre your app id before calling SDK methods. See here how to obtain an app id.
-
-## SDK properties
-
-### <a id="sdk-props_provider">WalletSDK.provider</a>
-
-Provides access to [Grindery Wallet Ethereum Provider API](#injected-ethereum-provider).
-
-**Example code:**
-
-```js
-const provider = window.Grindery.WalletSDK.provider;
+```typescript
+const WalletSDK = window.Grindery?.WalletSDK;
 ```
 
-## SDK methods
+> Make sure to configre your app id before calling SDK methods. See [here](#obtain-app-id) how to obtain an app id.
 
-- [isConnected()](#sdk-methods_isconnected)
-- [isWalletConnected()](#sdk-methods_iswalletconnected)
-- [setAppId()](#sdk-methods_setappid)
-- [connect()](#sdk-methods_connect)
-- [disconnect()](#sdk-methods_disconnect)
-- [sendTransaction()](#sdk-methods_sendtransaction)
-- [signMessage()](#sdk-methods_signmessage)
-- [on()](#sdk-methods_on)
-- [removeListener()](#sdk-methods_removelistener)
+## Server connection
 
-### <a id="sdk-methods_isconnected">WalletSDK.isConnected()</a>
+The SDK automatically connects to the server when page is loaded. You can check connection status using [`isConnected()`](/classes/sdk_GrinderyWalletSDK.GrinderyWalletSDK.html#isConnected) method:
 
-Indicates whether the SDK is connected to the server and ready to be used.
-
-**Arguments:** none
-
-**Returns:** Boolean. True if the provider is connected to the server.
-
-**Example code:**
-
-```js
-const isConnected = window.Grindery.WalletSDK.isConnected();
+```typescript
+const isConnected: boolean = WalletSDK.isConnected();
 ```
 
----
+You can listen for SDK [`connect`](/enums/provider_WalletProviderEventEmitter.ProviderEvents.html#connect) event to catch server connection event:
 
-### <a id="sdk-methods_iswalletconnected">WalletSDK.isWalletConnected()</a>
-
-Indicates whether the SDK is connected to the server and Grindery Wallet.
-
-**Arguments:** none
-
-**Returns:** Boolean. True if the provider is connected to the server and user's wallet.
-
-**Example code:**
-
-```js
-const isWalletConnected = window.Grindery.WalletSDK.isWalletConnected();
-```
-
----
-
-### <a id="sdk-methods_setappid">WalletSDK.setAppId()</a>
-
-Sets the App Id. See [app id obtaining](#obtain-app-id) section for details.
-
-**Arguments:** String. App id.
-
-**Returns:** App id
-
-**Example code:**
-
-```js
-const appId = window.Grindery.WalletSDK.setAppId('your-app-id');
-```
-
----
-
-### <a id="sdk-methods_connect">WalletSDK.connect()</a>
-
-Initiate connection with the Grindery Wallet. User will be redirected to the Grindery Bot to confirm connection.
-
-**Arguments:** none
-
-**Returns:** Promise resolving with an array of wallet addresses
-
-**Example code:**
-
-```js
-async () => {
-  const [address] = await window.Grindery.WalletSDK.connect();
-};
-```
-
----
-
-### <a id="sdk-methods_disconnect">WalletSDK.disconnect()</a>
-
-Disconnects app from the Grindery Wallet.
-
-**Arguments:** none
-
-**Returns:** Empty promise resolving when the app is disconnected from the wallet.
-
-**Example code:**
-
-```js
-window.Grindery.WalletSDK.disconnect().then(() => {
-  console.log('disconnected');
+```typescript
+WalletSDK.on.('connect', (chainId: string) => {
+  if(WalletSDK.isConnected()){
+    console.log(`Wallet SDK is connected to ${chainId} chain`)
+  }
 });
 ```
 
----
+## Wallet connection
 
-### <a id="sdk-methods_sendtransaction">WalletSDK.sendTransaction()</a>
+To initiate connection to the Grindery Wallet use [`connect()`](/classes/sdk_GrinderyWalletSDK.GrinderyWalletSDK.html#connect) method:
 
-Request transaction from the Grindery Wallet
+```typescript
+WalletSDK.on.('connect', async () => {
+  const [address]: string[] = await WalletSDK.connect();
+});
+```
 
-**Arguments**:
+You can listen for SDK [`accountsChanged`](/enums/provider_WalletProviderEventEmitter.ProviderEvents.html#accountsChanged) event, to catch when user's wallet is connected:
 
-- `params` Object. An object with transaction params:
-  - `to` String. Recipient address.
-  - `value` String. Optional. Transaction value.
-  - `data` String. Optional. Transaction data.
+```typescript
+WalletSDK.on.('accountsChanged', (addresses: string[]) => {
+  console.log('accountsChanged', addresses);
+});
+```
 
-**Returns:** Promise resolving with an array of transaction hashes
+To disconnect user's wallet use [`disconnect()`](/classes/sdk_GrinderyWalletSDK.GrinderyWalletSDK.html#disconnect) method (and you can listen for [`disconnect`](/enums/provider_WalletProviderEventEmitter.ProviderEvents.html#disconnect) event):
 
-**Example code:**
+```typescript
+WalletSDK.on.('disconnect',  => {
+  console.log('Wallet disconnected');
+});
 
-```js
-async () => {
-  const [txHash] = await window.Grindery.WalletSDK.sendTransaction({
-    to: '0x0',
-    value: '0x0',
-    data: '0x0',
+WalletSDK.disconnect();
+```
+
+## Sending transactions
+
+To request transaction sending use [`sendTransaction()`](/classes/sdk_GrinderyWalletSDK.GrinderyWalletSDK.html#sendTransaction) method, once the wallet is connected:
+
+```typescript
+WalletSDK.on.('accountsChanged', async (addresses: string[]) => {
+  const transactionHash = await WalletSDK.sendTransaction({
+    to: "0x0", // required
+    value: "", // optional
+    data: "" // optional
   });
-};
-```
-
----
-
-### <a id="sdk-methods_signmessage">WalletSDK.signMessage()</a>
-
-Request presonal signature from the Grindery Wallet
-
-**Arguments**:
-
-- `message` String. A message to sign.
-
-**Returns:** Promise resolving with a signature string
-
-**Example code:**
-
-```js
-async () => {
-  const signature = await window.Grindery.WalletSDK.signMessage('Hello World');
-};
-```
-
----
-
-### <a id="sdk-methods_on">WalletSDK.on()</a>
-
-Subscribe to wallet sdk event
-
-**Arguments**:
-
-- `event` String. An event name.
-- `callback` Function. A callback function to fire on the event
-
-**Returns:** WalletSDK class
-
-**Example code:**
-
-```js
-window.Grindery.WalletSDK.on('connect', data => {
-  console.log(data);
 });
 ```
 
----
+## Signing
 
-### <a id="sdk-methods_removelistener">WalletSDK.removeListener()</a>
+To sing a custom message using personal signature use [`signMessage()`](/classes/sdk_GrinderyWalletSDK.GrinderyWalletSDK.html#signMessage) method, once the wallet is connected:
 
-Unsubscribe from wallet sdk event
-
-**Arguments**:
-
-- `event` String. An event name.
-- `callback` Function. A callback function
-
-**Returns:** WalletSDK class
-
-**Example code:**
-
-```js
-window.Grindery.WalletSDK.removeListener('connect', data => {
-  console.log(data);
-});
-```
-
-## SDK events
-
-- [connect](#sdk-events_connect)
-- [disconnect](#sdk-events_disconnect)
-- [accountsChanged](#sdk-events_accountschanged)
-- [pair](#sdk-events_pair)
-
-### <a id="sdk-events_connect">`connect`</a>
-
-Event emitted when Wallet SDK is connected to the server and able to submit requests. We recommend listening to this event to determine when the SDK is connected.
-
-**Event data:** Object. Information about current SDK connection.
-
-- `chainId` String. Id of the currently connected blockchain in hex format.
-
-**Example code:**
-
-```js
-window.Grindery.WalletSDK.on('connect', data => {
-  console.log('connect', data);
-});
-```
-
----
-
-### <a id="sdk-events_disconnect">`disconnect`</a>
-
-Event emitted when Wallet SDK disconnected from the server and unable to submit requests.
-
-**Event data:** Provider Error object.
-
-**Example code:**
-
-```js
-window.Grindery.WalletSDK.on('disconnect', data => {
-  console.log('disconnect', data);
-});
-```
-
----
-
-### <a id="sdk-events_accountschanged">`accountsChanged`</a>
-
-Event emitted when connected wallet address changes.
-
-**Event data:** Array of Strings. Array of the wallet addresses.
-
-**Example code:**
-
-```js
-window.Grindery.WalletSDK.on('accountsChanged', data => {
-  console.log('accountsChanged', data);
-});
-```
-
----
-
-### <a id="sdk-events_pair">`pair`</a>
-
-Event emitted when SDK requests the wallet connection.
-
-> SDK will try to automatically redirect user to the connection page when `WalletSDK.connect()` method is called. However we recommend to listen for this event to get the connection page URL and show it to the user.
-
-**Event data:** Object:
-
-- `connectUrl` String. Telegram URI.
-- `connectUrlBrowser` String. Browser URL.
-- `shortToken` String. Connection token.
-
-**Example code:**
-
-```js
-window.Grindery.WalletSDK.on('pairing', data => {
-  console.log('pairing', data);
+```typescript
+WalletSDK.on.('accountsChanged', async (addresses: string[]) => {
+  const signature = await WalletSDK.signMessage("Custom message to sign");
 });
 ```
 
@@ -416,12 +199,12 @@ If the user has multiple wallet browser extensions installed that inject ethereu
 
 ### Provider Methods
 
-- [eth_requestAccounts](#method_eth_requestaccounts)
-- [eth_accounts](#method_eth_accounts)
-- [eth_sendTransaction](#method_eth_sendtransaction)
-- [personal_sign](#method_personal_sign)
+- [eth_requestAccounts](#method-eth_requestaccounts)
+- [eth_accounts](#method-eth_accounts)
+- [eth_sendTransaction](#method-eth_sendtransaction)
+- [personal_sign](#method-personal_sign)
 
-#### Method: <a id="method_eth_requestaccounts">`eth_requestAccounts`</a>
+#### Method: `eth_requestAccounts`
 
 Connect a dApp to the Grindery Wallet.
 
@@ -433,7 +216,7 @@ This method must always be called first, to initate dApp connection and get user
 
 ---
 
-#### Method: <a id="method_eth_accounts">`eth_accounts`</a>
+#### Method: `eth_accounts`
 
 Get connected user's wallet addresses.
 
@@ -443,7 +226,7 @@ Get connected user's wallet addresses.
 
 ---
 
-#### Method: <a id="method_eth_sendtransaction">`eth_sendTransaction`</a>
+#### Method: `eth_sendTransaction`
 
 **Request params:**
 
@@ -455,7 +238,7 @@ Get connected user's wallet addresses.
 
 ---
 
-#### Method: <a id="method_personal_sign">`personal_sign`</a>
+#### Method: `personal_sign`
 
 **Request params:**
 
@@ -466,9 +249,9 @@ Get connected user's wallet addresses.
 
 # SDK Development and building
 
-The SDK library compiled using [TSDX tool](https://tsdx.io/).
+The SDK library compiled using [DTS tool](https://github.com/weiran-zsd/dts-cli) (a fork of [TSDX](https://tsdx.io/)).
 
-See full [development documentation here](DEVELOPMENT.md).
+See full [development documentation here](https://github.com/grindery-io/grindery-wallet-sdk/blob/main/DEVELOPMENT.md).
 
 # License
 

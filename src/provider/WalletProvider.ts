@@ -1,4 +1,7 @@
-import { WalletProviderLocalStorage } from './WalletProviderLocalStorage';
+import {
+  ProviderStorageKeys,
+  WalletProviderLocalStorage,
+} from './WalletProviderLocalStorage';
 import {
   Address,
   ChainId,
@@ -15,12 +18,19 @@ import {
   WalletProviderError,
   WalletProviderErrors,
 } from './WalletProviderError';
-import {
-  GrinderyRpcMethodNames,
-  ProviderEvents,
-  ProviderStorageKeys,
-} from '../enums';
 import { uuid } from '../utils/uuid';
+import { ProviderEvents } from './WalletProviderEventEmitter';
+
+/**
+ * @summary The Grindery RPC API method names
+ */
+export enum GrinderyRpcMethodNames {
+  requestPairing = 'requestPairing',
+  waitForPairingResult = 'waitForPairingResult',
+  request = 'request',
+  waitForRequestResult = 'waitForRequestResult',
+  'disconnect' = 'disconnect',
+}
 
 /**
  * @summary The base wallet provider class
@@ -211,16 +221,17 @@ export class WalletProvider extends WalletProviderLocalStorage {
     }
 
     try {
-      return await this.sendGrinderyRpcApiRequest<
-        GrinderyRpcApiRequestResults.request
-      >(GrinderyRpcMethodNames.request, {
-        sessionId: this.getStorageValue(ProviderStorageKeys.sessionId),
-        scope: this.chainId,
-        request: {
-          method,
-          params,
-        },
-      });
+      return await this.sendGrinderyRpcApiRequest<GrinderyRpcApiRequestResults.request>(
+        GrinderyRpcMethodNames.request,
+        {
+          sessionId: this.getStorageValue(ProviderStorageKeys.sessionId),
+          scope: this.chainId,
+          request: {
+            method,
+            params,
+          },
+        }
+      );
     } catch (error) {
       throw this.createProviderRpcError(error);
     }
