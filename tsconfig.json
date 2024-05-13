@@ -40,8 +40,6 @@
       "src/**",
     ],
     "exclude": "src/index.ts",
-    "out": "docs",
-    "plugin": ["typedoc-material-theme"],
-    "themeColor": "#EA5230"
+    "out": "docs"
   }
 }
