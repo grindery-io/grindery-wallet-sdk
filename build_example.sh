@@ -5,3 +5,6 @@ cp -rf dist example/dist
 
 rm -rf docs/example
 cp -rf example docs/example
+
+rm docs/cover.png
+cp cover.png docs/cover.png

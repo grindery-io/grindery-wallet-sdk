@@ -1,6 +1,6 @@
 **Grindery Wallet SDK** is a JS library that provides a reliable, secure, and seamless connection from your dapp to the <a href="https://www.grindery.com">Grindery Smart-Wallet</a>.
 
-<img src="https://grindery-io.github.io/grindery-wallet-sdk/cover.png" alt="Grindery Wallet Beta" style="max-width: 100%; width: 100%; height: auto;" />
+<img src="cover.png" alt="Grindery Wallet Beta" style="max-width: 100%; width: 100%; height: auto;" />
   
 The SDK enables your dapp to provide a seamless user experience for Grindery users, without relying on third-party libraries. By integrating your dapp using the SDK, millions of Telegram users can connect the dapp to their Grindery Smart-Wallet.
 
