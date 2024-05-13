@@ -24,6 +24,7 @@ The SDK enables your dapp to provide a seamless user experience for Grindery use
   - [Sending transactions](#sending-transactions)
   - [Signing](#signing)
 - [Advanced usage](#advanced-usage)
+  - [Full documentation](#full-documentation)
   - [Injected Ethereum Provider](#injected-ethereum-provider)
 - [SDK development and building](#sdk-development-and-building)
 - [License](#license)
@@ -194,6 +195,10 @@ WalletSDK.on.('accountsChanged', async (addresses: string[]) => {
 ```
 
 # Advanced usage
+
+## Full documentation
+
+See full documentation here: [https://grindery-io.github.io/grindery-wallet-sdk](https://grindery-io.github.io/grindery-wallet-sdk)
 
 ## Injected Ethereum Provider
 
