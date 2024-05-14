@@ -1,6 +1,6 @@
 import { WalletProviderError } from './provider/WalletProviderError';
 import { ProviderEvents, WalletProviderEventEmitter } from './provider/WalletProviderEventEmitter';
-import { GrinderyWalletProviderMethodNames } from './provider/GrinderyWalletProvider';
+import { GrinderyWalletProvider, GrinderyWalletProviderMethodNames } from './provider/GrinderyWalletProvider';
 import { ProviderStorageKeys } from './provider/WalletProviderLocalStorage';
 import { GrinderyRpcMethodNames } from './provider/WalletProvider';
 export type ChainId = string;
@@ -88,4 +88,58 @@ export interface ProviderInterface extends WalletProviderEventEmitter {
 }
 export interface GrinderyWalletSDKConfig {
     appId: string;
+}
+/**
+ * Represents the assets needed to display a wallet
+ *
+ * @since 0.1.1
+ * @link https://eips.ethereum.org/EIPS/eip-6963#provider-info
+ */
+export interface EIP6963ProviderInfo {
+    uuid: string;
+    name: string;
+    /**
+     * Data URI as defined in RFC-2397.
+     *
+     * The image SHOULD be a square with 96x96px minimum resolution.
+     * The image format is RECOMMENDED to be either lossless or vector based such as PNG, WebP or SVG.
+     * @link https://eips.ethereum.org/EIPS/eip-6963#imagesicons
+     */
+    icon: string;
+    /**
+     * MUST BE a valid RFC-1034 Domain Name
+     * @link https://eips.ethereum.org/EIPS/eip-6963#rdns
+     */
+    rdns: string;
+}
+export interface EIP1193Provider extends GrinderyWalletProvider {
+}
+/**
+ * Used as a composition interface to announce a Wallet Provider and related metadata.
+ *
+ * @since 0.1.1
+ * @link https://eips.ethereum.org/EIPS/eip-6963#provider-detail
+ */
+export interface EIP6963ProviderDetail {
+    info: EIP6963ProviderInfo;
+    provider: EIP1193Provider;
+}
+/**
+ * Announce Event dispatched by a Wallet
+ *
+ * @since 0.1.1
+ * @link https://eips.ethereum.org/EIPS/eip-6963#announce-and-request-events
+ */
+export interface EIP6963AnnounceProviderEvent extends CustomEvent {
+    type: 'eip6963:announceProvider';
+    detail: EIP6963ProviderDetail;
+}
+/**
+ * Request Event dispatched by a DApp
+ *
+ * @since 0.1.1
+ * @link https://eips.ethereum.org/EIPS/eip-6963#announce-and-request-events
+ */
+export interface EIP6963RequestProviderEvent extends Event {
+    type: 'eip6963:requestProvider';
 }

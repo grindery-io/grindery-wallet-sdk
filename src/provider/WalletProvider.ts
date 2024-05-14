@@ -20,6 +20,7 @@ import {
 } from './WalletProviderError';
 import { uuid } from '../utils/uuid';
 import { ProviderEvents } from './WalletProviderEventEmitter';
+import { providerInfo } from '../utils/providerInfo';
 
 /**
  * @summary The Grindery RPC API method names
@@ -42,6 +43,8 @@ export class WalletProvider extends WalletProviderLocalStorage {
     super();
 
     this.injectProvider();
+    this.listenForRequestProviderEvents();
+    this.announceProvider();
   }
 
   /**
@@ -345,5 +348,33 @@ export class WalletProvider extends WalletProviderLocalStorage {
         window.ethereum.providers = [window.ethereum, this];
       }
     }
+  }
+
+  /**
+   * @summary Announces the provider to the window object
+   * @private
+   * @since 0.1.1
+   * @link https://eips.ethereum.org/EIPS/eip-6963#announce-and-request-events
+   * @returns {void}
+   */
+  private announceProvider(): void {
+    window.dispatchEvent(
+      new CustomEvent('eip6963:announceProvider', {
+        detail: Object.freeze({ info: providerInfo, provider: this }),
+      })
+    );
+  }
+
+  /**
+   * @summary Listens for the request provider events
+   * @private
+   * @since 0.1.1
+   * @link https://eips.ethereum.org/EIPS/eip-6963#announce-and-request-events
+   * @returns {void}
+   */
+  private listenForRequestProviderEvents(): void {
+    window.addEventListener('eip6963:requestProvider', () => {
+      this.announceProvider();
+    });
   }
 }

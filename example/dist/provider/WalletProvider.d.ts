@@ -140,4 +140,20 @@ export declare class WalletProvider extends WalletProviderLocalStorage {
      * @returns {void}
      */
     private injectProvider;
+    /**
+     * @summary Announces the provider to the window object
+     * @private
+     * @since 0.1.1
+     * @link https://eips.ethereum.org/EIPS/eip-6963#announce-and-request-events
+     * @returns {void}
+     */
+    private announceProvider;
+    /**
+     * @summary Listens for the request provider events
+     * @private
+     * @since 0.1.1
+     * @link https://eips.ethereum.org/EIPS/eip-6963#announce-and-request-events
+     * @returns {void}
+     */
+    private listenForRequestProviderEvents;
 }

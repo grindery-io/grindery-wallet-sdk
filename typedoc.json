@@ -1,0 +1,13 @@
+{
+    "name": "Grindery Wallet SDK",
+    "includeVersion": true,
+    "entryPoints": [
+      "src/**",
+    ],
+    "exclude": ["src/index.ts"],
+    "out": "docs",
+    "navigationLinks": {
+        "Changelog": "https://github.com/grindery-io/grindery-wallet-sdk/blob/main/CHANGELOG.md",
+        "GitHub": "https://github.com/grindery-io/grindery-wallet-sdk"
+    }
+  }

@@ -210,6 +210,8 @@ Provider API can be accessed via `window.ethereum` or `window.Grindery.WalletSDK
 
 If the user has multiple wallet browser extensions installed that inject ethereum providers (e.g., MetaMask or Coinbase Wallet), Grindery Wallet's injected provider will construct a "multiprovider" array at `window.ethereum.providers` containing the injected provider from each wallet. Grindery Wallet can be identified in this array by the `isGrinderyWallet` property.
 
+Alternativelly you can detect wallet by listenting to provider announcement events as specified by [EIP-6963](https://eips.ethereum.org/EIPS/eip-6963).
+
 ### Provider Methods
 
 - [eth_requestAccounts](#method-eth_requestaccounts)

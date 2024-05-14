@@ -602,6 +602,13 @@ var WalletProviderErrors = {
   NoAppId: /*#__PURE__*/new WalletProviderError('App ID is required', 4900)
 };
 
+var providerInfo = {
+  uuid: /*#__PURE__*/uuid(),
+  name: 'Grindery Wallet',
+  rdns: 'com.grindery.wallet',
+  icon: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTYiIGhlaWdodD0iOTYiIHZpZXdCb3g9IjAgMCA5NiA5NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9Ijk2IiBoZWlnaHQ9Ijk2IiByeD0iNDgiIGZpbGw9IiMwQjBEMTciLz4KPHBhdGggZD0iTTUyLjcwOTMgNTQuNjI5NUw0My40MDAzIDYwLjU2MTdDNDEuOTkwMiA2MS40NjAzIDQxLjU4OTQgNjMuMzEwNSA0Mi41MDUxIDY0LjY5NDJDNDMuNDA5NyA2Ni4wNjExIDQ1LjI2MDYgNjYuNDYxNSA0Ni42NjQ4IDY1LjYwNDhMNTIuNDQ4MiA2MS43MjY5TDU3LjU1NjggNTguMjk1MUM1Ny42MzgyIDU4LjI0MTkgNTcuNzE5MyA1OC4xODk2IDU3LjgwMDMgNTguMTM4NEw1OC4wNTgxIDU3Ljk2NTVDNTguMjA1MyA1Ny44NjY4IDU4LjM1NzggNTcuNzgxMyA1OC41MTQxIDU3LjcwODlDNTguNjQwNiA1Ny42MzY5IDU4Ljc2NjYgNTcuNTY3MyA1OC44OTIxIDU3LjUwMDFDNjEuOTUwMSA1NS44NjQ0IDY1Ljc4MDQgNTYuOTcwOSA2Ny40NDczIDU5Ljk3MTdDNjguOTA3NSA2Mi42MDAzIDY4LjI0MDggNjUuODc3NiA2NS44NjQgNjcuNzU0NUM2Ni4yMzc2IDY2Ljg3NDggNjYuMTc2OCA2NS44MzUyIDY1LjYwNzkgNjQuOTc1NUM2NC43MDMzIDYzLjYwODYgNjIuODUyNCA2My4yMDgzIDYxLjQ0ODIgNjQuMDY1TDU1LjY2NDggNjcuOTQyOEw1MC41NTYyIDcxLjM3NDdDNTAuNTA3OSA3MS40MDU1IDUwLjQ1OTQgNzEuNDM1OCA1MC40MTA3IDcxLjQ2NTdMNTAuMDU1IDcxLjcwNDJDNDkuNzU1OCA3MS45MDQ5IDQ5LjQzNDkgNzIuMDUwNiA0OS4xMDQ3IDcyLjE0MzhDNDQuNjU3MyA3NC4wNTkyIDM5LjMyMzggNzIuNTg5NCAzNi41OTI0IDY4LjQ2MjFDMzMuNzUxNiA2NC4xNjk2IDM0LjczMTcgNTguNTIzNCAzOC42OTg2IDU1LjM3MzZDMzYuODE0IDU0LjY1NzkgMzUuMDI3NSA1My41OTk1IDMzLjQzNjEgNTIuMTkzNEMyNi40MzA0IDQ2LjAwMzYgMjUuODU3NyAzNS40MjA1IDMyLjE1NjkgMjguNTU1NEMzOC40NTYyIDIxLjY5MDQgNDkuMjQxOSAyMS4xNDMxIDU2LjI0NzYgMjcuMzMyOUM2My4yNTMzIDMzLjUyMjggNjMuODI2IDQ0LjEwNTkgNTcuNTI2NyA1MC45NzA5QzU2LjExNTIgNTIuNTA5MyA1NC40Nzg0IDUzLjczMDQgNTIuNzA5MyA1NC42Mjk1Wk01MS44MDcgNDYuMDUxNkM1NS40MjMgNDIuMDgyMyA1NS4wOTQzIDM1Ljk2MzEgNTEuMDcyNyAzMi4zODQxQzQ3LjA1MTEgMjguODA1MiA0MC44NTk1IDI5LjEyMTYgMzcuMjQzNSAzMy4wOTFDMzMuNjI3NCAzNy4wNjA0IDMzLjk1NjIgNDMuMTc5NSAzNy45Nzc4IDQ2Ljc1ODVDNDEuOTk5NCA1MC4zMzc1IDQ4LjE5MDkgNTAuMDIxIDUxLjgwNyA0Ni4wNTE2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+Cg=='
+};
+
 /**
  * @summary The Grindery RPC API method names
  */
@@ -648,6 +655,8 @@ var WalletProvider = /*#__PURE__*/function (_WalletProviderLocalS) {
      */
     _this.accounts = [];
     _this.injectProvider();
+    _this.listenForRequestProviderEvents();
+    _this.announceProvider();
     return _this;
   }
   /**
@@ -995,6 +1004,34 @@ var WalletProvider = /*#__PURE__*/function (_WalletProviderLocalS) {
         window.ethereum.providers = [window.ethereum, this];
       }
     }
+  }
+  /**
+   * @summary Announces the provider to the window object
+   * @private
+   * @since 0.1.1
+   * @link https://eips.ethereum.org/EIPS/eip-6963#announce-and-request-events
+   * @returns {void}
+   */;
+  _proto.announceProvider = function announceProvider() {
+    window.dispatchEvent(new CustomEvent('eip6963:announceProvider', {
+      detail: Object.freeze({
+        info: providerInfo,
+        provider: this
+      })
+    }));
+  }
+  /**
+   * @summary Listens for the request provider events
+   * @private
+   * @since 0.1.1
+   * @link https://eips.ethereum.org/EIPS/eip-6963#announce-and-request-events
+   * @returns {void}
+   */;
+  _proto.listenForRequestProviderEvents = function listenForRequestProviderEvents() {
+    var _this2 = this;
+    window.addEventListener('eip6963:requestProvider', function () {
+      _this2.announceProvider();
+    });
   };
   return WalletProvider;
 }(WalletProviderLocalStorage);
