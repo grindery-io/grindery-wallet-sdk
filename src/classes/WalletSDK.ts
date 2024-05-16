@@ -1,7 +1,7 @@
 import { ProviderEventName, ProviderEvents } from './EventEmitter';
 import { Provider, ProviderMethodNames } from './Provider';
 import { RpcRequestResults } from './Rpc';
-import { Storage, StorageKeys } from './Storage';
+import { SdkStorage, SdkStorageKeys } from './SdkStorage';
 
 export type WalletSDKConfig = {
   appId?: string;
@@ -25,6 +25,10 @@ export class WalletSDK {
         appId: config?.appId,
       };
     }
+    this.storage.setValue(
+      SdkStorageKeys.chainId,
+      this.storage.getValue(SdkStorageKeys.chainId) || 'eip155:137'
+    );
     this.provider = this.getWeb3Provider();
     this.provider.on(ProviderEvents.pair, this.handlePairing);
   }
@@ -49,8 +53,8 @@ export class WalletSDK {
   public isWalletConnected(): boolean {
     return (
       this.isConnected() &&
-      !!this.storage.getValue(StorageKeys.pairingToken) &&
-      !this.storage.getValue(StorageKeys.sessionId)
+      !!this.storage.getValue(SdkStorageKeys.pairingToken) &&
+      !this.storage.getValue(SdkStorageKeys.sessionId)
     );
   }
 
@@ -138,10 +142,10 @@ export class WalletSDK {
   }
 
   /**
-   * @summary Storage class instance
+   * @summary SdkStorage class instance
    * @private
    */
-  private storage: Storage = new Storage();
+  private storage: SdkStorage = new SdkStorage();
 
   /**
    * @summary Gets the Grindery Wallet ethereum provider

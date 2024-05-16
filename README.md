@@ -116,7 +116,7 @@ import 'grindery-wallet-sdk';
 
 # Basic usage
 
-Once the script is loaded, a [`window.Grindery.WalletSDK`](https://grindery-io.github.io/grindery-wallet-sdk/classes/sdk_GrinderyWalletSDK.GrinderyWalletSDK.html) object will become available:
+Once the script is loaded, a [`window.Grindery.WalletSDK`](https://grindery-io.github.io/grindery-wallet-sdk/classes/classes_WalletSDK.WalletSDK.html) object will become available:
 
 ```typescript
 const WalletSDK = window.Grindery?.WalletSDK;
@@ -126,13 +126,13 @@ const WalletSDK = window.Grindery?.WalletSDK;
 
 ## Server connection
 
-The SDK automatically connects to the server when page is loaded. You can check connection status using [`isConnected()`](https://grindery-io.github.io/grindery-wallet-sdk/classes/sdk_GrinderyWalletSDK.GrinderyWalletSDK.html#isConnected) method:
+The SDK automatically connects to the server when page is loaded. You can check connection status using [`isConnected()`](https://grindery-io.github.io/grindery-wallet-sdk/classes/classes_WalletSDK.WalletSDK.html#isConnected) method:
 
 ```typescript
 const isConnected: boolean = WalletSDK.isConnected();
 ```
 
-You can listen for SDK [`connect`](https://grindery-io.github.io/grindery-wallet-sdk/enums/provider_WalletProviderEventEmitter.ProviderEvents.html#connect) event to catch server connection event:
+You can listen for SDK [`connect`](https://grindery-io.github.io/grindery-wallet-sdk/enums/classes_EventEmitter.ProviderEvents.html#connect) event to catch server connection event:
 
 ```typescript
 WalletSDK.on.('connect', (chainId: string) => {
@@ -144,7 +144,7 @@ WalletSDK.on.('connect', (chainId: string) => {
 
 ## Wallet connection
 
-To initiate connection to the Grindery Wallet use [`connect()`](https://grindery-io.github.io/grindery-wallet-sdk/classes/sdk_GrinderyWalletSDK.GrinderyWalletSDK.html#connect) method:
+To initiate connection to the Grindery Wallet use [`connect()`](https://grindery-io.github.io/grindery-wallet-sdk/classes/classes_WalletSDK.WalletSDK.html#connect) method:
 
 ```typescript
 WalletSDK.on.('connect', async () => {
@@ -152,7 +152,7 @@ WalletSDK.on.('connect', async () => {
 });
 ```
 
-You can listen for SDK [`accountsChanged`](https://grindery-io.github.io/grindery-wallet-sdk/enums/provider_WalletProviderEventEmitter.ProviderEvents.html#accountsChanged) event, to catch when user's wallet is connected:
+You can listen for SDK [`accountsChanged`](https://grindery-io.github.io/grindery-wallet-sdk/enums/classes_EventEmitter.ProviderEvents.html#accountsChanged) event, to catch when user's wallet is connected:
 
 ```typescript
 WalletSDK.on.('accountsChanged', (addresses: string[]) => {
@@ -160,7 +160,7 @@ WalletSDK.on.('accountsChanged', (addresses: string[]) => {
 });
 ```
 
-To disconnect user's wallet use [`disconnect()`](https://grindery-io.github.io/grindery-wallet-sdk/classes/sdk_GrinderyWalletSDK.GrinderyWalletSDK.html#disconnect) method (and you can listen for [`disconnect`](https://grindery-io.github.io/grindery-wallet-sdk/enums/provider_WalletProviderEventEmitter.ProviderEvents.html#disconnect) event):
+To disconnect user's wallet use [`disconnect()`](https://grindery-io.github.io/grindery-wallet-sdk/classes/classes_WalletSDK.WalletSDK.html#disconnect) method (and you can listen for [`disconnect`](https://grindery-io.github.io/grindery-wallet-sdk/enums/classes_EventEmitter.ProviderEvents.html#disconnect) event):
 
 ```typescript
 WalletSDK.on.('disconnect',  => {
@@ -172,7 +172,7 @@ WalletSDK.disconnect();
 
 ## Sending transactions
 
-To request transaction sending use [`sendTransaction()`](https://grindery-io.github.io/grindery-wallet-sdk/classes/sdk_GrinderyWalletSDK.GrinderyWalletSDK.html#sendTransaction) method, once the wallet is connected:
+To request transaction sending use [`sendTransaction()`](https://grindery-io.github.io/grindery-wallet-sdk/classes/classes_WalletSDK.WalletSDK.html#sendTransaction) method, once the wallet is connected:
 
 ```typescript
 WalletSDK.on.('accountsChanged', async (addresses: string[]) => {
@@ -186,7 +186,7 @@ WalletSDK.on.('accountsChanged', async (addresses: string[]) => {
 
 ## Signing
 
-To sing a custom message using personal signature use [`signMessage()`](https://grindery-io.github.io/grindery-wallet-sdk/classes/sdk_GrinderyWalletSDK.GrinderyWalletSDK.html#signMessage) method, once the wallet is connected:
+To sing a custom message using personal signature use [`signMessage()`](https://grindery-io.github.io/grindery-wallet-sdk/classes/classes_WalletSDK.WalletSDK.html#signMessage) method, once the wallet is connected:
 
 ```typescript
 WalletSDK.on.('accountsChanged', async (addresses: string[]) => {

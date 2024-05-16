@@ -1,5 +1,12 @@
 # Grindery Wallet SDK Changelog
 
+## v0.2.0 (2024-05-16)
+
+### Improvements
+
+- Code refactored
+- Bundle size reduced
+
 ## v0.1.1 (2024-05-15)
 
 ### Features

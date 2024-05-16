@@ -437,11 +437,12 @@ var EventEmitter = /*#__PURE__*/function () {
   function EventEmitter() {
     /**
      * @summary A map of events and their listeners
-     * @public
+     * @private
      */
     this.events = void 0;
     this.events = new Map();
   }
+  var _proto = EventEmitter.prototype;
   /**
    * @summary Adds a listener to the event
    * @public
@@ -449,7 +450,6 @@ var EventEmitter = /*#__PURE__*/function () {
    * @param {Function} callback Callback function
    * @returns {EventEmitter} The instance of the class itself
    */
-  var _proto = EventEmitter.prototype;
   _proto.on = function on(event, callback) {
     if (!this.events.has(event)) {
       this.events.set(event, []);
@@ -563,33 +563,45 @@ var ProviderErrors = {
   NoResult: /*#__PURE__*/new ProviderError('No result', 4900),
   NoAppId: /*#__PURE__*/new ProviderError('App ID is required', 4900)
 };
+var newProviderError = function newProviderError(error) {
+  var errorResponse;
+  if (error instanceof ProviderError) {
+    errorResponse = new ProviderError(error.message || 'Unknown error', error.code || 4900, error.data);
+  } else if (error instanceof Error) {
+    errorResponse = new ProviderError(error.message || 'Unknown error', 4900, error);
+  } else {
+    errorResponse = new ProviderError('Unknown error', 4900, error);
+  }
+  return errorResponse;
+};
 
 var LOCALSTORAGE_KEY = 'GrinderyWalletProvider';
 /**
- * @summary Storage keys
+ * @summary SdkStorage keys
  * @since 0.2.0
  */
-var StorageKeys;
-(function (StorageKeys) {
-  StorageKeys["pairingToken"] = "pairingToken";
-  StorageKeys["sessionId"] = "sessionId";
-  StorageKeys["connectUrl"] = "connectUrl";
-  StorageKeys["connectUrlBrowser"] = "connectUrlBrowser";
-  StorageKeys["shortToken"] = "shortToken";
-  StorageKeys["clientId"] = "clientId";
-  StorageKeys["address"] = "address";
-})(StorageKeys || (StorageKeys = {}));
+var SdkStorageKeys;
+(function (SdkStorageKeys) {
+  SdkStorageKeys["pairingToken"] = "pairingToken";
+  SdkStorageKeys["sessionId"] = "sessionId";
+  SdkStorageKeys["connectUrl"] = "connectUrl";
+  SdkStorageKeys["connectUrlBrowser"] = "connectUrlBrowser";
+  SdkStorageKeys["shortToken"] = "shortToken";
+  SdkStorageKeys["clientId"] = "clientId";
+  SdkStorageKeys["address"] = "address";
+  SdkStorageKeys["chainId"] = "chainId";
+})(SdkStorageKeys || (SdkStorageKeys = {}));
 /**
  * @summary A class to handle local storage
  * @since 0.2.0
  */
-var Storage$1 = /*#__PURE__*/function () {
-  function Storage() {}
-  var _proto = Storage.prototype;
+var SdkStorage = /*#__PURE__*/function () {
+  function SdkStorage() {}
+  var _proto = SdkStorage.prototype;
   /**
    * @summary Gets the value of the storage by the key
    * @public
-   * @param {StorageKey} key Provider storage key
+   * @param {SdkStorageKey} key Provider storage key
    * @returns {string} The value of the storage by the key
    */
   _proto.getValue = function getValue(key) {
@@ -599,7 +611,7 @@ var Storage$1 = /*#__PURE__*/function () {
   /**
    * @summary Sets the value of the storage by the key
    * @public
-   * @param {StorageKey} key Provider storage key
+   * @param {SdkStorageKey} key Provider storage key
    * @param {string} value The value to set
    * @returns {void}
    */;
@@ -622,7 +634,7 @@ var Storage$1 = /*#__PURE__*/function () {
   /**
    * @summary Gets the storage
    * @since 0.2.0
-   * @returns {StorageSnapshot} The storage snapshot object
+   * @returns {SdkStorageSnapshot} The storage snapshot object
    */;
   _proto.getSnapshot = function getSnapshot() {
     try {
@@ -635,12 +647,12 @@ var Storage$1 = /*#__PURE__*/function () {
   /**
    * @summary Saves the storage
    * @since 0.2.0
-   * @param {StorageSnapshot} storage Storage snapshot object
+   * @param {SdkStorageSnapshot} storage SdkStorage snapshot object
    */;
   _proto.saveSnapshot = function saveSnapshot(storage) {
     localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(storage));
   };
-  return Storage;
+  return SdkStorage;
 }();
 
 /**
@@ -712,11 +724,11 @@ var Rpc = /*#__PURE__*/function () {
       return _regeneratorRuntime().wrap(function _callee2$(_context2) {
         while (1) switch (_context2.prev = _context2.next) {
           case 0:
-            storage = new Storage();
+            storage = new SdkStorage();
             _context2.next = 3;
             return this.sendRpcApiRequest(RpcMethodNames.request, {
-              sessionId: storage.getValue(StorageKeys.sessionId),
-              scope: 'eip155:137',
+              sessionId: storage.getValue(SdkStorageKeys.sessionId),
+              scope: storage.getValue(SdkStorageKeys.chainId),
               request: {
                 method: method,
                 params: params
@@ -858,7 +870,7 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
     var _this;
     _this = _EventEmitter.call(this) || this;
     _this.isGrinderyWallet = true;
-    _this.storage = new Storage$1();
+    _this.storage = new SdkStorage();
     _this.rpc = new Rpc();
     /**
      * @summary The list of supported provider methods.
@@ -885,7 +897,7 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
             case 7:
               _context.prev = 7;
               _context.t0 = _context["catch"](1);
-              _this.storage.setValue(StorageKeys.sessionId, '');
+              _this.storage.setValue(SdkStorageKeys.sessionId, '');
               // skip failed request and continue with pairing
             case 10:
               if (!_this.storage.getValue('pairingToken')) {
@@ -895,12 +907,12 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
               _context.prev = 11;
               _context.next = 14;
               return _this.rpc.sendRpcApiRequest(RpcMethodNames.waitForPairingResult, {
-                pairingToken: _this.storage.getValue(StorageKeys.pairingToken)
+                pairingToken: _this.storage.getValue(SdkStorageKeys.pairingToken)
               });
             case 14:
               pairResult = _context.sent;
               _this.storage.clear();
-              _this.storage.setValue(StorageKeys.sessionId, pairResult.session.sessionId);
+              _this.storage.setValue(SdkStorageKeys.sessionId, pairResult.session.sessionId);
               if (pairResult.session.sessionId) {
                 _context.next = 19;
                 break;
@@ -924,7 +936,7 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
               _context.next = 30;
               return _this.rpc.sendRpcApiRequest(RpcMethodNames.requestPairing, {
                 appId: getAppId(),
-                clientId: _this.storage.getValue(StorageKeys.clientId)
+                clientId: _this.storage.getValue(SdkStorageKeys.clientId)
               });
             case 30:
               result = _context.sent;
@@ -934,10 +946,10 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
               }
               throw ProviderErrors.PairingFailed;
             case 33:
-              _this.storage.setValue(StorageKeys.pairingToken, result.pairingToken);
-              _this.storage.setValue(StorageKeys.connectUrl, result.connectUrl);
-              _this.storage.setValue(StorageKeys.connectUrlBrowser, result.connectUrlBrowser);
-              _this.storage.setValue(StorageKeys.shortToken, result.shortToken);
+              _this.storage.setValue(SdkStorageKeys.pairingToken, result.pairingToken);
+              _this.storage.setValue(SdkStorageKeys.connectUrl, result.connectUrl);
+              _this.storage.setValue(SdkStorageKeys.connectUrlBrowser, result.connectUrlBrowser);
+              _this.storage.setValue(SdkStorageKeys.shortToken, result.shortToken);
               _this.emit(ProviderEvents.pair, {
                 shortToken: result.shortToken,
                 connectUrl: result.connectUrl,
@@ -949,17 +961,17 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
               });
             case 40:
               _pairResult = _context.sent;
-              _this.storage.setValue(StorageKeys.sessionId, _pairResult.session.sessionId);
+              _this.storage.setValue(SdkStorageKeys.sessionId, _pairResult.session.sessionId);
               if (_pairResult.session.sessionId) {
                 _context.next = 44;
                 break;
               }
               throw ProviderErrors.PairingFailed;
             case 44:
-              _this.storage.setValue(StorageKeys.pairingToken, '');
-              _this.storage.setValue(StorageKeys.connectUrl, '');
-              _this.storage.setValue(StorageKeys.connectUrlBrowser, '');
-              _this.storage.setValue(StorageKeys.shortToken, '');
+              _this.storage.setValue(SdkStorageKeys.pairingToken, '');
+              _this.storage.setValue(SdkStorageKeys.connectUrl, '');
+              _this.storage.setValue(SdkStorageKeys.connectUrlBrowser, '');
+              _this.storage.setValue(SdkStorageKeys.shortToken, '');
               _context.next = 50;
               return _this.request({
                 method: ProviderMethodNames.eth_accounts,
@@ -970,7 +982,7 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
             case 53:
               _context.prev = 53;
               _context.t2 = _context["catch"](27);
-              throw new ProviderError('Server error', 500, _context.t2);
+              throw _context.t2;
             case 56:
             case "end":
               return _context.stop();
@@ -992,12 +1004,12 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
             case 3:
               result = _context2.sent;
               _this.emit(ProviderEvents.accountsChanged, result);
-              _this.storage.setValue(StorageKeys.address, result[0] || '');
+              _this.storage.setValue(SdkStorageKeys.address, result[0] || '');
               return _context2.abrupt("return", result);
             case 9:
               _context2.prev = 9;
               _context2.t0 = _context2["catch"](0);
-              throw new ProviderError('Server error', 500, _context2.t0);
+              throw newProviderError(_context2.t0);
             case 12:
             case "end":
               return _context2.stop();
@@ -1044,24 +1056,36 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
         return _ref4.apply(this, arguments);
       };
     }(), _this$methods[ProviderMethodNames.gws_disconnect] = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5() {
+      var result;
       return _regeneratorRuntime().wrap(function _callee5$(_context5) {
         while (1) switch (_context5.prev = _context5.next) {
           case 0:
-            _context5.next = 2;
-            return _this.rpc.sendAndWaitRpcRequest(ProviderMethodNames.gws_disconnect, []);
-          case 2:
-            return _context5.abrupt("return", _context5.sent);
+            _context5.prev = 0;
+            _context5.next = 3;
+            return _this.rpc.sendRpcApiRequest(RpcMethodNames.disconnect, {
+              sessionToken: _this.storage.getValue(SdkStorageKeys.sessionId)
+            });
           case 3:
+            result = _context5.sent;
+            _this.emit(ProviderEvents.disconnect, ProviderErrors.Disconnected);
+            return _context5.abrupt("return", result);
+          case 8:
+            _context5.prev = 8;
+            _context5.t0 = _context5["catch"](0);
+            throw newProviderError(_context5.t0);
+          case 11:
           case "end":
             return _context5.stop();
         }
-      }, _callee5);
+      }, _callee5, null, [[0, 8]]);
     })), _this$methods);
     _this.injectProvider();
     _this.listenForRequestProviderEvents();
     _this.announceProvider();
     window.addEventListener('load', function () {
-      _this.emit(ProviderEvents.connect, '0x89');
+      _this.emit(ProviderEvents.connect, {
+        chainId: "0x" + parseFloat(_this.storage.getValue(SdkStorageKeys.chainId).split(':')[1]).toString(16)
+      });
       _this.restorePairing();
       _this.restoreSession();
     });
@@ -1123,8 +1147,8 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
       return _regeneratorRuntime().wrap(function _callee7$(_context7) {
         while (1) switch (_context7.prev = _context7.next) {
           case 0:
-            pairingToken = this.storage.getValue(StorageKeys.pairingToken);
-            sessionId = this.storage.getValue(StorageKeys.sessionId);
+            pairingToken = this.storage.getValue(SdkStorageKeys.pairingToken);
+            sessionId = this.storage.getValue(SdkStorageKeys.sessionId);
             if (!(pairingToken && !sessionId)) {
               _context7.next = 19;
               break;
@@ -1137,7 +1161,7 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
           case 6:
             pairResult = _context7.sent;
             this.storage.clear();
-            this.storage.setValue(StorageKeys.sessionId, pairResult.session.sessionId);
+            this.storage.setValue(SdkStorageKeys.sessionId, pairResult.session.sessionId);
             if (pairResult.session.sessionId) {
               _context7.next = 11;
               break;
@@ -1147,7 +1171,7 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
             accounts = (((_pairResult$session = pairResult.session) == null || (_pairResult$session = _pairResult$session.namespaces) == null || (_pairResult$session = _pairResult$session["eip155"]) == null ? void 0 : _pairResult$session.accounts) || []).map(function (account) {
               return account.includes(':') ? account.split(':')[2] || '' : account;
             });
-            this.storage.setValue(StorageKeys.address, accounts[0] || '');
+            this.storage.setValue(SdkStorageKeys.address, accounts[0] || '');
             this.emit(ProviderEvents.accountsChanged, accounts);
             _context7.next = 19;
             break;
@@ -1180,8 +1204,8 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
       return _regeneratorRuntime().wrap(function _callee8$(_context8) {
         while (1) switch (_context8.prev = _context8.next) {
           case 0:
-            pairingToken = this.storage.getValue(StorageKeys.pairingToken);
-            sessionId = this.storage.getValue(StorageKeys.sessionId);
+            pairingToken = this.storage.getValue(SdkStorageKeys.pairingToken);
+            sessionId = this.storage.getValue(SdkStorageKeys.sessionId);
             if (!(sessionId && !pairingToken)) {
               _context8.next = 11;
               break;
@@ -1269,15 +1293,16 @@ var WalletSDK = /*#__PURE__*/function () {
      */
     this.provider = void 0;
     /**
-     * @summary Storage class instance
+     * @summary SdkStorage class instance
      * @private
      */
-    this.storage = new Storage$1();
+    this.storage = new SdkStorage();
     if (config != null && config.appId) {
       window.Grindery = _extends({}, window.Grindery || {}, {
         appId: config == null ? void 0 : config.appId
       });
     }
+    this.storage.setValue(SdkStorageKeys.chainId, this.storage.getValue(SdkStorageKeys.chainId) || 'eip155:137');
     this.provider = this.getWeb3Provider();
     this.provider.on(ProviderEvents.pair, this.handlePairing);
   }
@@ -1299,7 +1324,7 @@ var WalletSDK = /*#__PURE__*/function () {
    * @returns {boolean} True if the provider is connected to the server and the Grindery Wallet.
    */;
   _proto.isWalletConnected = function isWalletConnected() {
-    return this.isConnected() && !!this.storage.getValue(StorageKeys.pairingToken) && !this.storage.getValue(StorageKeys.sessionId);
+    return this.isConnected() && !!this.storage.getValue(SdkStorageKeys.pairingToken) && !this.storage.getValue(SdkStorageKeys.sessionId);
   }
   /**
    * @summary Initiate connection to the Grindery Wallet

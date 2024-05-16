@@ -83,7 +83,7 @@ export declare class WalletSDK {
      */
     removeListener(event: ProviderEventName, callback: Function): this;
     /**
-     * @summary Storage class instance
+     * @summary SdkStorage class instance
      * @private
      */
     private storage;

@@ -3,10 +3,10 @@ import { uuid } from '../utils/uuid';
 const LOCALSTORAGE_KEY = 'GrinderyWalletProvider';
 
 /**
- * @summary Storage keys
+ * @summary SdkStorage keys
  * @since 0.2.0
  */
-export enum StorageKeys {
+export enum SdkStorageKeys {
   pairingToken = 'pairingToken',
   sessionId = 'sessionId',
   connectUrl = 'connectUrl',
@@ -14,30 +14,31 @@ export enum StorageKeys {
   shortToken = 'shortToken',
   clientId = 'clientId',
   address = 'address',
+  chainId = 'chainId',
 }
 
 /**
- * @summary Storage key type
+ * @summary SdkStorage key type
  * @since 0.2.0
  */
-export type StorageKey = keyof typeof StorageKeys;
+export type SdkStorageKey = keyof typeof SdkStorageKeys;
 
-export type StorageSnapshot = {
-  [key in StorageKeys]?: string;
+export type SdkStorageSnapshot = {
+  [key in SdkStorageKeys]?: string;
 };
 
 /**
  * @summary A class to handle local storage
  * @since 0.2.0
  */
-export class Storage {
+export class SdkStorage {
   /**
    * @summary Gets the value of the storage by the key
    * @public
-   * @param {StorageKey} key Provider storage key
+   * @param {SdkStorageKey} key Provider storage key
    * @returns {string} The value of the storage by the key
    */
-  public getValue(key: StorageKey): string {
+  public getValue(key: SdkStorageKey): string {
     const value = this.getSnapshot()[key] || '';
     return value;
   }
@@ -45,11 +46,11 @@ export class Storage {
   /**
    * @summary Sets the value of the storage by the key
    * @public
-   * @param {StorageKey} key Provider storage key
+   * @param {SdkStorageKey} key Provider storage key
    * @param {string} value The value to set
    * @returns {void}
    */
-  public setValue(key: StorageKey, value: string): string {
+  public setValue(key: SdkStorageKey, value: string): string {
     const snapshot = this.getSnapshot();
     snapshot[key] = value;
     this.saveSnapshot(snapshot);
@@ -70,13 +71,13 @@ export class Storage {
   /**
    * @summary Gets the storage
    * @since 0.2.0
-   * @returns {StorageSnapshot} The storage snapshot object
+   * @returns {SdkStorageSnapshot} The storage snapshot object
    */
-  private getSnapshot(): StorageSnapshot {
+  private getSnapshot(): SdkStorageSnapshot {
     try {
       return JSON.parse(
         localStorage.getItem(LOCALSTORAGE_KEY) || '{}'
-      ) as StorageSnapshot;
+      ) as SdkStorageSnapshot;
     } catch (error) {
       localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify({}));
       throw new Error('Error parsing storage');
@@ -86,9 +87,9 @@ export class Storage {
   /**
    * @summary Saves the storage
    * @since 0.2.0
-   * @param {StorageSnapshot} storage Storage snapshot object
+   * @param {SdkStorageSnapshot} storage SdkStorage snapshot object
    */
-  private saveSnapshot(storage: StorageSnapshot): void {
+  private saveSnapshot(storage: SdkStorageSnapshot): void {
     localStorage.setItem(LOCALSTORAGE_KEY, JSON.stringify(storage));
   }
 }

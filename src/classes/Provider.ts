@@ -1,9 +1,9 @@
 import { getAppId } from '../utils/getAppId';
 import { providerInfo } from '../utils/providerInfo';
 import { EventEmitter, ProviderEvents } from './EventEmitter';
-import { ProviderError, ProviderErrors } from './ProviderError';
+import { ProviderErrors, newProviderError } from './ProviderError';
 import { Rpc, RpcMethodNames, RpcRequestResults } from './Rpc';
-import { Storage, StorageKeys } from './Storage';
+import { SdkStorage, SdkStorageKeys } from './SdkStorage';
 
 /**
  * @summary The Grindery wallet provider methods
@@ -71,7 +71,11 @@ export class Provider extends EventEmitter {
     this.listenForRequestProviderEvents();
     this.announceProvider();
     window.addEventListener('load', () => {
-      this.emit(ProviderEvents.connect, '0x89');
+      this.emit(ProviderEvents.connect, {
+        chainId: `0x${parseFloat(
+          this.storage.getValue(SdkStorageKeys.chainId).split(':')[1]
+        ).toString(16)}`,
+      });
       this.restorePairing();
       this.restoreSession();
     });
@@ -101,7 +105,7 @@ export class Provider extends EventEmitter {
     return (await this.methods[method]?.(params)) as T;
   }
 
-  private storage: Storage = new Storage();
+  private storage: SdkStorage = new SdkStorage();
 
   private rpc: Rpc = new Rpc();
 
@@ -123,7 +127,7 @@ export class Provider extends EventEmitter {
             params: [],
           });
         } catch (error) {
-          this.storage.setValue(StorageKeys.sessionId, '');
+          this.storage.setValue(SdkStorageKeys.sessionId, '');
           // skip failed request and continue with pairing
         }
       }
@@ -133,13 +137,15 @@ export class Provider extends EventEmitter {
             (await this.rpc.sendRpcApiRequest<RpcRequestResults.waitForPairingResult>(
               RpcMethodNames.waitForPairingResult,
               {
-                pairingToken: this.storage.getValue(StorageKeys.pairingToken),
+                pairingToken: this.storage.getValue(
+                  SdkStorageKeys.pairingToken
+                ),
               }
             )) as RpcRequestResults.waitForPairingResult;
 
           this.storage.clear();
           this.storage.setValue(
-            StorageKeys.sessionId,
+            SdkStorageKeys.sessionId,
             pairResult.session.sessionId
           );
 
@@ -162,7 +168,7 @@ export class Provider extends EventEmitter {
             RpcMethodNames.requestPairing,
             {
               appId: getAppId(),
-              clientId: this.storage.getValue(StorageKeys.clientId),
+              clientId: this.storage.getValue(SdkStorageKeys.clientId),
             }
           )) as RpcRequestResults.requestPairing;
 
@@ -170,13 +176,13 @@ export class Provider extends EventEmitter {
           throw ProviderErrors.PairingFailed;
         }
 
-        this.storage.setValue(StorageKeys.pairingToken, result.pairingToken);
-        this.storage.setValue(StorageKeys.connectUrl, result.connectUrl);
+        this.storage.setValue(SdkStorageKeys.pairingToken, result.pairingToken);
+        this.storage.setValue(SdkStorageKeys.connectUrl, result.connectUrl);
         this.storage.setValue(
-          StorageKeys.connectUrlBrowser,
+          SdkStorageKeys.connectUrlBrowser,
           result.connectUrlBrowser
         );
-        this.storage.setValue(StorageKeys.shortToken, result.shortToken);
+        this.storage.setValue(SdkStorageKeys.shortToken, result.shortToken);
         this.emit(ProviderEvents.pair, {
           shortToken: result.shortToken,
           connectUrl: result.connectUrl,
@@ -191,24 +197,24 @@ export class Provider extends EventEmitter {
           )) as RpcRequestResults.waitForPairingResult;
 
         this.storage.setValue(
-          StorageKeys.sessionId,
+          SdkStorageKeys.sessionId,
           pairResult.session.sessionId
         );
 
         if (!pairResult.session.sessionId) {
           throw ProviderErrors.PairingFailed;
         }
-        this.storage.setValue(StorageKeys.pairingToken, '');
-        this.storage.setValue(StorageKeys.connectUrl, '');
-        this.storage.setValue(StorageKeys.connectUrlBrowser, '');
-        this.storage.setValue(StorageKeys.shortToken, '');
+        this.storage.setValue(SdkStorageKeys.pairingToken, '');
+        this.storage.setValue(SdkStorageKeys.connectUrl, '');
+        this.storage.setValue(SdkStorageKeys.connectUrlBrowser, '');
+        this.storage.setValue(SdkStorageKeys.shortToken, '');
 
         return await this.request({
           method: ProviderMethodNames.eth_accounts,
           params: params || [],
         });
       } catch (error) {
-        throw new ProviderError('Server error', 500, error);
+        throw error;
       }
     },
 
@@ -224,10 +230,10 @@ export class Provider extends EventEmitter {
           params ? (Array.isArray(params) ? params : [params]) : []
         )) as ProviderRequestResults.eth_accounts;
         this.emit(ProviderEvents.accountsChanged, result);
-        this.storage.setValue(StorageKeys.address, result[0] || '');
+        this.storage.setValue(SdkStorageKeys.address, result[0] || '');
         return result;
       } catch (error) {
-        throw new ProviderError('Server error', 500, error);
+        throw newProviderError(error);
       }
     },
 
@@ -260,10 +266,21 @@ export class Provider extends EventEmitter {
      */
     [ProviderMethodNames.gws_disconnect]:
       async (): Promise<ProviderRequestResults.disconnect> => {
-        return (await this.rpc.sendAndWaitRpcRequest(
-          ProviderMethodNames.gws_disconnect,
-          []
-        )) as ProviderRequestResults.disconnect;
+        try {
+          const result =
+            await this.rpc.sendRpcApiRequest<ProviderRequestResults.disconnect>(
+              RpcMethodNames.disconnect,
+              {
+                sessionToken: this.storage.getValue(SdkStorageKeys.sessionId),
+              }
+            );
+
+          this.emit(ProviderEvents.disconnect, ProviderErrors.Disconnected);
+
+          return result;
+        } catch (error) {
+          throw newProviderError(error);
+        }
       },
   };
 
@@ -273,8 +290,8 @@ export class Provider extends EventEmitter {
    * @returns {void}
    */
   private async restorePairing(): Promise<void> {
-    const pairingToken = this.storage.getValue(StorageKeys.pairingToken);
-    const sessionId = this.storage.getValue(StorageKeys.sessionId);
+    const pairingToken = this.storage.getValue(SdkStorageKeys.pairingToken);
+    const sessionId = this.storage.getValue(SdkStorageKeys.sessionId);
     if (pairingToken && !sessionId) {
       try {
         const pairResult =
@@ -287,7 +304,7 @@ export class Provider extends EventEmitter {
 
         this.storage.clear();
         this.storage.setValue(
-          StorageKeys.sessionId,
+          SdkStorageKeys.sessionId,
           pairResult.session.sessionId
         );
 
@@ -300,7 +317,7 @@ export class Provider extends EventEmitter {
         ).map((account) =>
           account.includes(':') ? account.split(':')[2] || '' : account
         );
-        this.storage.setValue(StorageKeys.address, accounts[0] || '');
+        this.storage.setValue(SdkStorageKeys.address, accounts[0] || '');
         this.emit(ProviderEvents.accountsChanged, accounts);
       } catch (error) {
         this.storage.clear();
@@ -314,8 +331,8 @@ export class Provider extends EventEmitter {
    * @returns {void}
    */
   private async restoreSession(): Promise<void> {
-    const pairingToken = this.storage.getValue(StorageKeys.pairingToken);
-    const sessionId = this.storage.getValue(StorageKeys.sessionId);
+    const pairingToken = this.storage.getValue(SdkStorageKeys.pairingToken);
+    const sessionId = this.storage.getValue(SdkStorageKeys.sessionId);
     if (sessionId && !pairingToken) {
       try {
         await this.request<string[]>({

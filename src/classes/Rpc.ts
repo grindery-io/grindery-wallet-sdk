@@ -1,5 +1,5 @@
 import { ProviderError, ProviderErrors } from './ProviderError';
-import { StorageKeys } from './Storage';
+import { SdkStorage, SdkStorageKeys } from './SdkStorage';
 
 /**
  * @summary The Grindery RPC API method names
@@ -96,12 +96,12 @@ export class Rpc {
     method: string,
     params?: readonly unknown[]
   ): Promise<RpcRequestResults.request> {
-    const storage = new Storage();
+    const storage = new SdkStorage();
     return await this.sendRpcApiRequest<RpcRequestResults.request>(
       RpcMethodNames.request,
       {
-        sessionId: storage.getValue(StorageKeys.sessionId),
-        scope: 'eip155:137',
+        sessionId: storage.getValue(SdkStorageKeys.sessionId),
+        scope: storage.getValue(SdkStorageKeys.chainId),
         request: {
           method,
           params,

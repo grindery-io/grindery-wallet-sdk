@@ -24,15 +24,15 @@ export type ProviderEventName = keyof typeof ProviderEvents;
  * @since 0.2.0
  */
 export class EventEmitter {
-  /**
-   * @summary A map of events and their listeners
-   * @public
-   */
-  public events: Map<ProviderEventName, Array<Function>>;
-
   constructor() {
     this.events = new Map();
   }
+
+  /**
+   * @summary A map of events and their listeners
+   * @private
+   */
+  private events: Map<ProviderEventName, Array<Function>>;
 
   /**
    * @summary Adds a listener to the event

@@ -23,3 +23,23 @@ export const ProviderErrors = {
   NoResult: new ProviderError('No result', 4900),
   NoAppId: new ProviderError('App ID is required', 4900),
 };
+
+export const newProviderError = (error?: unknown): ProviderError => {
+  let errorResponse: ProviderError;
+  if (error instanceof ProviderError) {
+    errorResponse = new ProviderError(
+      error.message || 'Unknown error',
+      error.code || 4900,
+      error.data
+    );
+  } else if (error instanceof Error) {
+    errorResponse = new ProviderError(
+      error.message || 'Unknown error',
+      4900,
+      error
+    );
+  } else {
+    errorResponse = new ProviderError('Unknown error', 4900, error);
+  }
+  return errorResponse;
+};

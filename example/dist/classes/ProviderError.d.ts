@@ -17,3 +17,4 @@ export declare const ProviderErrors: {
     NoResult: ProviderError;
     NoAppId: ProviderError;
 };
+export declare const newProviderError: (error?: unknown) => ProviderError;
