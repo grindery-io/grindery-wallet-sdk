@@ -1,5 +1,4 @@
-import { GrinderyWalletSDK } from './sdk/GrinderyWalletSDK';
-import { getAppId } from './utils/getAppId';
+import { WalletSDK } from './classes/WalletSDK';
 
 declare global {
   interface Window {
@@ -7,21 +6,24 @@ declare global {
     ethereum?: any;
     Grindery?: {
       appId?: string;
-      WalletSDK?: GrinderyWalletSDK;
+      WalletSDK?: WalletSDK;
     };
   }
 }
 
+/**
+ * @summary The Grindery Wallet SDK
+ */
+export const GrinderyWalletSDK = WalletSDK;
+
 function init() {
   if (
     !window.Grindery?.WalletSDK ||
-    !(window.Grindery.WalletSDK instanceof GrinderyWalletSDK)
+    !(window.Grindery.WalletSDK instanceof WalletSDK)
   ) {
     window.Grindery = {
       ...(window.Grindery || {}),
-      WalletSDK: new GrinderyWalletSDK({
-        appId: getAppId(),
-      }),
+      WalletSDK: new WalletSDK(),
     };
   }
 }
