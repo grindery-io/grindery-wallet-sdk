@@ -1,5 +1,7 @@
 import { SdkStorage, SdkStorageKeys } from '../../src/classes/SdkStorage';
 
+const LOCALSTORAGE_KEY = 'GrinderyWalletProvider';
+
 describe('SdkStorage', () => {
   let sdkStorage: SdkStorage;
 
@@ -32,5 +34,13 @@ describe('SdkStorage', () => {
     const value = '0x0';
     sdkStorage['saveSnapshot']({ [key]: value });
     expect(sdkStorage['getSnapshot']()).toStrictEqual({ [key]: value });
+  });
+
+  it('throws error if storage is not a valid json string', () => {
+    localStorage.setItem(LOCALSTORAGE_KEY, 'invalid');
+
+    expect(() => sdkStorage['getSnapshot']()).toThrow(
+      new Error('Error parsing storage')
+    );
   });
 });
