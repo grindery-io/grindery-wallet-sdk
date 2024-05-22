@@ -73,7 +73,9 @@ export class Provider extends EventEmitter {
     window.addEventListener('load', () => {
       this.emit(ProviderEvents.connect, {
         chainId: `0x${parseFloat(
-          this.storage.getValue(SdkStorageKeys.chainId).split(':')[1]
+          (this.storage.getValue(SdkStorageKeys.chainId) || 'eip155:137').split(
+            ':'
+          )[1]
         ).toString(16)}`,
       });
       this.restorePairing();
