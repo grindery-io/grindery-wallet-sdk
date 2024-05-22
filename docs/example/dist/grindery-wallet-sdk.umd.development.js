@@ -1086,7 +1086,7 @@
       _this.announceProvider();
       window.addEventListener('load', function () {
         _this.emit(ProviderEvents.connect, {
-          chainId: "0x" + parseFloat(_this.storage.getValue(SdkStorageKeys.chainId).split(':')[1]).toString(16)
+          chainId: "0x" + parseFloat((_this.storage.getValue(SdkStorageKeys.chainId) || 'eip155:137').split(':')[1]).toString(16)
         });
         _this.restorePairing();
         _this.restoreSession();
