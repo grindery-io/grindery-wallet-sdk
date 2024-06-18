@@ -23,9 +23,11 @@ The SDK enables your dapp to provide a seamless user experience for Grindery use
   - [Wallet connection](#wallet-connection)
   - [Sending transactions](#sending-transactions)
   - [Signing](#signing)
+  - [Chain switching](#chain-switching)
 - [Advanced usage](#advanced-usage)
   - [Full documentation](#full-documentation)
   - [Injected Ethereum Provider](#injected-ethereum-provider)
+- [Changelog](#changelog)
 - [SDK development and building](#sdk-development-and-building)
 - [License](#license)
 
@@ -194,6 +196,25 @@ WalletSDK.on('accountsChanged', async (addresses: string[]) => {
 });
 ```
 
+## Chain switching
+
+To switch the network use [`switchChain()`](https://grindery-io.github.io/grindery-wallet-sdk/classes/classes_WalletSDK.WalletSDK.html#switchChain) method, once the wallet is connected:
+
+```typescript
+WalletSDK.on('chainChanged', (chainId: string) => {
+  console.log('chainId', chainId);
+});
+WalletSDK.switchChain('eip155:137');
+```
+
+To get the current network use [`getChain()`](https://grindery-io.github.io/grindery-wallet-sdk/classes/classes_WalletSDK.WalletSDK.html#getChain) method, once the wallet is connected:
+
+```typescript
+WalletSDK.on('accountsChanged', () => {
+  console.log('chainId', WalletSDK.getChain());
+});
+```
+
 # Advanced usage
 
 ## Full documentation
@@ -218,6 +239,8 @@ Alternativelly you can detect wallet by listenting to provider announcement even
 - [eth_accounts](#method-eth_accounts)
 - [eth_sendTransaction](#method-eth_sendtransaction)
 - [personal_sign](#method-personal_sign)
+- [eth_chainId](#method-eth_chainid)
+- [wallet_switchEthereumChain](#method-wallet_switchethereumchain)
 
 #### Method: `eth_requestAccounts`
 
@@ -261,6 +284,24 @@ Get connected user's wallet addresses.
 - `fromAddress` String. Required.
 
 **Response result:** String. The signature.
+
+#### Method: `eth_chainId`
+
+**Request params:** none
+
+**Response result:** String. Integer ID of the chain as a hexadecimal string, per the `eth_chainId` Ethereum RPC method.
+
+#### Method: `wallet_switchEthereumChain`
+
+**Request params:**
+
+- `chainId` String. Required. Integer ID of the chain as a hexadecimal string, per the `eth_chainId` Ethereum RPC method.
+
+**Response result:** `null` on success.
+
+# Changelog
+
+See full [changelog here](https://github.com/grindery-io/grindery-wallet-sdk/blob/main/CHANGELOG.md).
 
 # SDK Development and building
 

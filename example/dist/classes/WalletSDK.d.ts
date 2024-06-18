@@ -67,6 +67,21 @@ export declare class WalletSDK {
      */
     signMessage(message: string): Promise<string>;
     /**
+     * @summary Requests the Grindery Wallet to switch the chain
+     * @public
+     * @since 0.3.0
+     * @param {string} chainId Chain id in CAIP-2 format
+     * @returns {Promise<null>} Returns `null` on success
+     */
+    switchChain(chainId: string): Promise<null>;
+    /**
+     * @summary Gets currently connected chain
+     * @public
+     * @since 0.3.0
+     * @returns {string} Returns chain id in CAIP-2 format
+     */
+    getChain(): string;
+    /**
      * @summary Adds a listener to the event
      * @public
      * @param {ProviderEventName} event Event name

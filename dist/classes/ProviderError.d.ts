@@ -16,5 +16,7 @@ export declare const ProviderErrors: {
     Unauthorized: ProviderError;
     NoResult: ProviderError;
     NoAppId: ProviderError;
+    UserRejected: ProviderError;
+    ChainDisconnected: ProviderError;
 };
 export declare const newProviderError: (error?: unknown) => ProviderError;

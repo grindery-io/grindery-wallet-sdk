@@ -1,12 +1,15 @@
 const WalletSDK = window.Grindery && window.Grindery.WalletSDK;
 
-const shortenAddress = address => {
+let newChainId = 'eip155:204';
+let newChainName = 'opBNB';
+
+const shortenAddress = (address) => {
   return address.length > 10
     ? address.substring(0, 6) + '...' + address.substring(address.length - 4)
     : address;
 };
 
-const showUsername = target => {
+const showUsername = (target) => {
   const WebApp = window && window.Telegram && window.Telegram.WebApp;
   if (WebApp) {
     const user = WebApp && WebApp.initDataUnsafe && WebApp.initDataUnsafe.user;
@@ -19,7 +22,7 @@ const showUsername = target => {
   }
 };
 
-const showConnectButton = target => {
+const showConnectButton = (target) => {
   if (!target) {
     return;
   }
@@ -30,7 +33,7 @@ const showConnectButton = target => {
       `;
   const button = target.querySelector('button');
   if (button) {
-    button.addEventListener('click', event => {
+    button.addEventListener('click', (event) => {
       onConnectButtonClick(event, button, target);
     });
   }
@@ -41,7 +44,9 @@ const showConnectedWallet = (address, target) => {
     return;
   }
   target.innerHTML = `
-        <p class="text-center mb-4">Grindery Wallet Connected!</p>
+        <p class="text-center mb-4">Grindery Wallet Connected to <span id="chain_name">${
+          newChainId === 'eip155:204' ? 'Polygon' : 'opBNB'
+        }</span>!</p>
         <p class="text-center mb-4">${shortenAddress(address)}</p>
         <div class="mt-6">
             <button id="personal_sign" class="py-2 px-4 bg-blue-500 text-white rounded-xl disabled:opacity-50">
@@ -54,6 +59,11 @@ const showConnectedWallet = (address, target) => {
             </button>
         </div>
         <div class="mt-4">
+            <button id="wallet_switchEthereumChain" class="py-2 px-4 bg-blue-500 text-white rounded-xl disabled:opacity-50">
+            Switch chain to ${newChainName}
+            </button>
+        </div>
+        <div class="mt-4">
             <button id="gws_disconnect" class="py-2 px-4 bg-red-500 text-white rounded-xl disabled:opacity-50">
               Disconnect wallet
             </button>
@@ -61,7 +71,7 @@ const showConnectedWallet = (address, target) => {
       `;
 };
 
-const showReloadButton = target => {
+const showReloadButton = (target) => {
   if (!target) {
     return;
   }
@@ -77,7 +87,7 @@ const onConnectButtonClick = (e, button, target) => {
   button.innerHTML = 'Connecting...';
   button.disabled = true;
 
-  WalletSDK.connect().catch(error => {
+  WalletSDK.connect().catch((error) => {
     console.error('connect', error);
     showReloadButton(target);
   });
@@ -91,7 +101,7 @@ const onDisconnectButtonClick = (e, button, target) => {
     .then(() => {
       showConnectButton(target);
     })
-    .catch(error => {
+    .catch((error) => {
       console.error('disconnect', error);
     });
 };
@@ -100,11 +110,11 @@ const onSignButtonClick = (e, button, address) => {
   button.disabled = true;
   button.innerHTML = 'Approve request in Grindery Bot...';
   WalletSDK.signMessage('Hello, Grindery!')
-    .then(signature => {
+    .then((signature) => {
       console.log('signMessage', signature);
       button.parentElement.innerHTML = `<p class="text-center max-w-full overflow-hidden text-ellipsis">Signature: <em>${signature}</em></p>`;
     })
-    .catch(error => {
+    .catch((error) => {
       console.error('signMessage', error);
       button.disabled = false;
       button.innerHTML = 'Personal sign';
@@ -115,15 +125,31 @@ const onSignButtonClick = (e, button, address) => {
 const onSendTxButtonClick = (e, button, address) => {
   button.disabled = true;
   button.innerHTML = 'Approve request in Grindery Bot...';
-  WalletSDK.sendTransaction({ to: address, value: '0xde0b6b3a7640000' })
-    .then(txHash => {
+
+  // send 0.001 native tokens
+  WalletSDK.sendTransaction({ to: address, value: '0x38d7ea4c68000' })
+    .then((txHash) => {
       console.log('sendTransaction', txHash);
       button.parentElement.innerHTML = `<p class="text-center max-w-full overflow-hidden text-ellipsis">Transaction: <em>${txHash}</em></p>`;
     })
-    .catch(error => {
+    .catch((error) => {
       console.error('sendTransaction', error);
       button.disabled = false;
       button.innerHTML = 'Send transaction';
+      alert('Error: ' + error.message);
+    });
+};
+
+const onSwitchChainButtonclick = (e, button) => {
+  button.disabled = true;
+  WalletSDK.switchChain(newChainId)
+    .then(() => {
+      button.disabled = false;
+      button.innerHTML = `Switch chain to ${newChainName}`;
+    })
+    .catch((error) => {
+      console.error('switchChain', error);
+      button.disabled = false;
       alert('Error: ' + error.message);
     });
 };
@@ -134,19 +160,25 @@ const listenWalletButtonsClicks = (address, target) => {
   }
   const signButton = target.querySelector('#personal_sign');
   const sendButton = target.querySelector('#eth_sendTransaction');
+  const switchChainButton = target.querySelector('#wallet_switchEthereumChain');
   const disconnectButton = target.querySelector('#gws_disconnect');
   if (signButton) {
-    signButton.addEventListener('click', event =>
+    signButton.addEventListener('click', (event) =>
       onSignButtonClick(event, signButton, address)
     );
   }
   if (sendButton) {
-    sendButton.addEventListener('click', event =>
+    sendButton.addEventListener('click', (event) =>
       onSendTxButtonClick(event, sendButton, address)
     );
   }
+  if (switchChainButton) {
+    switchChainButton.addEventListener('click', (event) =>
+      onSwitchChainButtonclick(event, switchChainButton)
+    );
+  }
   if (disconnectButton) {
-    disconnectButton.addEventListener('click', event =>
+    disconnectButton.addEventListener('click', (event) =>
       onDisconnectButtonClick(event, disconnectButton, target)
     );
   }
@@ -189,14 +221,35 @@ const onDisconnect = (_, target) => {
   showConnectButton(target);
 };
 
-const listenProviderEvents = target => {
-  WalletSDK.on('pair', data => onPairing(data, target));
-  WalletSDK.on('accountsChanged', data => onAccountsChanged(data, target));
-  WalletSDK.on('disconnect', data => onDisconnect(data, target));
+const onChainChanged = ({ chainId }) => {
+  alert(`Chain changed to ${chainId}`);
+  let chain_name = document.getElementById('chain_name');
+  if (chainId === '0xcc') {
+    newChainId = 'eip155:137';
+    newChainName = 'Polygon';
+    if (chain_name) {
+      chain_name.innerHTML = 'opBNB';
+    }
+  } else {
+    newChainId = 'eip155:204';
+    newChainName = 'opBNB';
+    if (chain_name) {
+      chain_name.innerHTML = 'Polygon';
+    }
+  }
 };
 
-const onProviderConnect = () => {
+const listenProviderEvents = (target) => {
+  WalletSDK.on('pair', (data) => onPairing(data, target));
+  WalletSDK.on('accountsChanged', (data) => onAccountsChanged(data, target));
+  WalletSDK.on('disconnect', (data) => onDisconnect(data, target));
+  WalletSDK.on('chainChanged', (data) => onChainChanged(data));
+};
+
+const onProviderConnect = ({ chainId }) => {
   const targetEl = document.getElementById('sdk-example');
+  newChainId = chainId === '0xcc' ? 'eip155:137' : 'eip155:204';
+  newChainName = chainId === '0xcc' ? 'Polygon' : 'opBNB';
   listenProviderEvents(targetEl);
   showUsername(targetEl);
   showConnectButton(targetEl);

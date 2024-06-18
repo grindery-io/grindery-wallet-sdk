@@ -16,7 +16,7 @@ describe('SdkStorage', () => {
   it('should clear the storage', () => {
     sdkStorage.clear();
     Object.entries(SdkStorageKeys).forEach(([_, value]) => {
-      if (value !== 'clientId') {
+      if (value !== 'clientId' && value !== 'chainId') {
         expect(sdkStorage.getValue(SdkStorageKeys[value])).toEqual('');
       }
     });

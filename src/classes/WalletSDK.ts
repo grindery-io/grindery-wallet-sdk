@@ -2,6 +2,7 @@ import { ProviderEventName, ProviderEvents } from './EventEmitter';
 import { Provider, ProviderMethodNames } from './Provider';
 import { RpcRequestResults } from './Rpc';
 import { SdkStorage, SdkStorageKeys } from './SdkStorage';
+import { CHAINS, hexChainId } from '../utils/chains';
 
 export type WalletSDKConfig = {
   appId?: string;
@@ -27,7 +28,7 @@ export class WalletSDK {
     }
     this.storage.setValue(
       SdkStorageKeys.chainId,
-      this.storage.getValue(SdkStorageKeys.chainId) || 'eip155:137'
+      this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0]
     );
     this.provider = this.getWeb3Provider();
     this.provider.on(ProviderEvents.pair, this.handlePairing);
@@ -115,6 +116,30 @@ export class WalletSDK {
       method: ProviderMethodNames.personal_sign,
       params: [message, this.storage.getValue('address')],
     });
+  }
+
+  /**
+   * @summary Requests the Grindery Wallet to switch the chain
+   * @public
+   * @since 0.3.0
+   * @param {string} chainId Chain id in CAIP-2 format
+   * @returns {Promise<null>} Returns `null` on success
+   */
+  public async switchChain(chainId: string): Promise<null> {
+    return await this.provider.request<null>({
+      method: ProviderMethodNames.wallet_switchEthereumChain,
+      params: { chainId: hexChainId(chainId) },
+    });
+  }
+
+  /**
+   * @summary Gets currently connected chain
+   * @public
+   * @since 0.3.0
+   * @returns {string} Returns chain id in CAIP-2 format
+   */
+  public getChain(): string {
+    return this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0];
   }
 
   /**

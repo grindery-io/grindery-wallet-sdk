@@ -4,6 +4,7 @@ import { EventEmitter, ProviderEvents } from './EventEmitter';
 import { ProviderErrors, newProviderError } from './ProviderError';
 import { Rpc, RpcMethodNames, RpcRequestResults } from './Rpc';
 import { SdkStorage, SdkStorageKeys } from './SdkStorage';
+import { CHAINS, hexChainId, unhexChainId } from '../utils/chains';
 
 /**
  * @summary The Grindery wallet provider methods
@@ -18,6 +19,7 @@ export type ProviderMethods = {
 /**
  * @summary The Grindery wallet provider method names
  * @since 0.2.0
+ * @since 0.3.0 Added `eth_chainId`, `wallet_addEthereumChain` and `wallet_switchEthereumChain` methods
  */
 export enum ProviderMethodNames {
   eth_requestAccounts = 'eth_requestAccounts',
@@ -25,6 +27,9 @@ export enum ProviderMethodNames {
   personal_sign = 'personal_sign',
   eth_sendTransaction = 'eth_sendTransaction',
   gws_disconnect = 'gws_disconnect',
+  eth_chainId = 'eth_chainId',
+  wallet_addEthereumChain = 'wallet_addEthereumChain',
+  wallet_switchEthereumChain = 'wallet_switchEthereumChain',
 }
 
 export namespace ProviderRequestResults {
@@ -33,6 +38,9 @@ export namespace ProviderRequestResults {
   export type personal_sign = string;
   export type eth_sendTransaction = string;
   export type disconnect = boolean;
+  export type wallet_switchEthereumChain = null;
+  export type wallet_addEthereumChain = null;
+  export type eth_chainId = string;
 }
 
 /**
@@ -72,11 +80,9 @@ export class Provider extends EventEmitter {
     this.announceProvider();
     window.addEventListener('load', () => {
       this.emit(ProviderEvents.connect, {
-        chainId: `0x${parseFloat(
-          (this.storage.getValue(SdkStorageKeys.chainId) || 'eip155:137').split(
-            ':'
-          )[1]
-        ).toString(16)}`,
+        chainId: hexChainId(
+          this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0]
+        ),
       });
       this.restorePairing();
       this.restoreSession();
@@ -110,6 +116,22 @@ export class Provider extends EventEmitter {
   private storage: SdkStorage = new SdkStorage();
 
   private rpc: Rpc = new Rpc();
+
+  /**
+   * @summary Switches the chain
+   * @since 0.3.0
+   * @param {string} chainId Chain id in hex format
+   * @returns {null} `Null` on success
+   */
+  private switchChain = async ({ chainId }: any): Promise<null> => {
+    const chainCaip = unhexChainId(chainId);
+    if (!CHAINS.includes(chainCaip)) {
+      throw newProviderError(ProviderErrors.ChainDisconnected);
+    }
+    this.storage.setValue(SdkStorageKeys.chainId, chainCaip);
+    this.emit(ProviderEvents.chainChanged, { chainId });
+    return null;
+  };
 
   /**
    * @summary The list of supported provider methods.
@@ -165,6 +187,7 @@ export class Provider extends EventEmitter {
         }
       }
       try {
+        this.storage.clear();
         const result =
           (await this.rpc.sendRpcApiRequest<RpcRequestResults.requestPairing>(
             RpcMethodNames.requestPairing,
@@ -284,6 +307,37 @@ export class Provider extends EventEmitter {
           throw newProviderError(error);
         }
       },
+
+    /**
+     * @summary The `eth_chainId` provider method
+     * @since 0.3.0
+     */
+    [ProviderMethodNames.eth_chainId]: async (
+      _?: ProviderRequestArgumentsParams
+    ): Promise<ProviderRequestResults.eth_chainId> => {
+      return hexChainId(
+        this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0]
+      );
+    },
+
+    /**
+     * @summary The `wallet_addEthereumChain` provider method
+     * @since 0.3.0
+     */
+    [ProviderMethodNames.wallet_addEthereumChain]: async (
+      _?: ProviderRequestArgumentsParams
+    ): Promise<ProviderRequestResults.wallet_addEthereumChain> => {
+      throw newProviderError(ProviderErrors.UserRejected);
+    },
+
+    /**
+     * @summary The `wallet_switchEthereumChain` provider method
+     * @since 0.3.0
+     */
+    [ProviderMethodNames.wallet_switchEthereumChain]: async (
+      params?: ProviderRequestArgumentsParams
+    ): Promise<ProviderRequestResults.wallet_switchEthereumChain> =>
+      await this.switchChain(params),
   };
 
   /**
