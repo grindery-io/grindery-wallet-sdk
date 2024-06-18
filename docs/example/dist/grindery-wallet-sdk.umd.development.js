@@ -561,9 +561,11 @@
     PairingFailed: /*#__PURE__*/new ProviderError('Pairing failed', 4900),
     Disconnected: /*#__PURE__*/new ProviderError('Disconnected', 4900),
     UnsupportedMethod: /*#__PURE__*/new ProviderError('Unsupported Method', 4200),
-    Unauthorized: /*#__PURE__*/new ProviderError('Unauthorized', 4900),
+    Unauthorized: /*#__PURE__*/new ProviderError('Unauthorized', 4100),
     NoResult: /*#__PURE__*/new ProviderError('No result', 4900),
-    NoAppId: /*#__PURE__*/new ProviderError('App ID is required', 4900)
+    NoAppId: /*#__PURE__*/new ProviderError('App ID is required', 4900),
+    UserRejected: /*#__PURE__*/new ProviderError('User Rejected Request', 4001),
+    ChainDisconnected: /*#__PURE__*/new ProviderError('Chain Disconnected', 4901)
   };
   var newProviderError = function newProviderError(error) {
     var errorResponse;
@@ -575,6 +577,22 @@
       errorResponse = new ProviderError('Unknown error', 4900, error);
     }
     return errorResponse;
+  };
+
+  /**
+   * Supported chains list
+   *
+   * @description Currently supports the following chains: Polygon, BNB Smart Chain, and opBNB Smart Chain
+   *
+   * @since 0.3.0
+   * @type {string[]} Chain ids in CAIP-2 format
+   */
+  var CHAINS = ['eip155:137', 'eip155:56', 'eip155:204'];
+  var hexChainId = function hexChainId(chainId) {
+    return "0x" + parseInt(chainId.split(':')[1], 10).toString(16);
+  };
+  var unhexChainId = function unhexChainId(hexChainId) {
+    return "eip155:" + parseInt(hexChainId, 16);
   };
 
   var LOCALSTORAGE_KEY = 'GrinderyWalletProvider';
@@ -630,7 +648,8 @@
      */;
     _proto.clear = function clear() {
       this.saveSnapshot({
-        clientId: this.getSnapshot().clientId || uuid()
+        clientId: this.getSnapshot().clientId || uuid(),
+        chainId: this.getSnapshot().chainId || CHAINS[0]
       });
     }
     /**
@@ -834,8 +853,14 @@
             case 14:
               _context4.prev = 14;
               _context4.t0 = _context4["catch"](0);
+              if (!(_context4.t0 instanceof Error)) {
+                _context4.next = 18;
+                break;
+              }
+              throw new ProviderError(_context4.t0.message, 500, _context4.t0);
+            case 18:
               throw new ProviderError('Server error', 500, _context4.t0);
-            case 17:
+            case 19:
             case "end":
               return _context4.stop();
           }
@@ -852,6 +877,7 @@
   /**
    * @summary The Grindery wallet provider method names
    * @since 0.2.0
+   * @since 0.3.0 Added `eth_chainId`, `wallet_addEthereumChain` and `wallet_switchEthereumChain` methods
    */
   var ProviderMethodNames;
   (function (ProviderMethodNames) {
@@ -860,6 +886,9 @@
     ProviderMethodNames["personal_sign"] = "personal_sign";
     ProviderMethodNames["eth_sendTransaction"] = "eth_sendTransaction";
     ProviderMethodNames["gws_disconnect"] = "gws_disconnect";
+    ProviderMethodNames["eth_chainId"] = "eth_chainId";
+    ProviderMethodNames["wallet_addEthereumChain"] = "wallet_addEthereumChain";
+    ProviderMethodNames["wallet_switchEthereumChain"] = "wallet_switchEthereumChain";
   })(ProviderMethodNames || (ProviderMethodNames = {}));
   /**
    * @summary The base wallet provider class
@@ -875,79 +904,115 @@
       _this.storage = new SdkStorage();
       _this.rpc = new Rpc();
       /**
+       * @summary Switches the chain
+       * @since 0.3.0
+       * @param {string} chainId Chain id in hex format
+       * @returns {null} `Null` on success
+       */
+      _this.switchChain = /*#__PURE__*/function () {
+        var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(_ref) {
+          var chainId, chainCaip;
+          return _regeneratorRuntime().wrap(function _callee$(_context) {
+            while (1) switch (_context.prev = _context.next) {
+              case 0:
+                chainId = _ref.chainId;
+                chainCaip = unhexChainId(chainId);
+                if (CHAINS.includes(chainCaip)) {
+                  _context.next = 4;
+                  break;
+                }
+                throw newProviderError(ProviderErrors.ChainDisconnected);
+              case 4:
+                _this.storage.setValue(SdkStorageKeys.chainId, chainCaip);
+                _this.emit(ProviderEvents.chainChanged, {
+                  chainId: chainId
+                });
+                return _context.abrupt("return", null);
+              case 7:
+              case "end":
+                return _context.stop();
+            }
+          }, _callee);
+        }));
+        return function (_x) {
+          return _ref2.apply(this, arguments);
+        };
+      }();
+      /**
        * @summary The list of supported provider methods.
        * @private
        */
       _this.methods = (_this$methods = {}, _this$methods[ProviderMethodNames.eth_requestAccounts] = function () {
-        var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(params) {
+        var _ref3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(params) {
           var pairResult, result, _pairResult;
-          return _regeneratorRuntime().wrap(function _callee$(_context) {
-            while (1) switch (_context.prev = _context.next) {
+          return _regeneratorRuntime().wrap(function _callee2$(_context2) {
+            while (1) switch (_context2.prev = _context2.next) {
               case 0:
                 if (!_this.storage.getValue('sessionId')) {
-                  _context.next = 10;
+                  _context2.next = 10;
                   break;
                 }
-                _context.prev = 1;
-                _context.next = 4;
+                _context2.prev = 1;
+                _context2.next = 4;
                 return _this.request({
                   method: ProviderMethodNames.eth_accounts,
                   params: []
                 });
               case 4:
-                return _context.abrupt("return", _context.sent);
+                return _context2.abrupt("return", _context2.sent);
               case 7:
-                _context.prev = 7;
-                _context.t0 = _context["catch"](1);
+                _context2.prev = 7;
+                _context2.t0 = _context2["catch"](1);
                 _this.storage.setValue(SdkStorageKeys.sessionId, '');
                 // skip failed request and continue with pairing
               case 10:
                 if (!_this.storage.getValue('pairingToken')) {
-                  _context.next = 27;
+                  _context2.next = 27;
                   break;
                 }
-                _context.prev = 11;
-                _context.next = 14;
+                _context2.prev = 11;
+                _context2.next = 14;
                 return _this.rpc.sendRpcApiRequest(RpcMethodNames.waitForPairingResult, {
                   pairingToken: _this.storage.getValue(SdkStorageKeys.pairingToken)
                 });
               case 14:
-                pairResult = _context.sent;
+                pairResult = _context2.sent;
                 _this.storage.clear();
                 _this.storage.setValue(SdkStorageKeys.sessionId, pairResult.session.sessionId);
                 if (pairResult.session.sessionId) {
-                  _context.next = 19;
+                  _context2.next = 19;
                   break;
                 }
                 throw ProviderErrors.PairingFailed;
               case 19:
-                _context.next = 21;
+                _context2.next = 21;
                 return _this.request({
                   method: ProviderMethodNames.eth_accounts,
                   params: params || []
                 });
               case 21:
-                return _context.abrupt("return", _context.sent);
+                return _context2.abrupt("return", _context2.sent);
               case 24:
-                _context.prev = 24;
-                _context.t1 = _context["catch"](11);
+                _context2.prev = 24;
+                _context2.t1 = _context2["catch"](11);
                 _this.storage.clear();
                 // skip failed request and continue with pairing
               case 27:
-                _context.prev = 27;
-                _context.next = 30;
+                _context2.prev = 27;
+                _this.storage.clear();
+                _context2.next = 31;
                 return _this.rpc.sendRpcApiRequest(RpcMethodNames.requestPairing, {
                   appId: getAppId(),
                   clientId: _this.storage.getValue(SdkStorageKeys.clientId)
                 });
-              case 30:
-                result = _context.sent;
+              case 31:
+                result = _context2.sent;
                 if (!(!result.pairingToken || !result.connectUrl)) {
-                  _context.next = 33;
+                  _context2.next = 34;
                   break;
                 }
                 throw ProviderErrors.PairingFailed;
-              case 33:
+              case 34:
                 _this.storage.setValue(SdkStorageKeys.pairingToken, result.pairingToken);
                 _this.storage.setValue(SdkStorageKeys.connectUrl, result.connectUrl);
                 _this.storage.setValue(SdkStorageKeys.connectUrlBrowser, result.connectUrlBrowser);
@@ -957,95 +1022,77 @@
                   connectUrl: result.connectUrl,
                   connectUrlBrowser: result.connectUrlBrowser
                 });
-                _context.next = 40;
+                _context2.next = 41;
                 return _this.rpc.sendRpcApiRequest(RpcMethodNames.waitForPairingResult, {
                   pairingToken: result.pairingToken
                 });
-              case 40:
-                _pairResult = _context.sent;
+              case 41:
+                _pairResult = _context2.sent;
                 _this.storage.setValue(SdkStorageKeys.sessionId, _pairResult.session.sessionId);
                 if (_pairResult.session.sessionId) {
-                  _context.next = 44;
+                  _context2.next = 45;
                   break;
                 }
                 throw ProviderErrors.PairingFailed;
-              case 44:
+              case 45:
                 _this.storage.setValue(SdkStorageKeys.pairingToken, '');
                 _this.storage.setValue(SdkStorageKeys.connectUrl, '');
                 _this.storage.setValue(SdkStorageKeys.connectUrlBrowser, '');
                 _this.storage.setValue(SdkStorageKeys.shortToken, '');
-                _context.next = 50;
+                _context2.next = 51;
                 return _this.request({
                   method: ProviderMethodNames.eth_accounts,
                   params: params || []
                 });
-              case 50:
-                return _context.abrupt("return", _context.sent);
-              case 53:
-                _context.prev = 53;
-                _context.t2 = _context["catch"](27);
-                throw _context.t2;
-              case 56:
-              case "end":
-                return _context.stop();
-            }
-          }, _callee, null, [[1, 7], [11, 24], [27, 53]]);
-        }));
-        return function (_x) {
-          return _ref.apply(this, arguments);
-        };
-      }(), _this$methods[ProviderMethodNames.eth_accounts] = function () {
-        var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(params) {
-          var result;
-          return _regeneratorRuntime().wrap(function _callee2$(_context2) {
-            while (1) switch (_context2.prev = _context2.next) {
-              case 0:
-                _context2.prev = 0;
-                _context2.next = 3;
-                return _this.rpc.sendAndWaitRpcRequest(ProviderMethodNames.eth_accounts, params ? Array.isArray(params) ? params : [params] : []);
-              case 3:
-                result = _context2.sent;
-                _this.emit(ProviderEvents.accountsChanged, result);
-                _this.storage.setValue(SdkStorageKeys.address, result[0] || '');
-                return _context2.abrupt("return", result);
-              case 9:
-                _context2.prev = 9;
-                _context2.t0 = _context2["catch"](0);
-                throw newProviderError(_context2.t0);
-              case 12:
+              case 51:
+                return _context2.abrupt("return", _context2.sent);
+              case 54:
+                _context2.prev = 54;
+                _context2.t2 = _context2["catch"](27);
+                throw _context2.t2;
+              case 57:
               case "end":
                 return _context2.stop();
             }
-          }, _callee2, null, [[0, 9]]);
+          }, _callee2, null, [[1, 7], [11, 24], [27, 54]]);
         }));
         return function (_x2) {
-          return _ref2.apply(this, arguments);
+          return _ref3.apply(this, arguments);
         };
-      }(), _this$methods[ProviderMethodNames.eth_sendTransaction] = function () {
-        var _ref3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(params) {
+      }(), _this$methods[ProviderMethodNames.eth_accounts] = function () {
+        var _ref4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(params) {
+          var result;
           return _regeneratorRuntime().wrap(function _callee3$(_context3) {
             while (1) switch (_context3.prev = _context3.next) {
               case 0:
-                _context3.next = 2;
-                return _this.rpc.sendAndWaitRpcRequest(ProviderMethodNames.eth_sendTransaction, params ? Array.isArray(params) ? params : [params] : []);
-              case 2:
-                return _context3.abrupt("return", _context3.sent);
+                _context3.prev = 0;
+                _context3.next = 3;
+                return _this.rpc.sendAndWaitRpcRequest(ProviderMethodNames.eth_accounts, params ? Array.isArray(params) ? params : [params] : []);
               case 3:
+                result = _context3.sent;
+                _this.emit(ProviderEvents.accountsChanged, result);
+                _this.storage.setValue(SdkStorageKeys.address, result[0] || '');
+                return _context3.abrupt("return", result);
+              case 9:
+                _context3.prev = 9;
+                _context3.t0 = _context3["catch"](0);
+                throw newProviderError(_context3.t0);
+              case 12:
               case "end":
                 return _context3.stop();
             }
-          }, _callee3);
+          }, _callee3, null, [[0, 9]]);
         }));
         return function (_x3) {
-          return _ref3.apply(this, arguments);
+          return _ref4.apply(this, arguments);
         };
-      }(), _this$methods[ProviderMethodNames.personal_sign] = function () {
-        var _ref4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee4(params) {
+      }(), _this$methods[ProviderMethodNames.eth_sendTransaction] = function () {
+        var _ref5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee4(params) {
           return _regeneratorRuntime().wrap(function _callee4$(_context4) {
             while (1) switch (_context4.prev = _context4.next) {
               case 0:
                 _context4.next = 2;
-                return _this.rpc.sendAndWaitRpcRequest(ProviderMethodNames.personal_sign, params ? Array.isArray(params) ? params : [params] : []);
+                return _this.rpc.sendAndWaitRpcRequest(ProviderMethodNames.eth_sendTransaction, params ? Array.isArray(params) ? params : [params] : []);
               case 2:
                 return _context4.abrupt("return", _context4.sent);
               case 3:
@@ -1055,38 +1102,104 @@
           }, _callee4);
         }));
         return function (_x4) {
-          return _ref4.apply(this, arguments);
+          return _ref5.apply(this, arguments);
         };
-      }(), _this$methods[ProviderMethodNames.gws_disconnect] = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5() {
+      }(), _this$methods[ProviderMethodNames.personal_sign] = function () {
+        var _ref6 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5(params) {
+          return _regeneratorRuntime().wrap(function _callee5$(_context5) {
+            while (1) switch (_context5.prev = _context5.next) {
+              case 0:
+                _context5.next = 2;
+                return _this.rpc.sendAndWaitRpcRequest(ProviderMethodNames.personal_sign, params ? Array.isArray(params) ? params : [params] : []);
+              case 2:
+                return _context5.abrupt("return", _context5.sent);
+              case 3:
+              case "end":
+                return _context5.stop();
+            }
+          }, _callee5);
+        }));
+        return function (_x5) {
+          return _ref6.apply(this, arguments);
+        };
+      }(), _this$methods[ProviderMethodNames.gws_disconnect] = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee6() {
         var result;
-        return _regeneratorRuntime().wrap(function _callee5$(_context5) {
-          while (1) switch (_context5.prev = _context5.next) {
+        return _regeneratorRuntime().wrap(function _callee6$(_context6) {
+          while (1) switch (_context6.prev = _context6.next) {
             case 0:
-              _context5.prev = 0;
-              _context5.next = 3;
+              _context6.prev = 0;
+              _context6.next = 3;
               return _this.rpc.sendRpcApiRequest(RpcMethodNames.disconnect, {
                 sessionToken: _this.storage.getValue(SdkStorageKeys.sessionId)
               });
             case 3:
-              result = _context5.sent;
+              result = _context6.sent;
               _this.emit(ProviderEvents.disconnect, ProviderErrors.Disconnected);
-              return _context5.abrupt("return", result);
+              return _context6.abrupt("return", result);
             case 8:
-              _context5.prev = 8;
-              _context5.t0 = _context5["catch"](0);
-              throw newProviderError(_context5.t0);
+              _context6.prev = 8;
+              _context6.t0 = _context6["catch"](0);
+              throw newProviderError(_context6.t0);
             case 11:
             case "end":
-              return _context5.stop();
+              return _context6.stop();
           }
-        }, _callee5, null, [[0, 8]]);
-      })), _this$methods);
+        }, _callee6, null, [[0, 8]]);
+      })), _this$methods[ProviderMethodNames.eth_chainId] = function () {
+        var _ref8 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee7(_) {
+          return _regeneratorRuntime().wrap(function _callee7$(_context7) {
+            while (1) switch (_context7.prev = _context7.next) {
+              case 0:
+                return _context7.abrupt("return", hexChainId(_this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0]));
+              case 1:
+              case "end":
+                return _context7.stop();
+            }
+          }, _callee7);
+        }));
+        return function (_x6) {
+          return _ref8.apply(this, arguments);
+        };
+      }(), _this$methods[ProviderMethodNames.wallet_addEthereumChain] = function () {
+        var _ref9 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8(_) {
+          return _regeneratorRuntime().wrap(function _callee8$(_context8) {
+            while (1) switch (_context8.prev = _context8.next) {
+              case 0:
+                throw newProviderError(ProviderErrors.UserRejected);
+              case 1:
+              case "end":
+                return _context8.stop();
+            }
+          }, _callee8);
+        }));
+        return function (_x7) {
+          return _ref9.apply(this, arguments);
+        };
+      }(), _this$methods[ProviderMethodNames.wallet_switchEthereumChain] = function () {
+        var _ref10 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee9(params) {
+          return _regeneratorRuntime().wrap(function _callee9$(_context9) {
+            while (1) switch (_context9.prev = _context9.next) {
+              case 0:
+                _context9.next = 2;
+                return _this.switchChain(params);
+              case 2:
+                return _context9.abrupt("return", _context9.sent);
+              case 3:
+              case "end":
+                return _context9.stop();
+            }
+          }, _callee9);
+        }));
+        return function (_x8) {
+          return _ref10.apply(this, arguments);
+        };
+      }(), _this$methods);
       _this.injectProvider();
       _this.listenForRequestProviderEvents();
       _this.announceProvider();
       window.addEventListener('load', function () {
         _this.emit(ProviderEvents.connect, {
-          chainId: "0x" + parseFloat((_this.storage.getValue(SdkStorageKeys.chainId) || 'eip155:137').split(':')[1]).toString(16)
+          chainId: hexChainId(_this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0])
         });
         _this.restorePairing();
         _this.restoreSession();
@@ -1114,24 +1227,24 @@
     _proto.request =
     /*#__PURE__*/
     function () {
-      var _request = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee6(_ref6) {
+      var _request = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee10(_ref11) {
         var _this$methods$method, _this$methods2;
         var method, params;
-        return _regeneratorRuntime().wrap(function _callee6$(_context6) {
-          while (1) switch (_context6.prev = _context6.next) {
+        return _regeneratorRuntime().wrap(function _callee10$(_context10) {
+          while (1) switch (_context10.prev = _context10.next) {
             case 0:
-              method = _ref6.method, params = _ref6.params;
-              _context6.next = 3;
+              method = _ref11.method, params = _ref11.params;
+              _context10.next = 3;
               return (_this$methods$method = (_this$methods2 = this.methods)[method]) == null ? void 0 : _this$methods$method.call(_this$methods2, params);
             case 3:
-              return _context6.abrupt("return", _context6.sent);
+              return _context10.abrupt("return", _context10.sent);
             case 4:
             case "end":
-              return _context6.stop();
+              return _context10.stop();
           }
-        }, _callee6, this);
+        }, _callee10, this);
       }));
-      function request(_x5) {
+      function request(_x9) {
         return _request.apply(this, arguments);
       }
       return request;
@@ -1144,28 +1257,28 @@
     _proto.restorePairing =
     /*#__PURE__*/
     function () {
-      var _restorePairing = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee7() {
+      var _restorePairing = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee11() {
         var pairingToken, sessionId, _pairResult$session, pairResult, accounts;
-        return _regeneratorRuntime().wrap(function _callee7$(_context7) {
-          while (1) switch (_context7.prev = _context7.next) {
+        return _regeneratorRuntime().wrap(function _callee11$(_context11) {
+          while (1) switch (_context11.prev = _context11.next) {
             case 0:
               pairingToken = this.storage.getValue(SdkStorageKeys.pairingToken);
               sessionId = this.storage.getValue(SdkStorageKeys.sessionId);
               if (!(pairingToken && !sessionId)) {
-                _context7.next = 19;
+                _context11.next = 19;
                 break;
               }
-              _context7.prev = 3;
-              _context7.next = 6;
+              _context11.prev = 3;
+              _context11.next = 6;
               return this.rpc.sendRpcApiRequest(RpcMethodNames.waitForPairingResult, {
                 pairingToken: pairingToken
               });
             case 6:
-              pairResult = _context7.sent;
+              pairResult = _context11.sent;
               this.storage.clear();
               this.storage.setValue(SdkStorageKeys.sessionId, pairResult.session.sessionId);
               if (pairResult.session.sessionId) {
-                _context7.next = 11;
+                _context11.next = 11;
                 break;
               }
               throw ProviderErrors.PairingFailed;
@@ -1175,17 +1288,17 @@
               });
               this.storage.setValue(SdkStorageKeys.address, accounts[0] || '');
               this.emit(ProviderEvents.accountsChanged, accounts);
-              _context7.next = 19;
+              _context11.next = 19;
               break;
             case 16:
-              _context7.prev = 16;
-              _context7.t0 = _context7["catch"](3);
+              _context11.prev = 16;
+              _context11.t0 = _context11["catch"](3);
               this.storage.clear();
             case 19:
             case "end":
-              return _context7.stop();
+              return _context11.stop();
           }
-        }, _callee7, this, [[3, 16]]);
+        }, _callee11, this, [[3, 16]]);
       }));
       function restorePairing() {
         return _restorePairing.apply(this, arguments);
@@ -1201,34 +1314,34 @@
     _proto.restoreSession =
     /*#__PURE__*/
     function () {
-      var _restoreSession = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8() {
+      var _restoreSession = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee12() {
         var pairingToken, sessionId;
-        return _regeneratorRuntime().wrap(function _callee8$(_context8) {
-          while (1) switch (_context8.prev = _context8.next) {
+        return _regeneratorRuntime().wrap(function _callee12$(_context12) {
+          while (1) switch (_context12.prev = _context12.next) {
             case 0:
               pairingToken = this.storage.getValue(SdkStorageKeys.pairingToken);
               sessionId = this.storage.getValue(SdkStorageKeys.sessionId);
               if (!(sessionId && !pairingToken)) {
-                _context8.next = 11;
+                _context12.next = 11;
                 break;
               }
-              _context8.prev = 3;
-              _context8.next = 6;
+              _context12.prev = 3;
+              _context12.next = 6;
               return this.request({
                 method: ProviderMethodNames.eth_requestAccounts
               });
             case 6:
-              _context8.next = 11;
+              _context12.next = 11;
               break;
             case 8:
-              _context8.prev = 8;
-              _context8.t0 = _context8["catch"](3);
+              _context12.prev = 8;
+              _context12.t0 = _context12["catch"](3);
               this.storage.clear();
             case 11:
             case "end":
-              return _context8.stop();
+              return _context12.stop();
           }
-        }, _callee8, this, [[3, 8]]);
+        }, _callee12, this, [[3, 8]]);
       }));
       function restoreSession() {
         return _restoreSession.apply(this, arguments);
@@ -1304,7 +1417,7 @@
           appId: config == null ? void 0 : config.appId
         });
       }
-      this.storage.setValue(SdkStorageKeys.chainId, this.storage.getValue(SdkStorageKeys.chainId) || 'eip155:137');
+      this.storage.setValue(SdkStorageKeys.chainId, this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0]);
       this.provider = this.getWeb3Provider();
       this.provider.on(ProviderEvents.pair, this.handlePairing);
     }
@@ -1459,13 +1572,57 @@
       return signMessage;
     }()
     /**
+     * @summary Requests the Grindery Wallet to switch the chain
+     * @public
+     * @since 0.3.0
+     * @param {string} chainId Chain id in CAIP-2 format
+     * @returns {Promise<null>} Returns `null` on success
+     */
+    ;
+    _proto.switchChain =
+    /*#__PURE__*/
+    function () {
+      var _switchChain = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5(chainId) {
+        return _regeneratorRuntime().wrap(function _callee5$(_context5) {
+          while (1) switch (_context5.prev = _context5.next) {
+            case 0:
+              _context5.next = 2;
+              return this.provider.request({
+                method: ProviderMethodNames.wallet_switchEthereumChain,
+                params: {
+                  chainId: hexChainId(chainId)
+                }
+              });
+            case 2:
+              return _context5.abrupt("return", _context5.sent);
+            case 3:
+            case "end":
+              return _context5.stop();
+          }
+        }, _callee5, this);
+      }));
+      function switchChain(_x3) {
+        return _switchChain.apply(this, arguments);
+      }
+      return switchChain;
+    }()
+    /**
+     * @summary Gets currently connected chain
+     * @public
+     * @since 0.3.0
+     * @returns {string} Returns chain id in CAIP-2 format
+     */
+    ;
+    _proto.getChain = function getChain() {
+      return this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0];
+    }
+    /**
      * @summary Adds a listener to the event
      * @public
      * @param {ProviderEventName} event Event name
      * @param {Function} callback Callback function
      * @returns {EventEmitter} The instance of the class itself
-     */
-    ;
+     */;
     _proto.on = function on(event, callback) {
       this.provider.on(event, callback);
       return this;

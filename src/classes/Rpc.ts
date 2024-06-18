@@ -163,6 +163,9 @@ export class Rpc {
       }
       return data.result;
     } catch (error) {
+      if (error instanceof Error) {
+        throw new ProviderError(error.message, 500, error);
+      }
       throw new ProviderError('Server error', 500, error);
     }
   }

@@ -1,3 +1,4 @@
+import { CHAINS } from '../utils/chains';
 import { uuid } from '../utils/uuid';
 
 const LOCALSTORAGE_KEY = 'GrinderyWalletProvider';
@@ -65,6 +66,7 @@ export class SdkStorage {
   public clear(): void {
     this.saveSnapshot({
       clientId: this.getSnapshot().clientId || uuid(),
+      chainId: this.getSnapshot().chainId || CHAINS[0],
     });
   }
 

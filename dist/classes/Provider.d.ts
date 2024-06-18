@@ -9,13 +9,17 @@ export type ProviderMethods = {
 /**
  * @summary The Grindery wallet provider method names
  * @since 0.2.0
+ * @since 0.3.0 Added `eth_chainId`, `wallet_addEthereumChain` and `wallet_switchEthereumChain` methods
  */
 export declare enum ProviderMethodNames {
     eth_requestAccounts = "eth_requestAccounts",
     eth_accounts = "eth_accounts",
     personal_sign = "personal_sign",
     eth_sendTransaction = "eth_sendTransaction",
-    gws_disconnect = "gws_disconnect"
+    gws_disconnect = "gws_disconnect",
+    eth_chainId = "eth_chainId",
+    wallet_addEthereumChain = "wallet_addEthereumChain",
+    wallet_switchEthereumChain = "wallet_switchEthereumChain"
 }
 export declare namespace ProviderRequestResults {
     type eth_accounts = string[];
@@ -23,6 +27,9 @@ export declare namespace ProviderRequestResults {
     type personal_sign = string;
     type eth_sendTransaction = string;
     type disconnect = boolean;
+    type wallet_switchEthereumChain = null;
+    type wallet_addEthereumChain = null;
+    type eth_chainId = string;
 }
 /**
  * @summary The Grindery wallet provider method names
@@ -66,6 +73,13 @@ export declare class Provider extends EventEmitter {
     request<T>({ method, params, }: ProviderRequestArguments): Promise<T>;
     private storage;
     private rpc;
+    /**
+     * @summary Switches the chain
+     * @since 0.3.0
+     * @param {string} chainId Chain id in hex format
+     * @returns {null} `Null` on success
+     */
+    private switchChain;
     /**
      * @summary The list of supported provider methods.
      * @private
