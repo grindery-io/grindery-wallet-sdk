@@ -5,7 +5,7 @@
 [![GitHub package.json dynamic](https://img.shields.io/github/package-json/version/grindery-io/grindery-wallet-sdk)](https://github.com/grindery-io/grindery-wallet-sdk/blob/main/package.json#L4)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/grindery-io/grindery-wallet-sdk/main.yml)](https://github.com/grindery-io/grindery-wallet-sdk/actions)
 [![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/grindery-io/grindery-wallet-sdk)](https://github.com/grindery-io/grindery-wallet-sdk/issues)
-![GitHub file size in bytes](https://img.shields.io/github/size/grindery-io/grindery-wallet-sdk/dist%2Fgrindery-wallet-sdk.cjs.production.min.js)
+![GitHub file size in bytes](https://img.shields.io/github/size/grindery-io/grindery-wallet-sdk/dist%2Fgrindery-wallet-sdk.esm.js)
 [![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/grindery-io/grindery-wallet-sdk/total)](https://github.com/grindery-io/grindery-wallet-sdk/releases)
 [![Website](https://img.shields.io/website?url=https%3A%2F%2Fgrindery-io.github.io%2Fgrindery-wallet-sdk%2Fexample%2F&label=Example%20website&link=https%3A%2F%2Fgrindery-io.github.io%2Fgrindery-wallet-sdk%2Fexample%2F)](https://grindery-io.github.io/grindery-wallet-sdk/example)
 [![GitHub License](https://img.shields.io/github/license/grindery-io/grindery-wallet-sdk)](https://github.com/grindery-io/grindery-wallet-sdk/blob/main/LICENSE)
