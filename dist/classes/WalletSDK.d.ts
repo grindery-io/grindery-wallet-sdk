@@ -1,5 +1,6 @@
 import { ProviderEventName } from './EventEmitter';
 import { Provider } from './Provider';
+import { RpcRequestResults } from './Rpc';
 export type WalletSDKConfig = {
     appId?: string;
 };
@@ -81,6 +82,14 @@ export declare class WalletSDK {
      * @returns {string} Returns chain id in CAIP-2 format
      */
     getChain(): string;
+    /**
+     * @summary Exchange Telegram user ID to Grindery Wallet address
+     * @public
+     * @since 0.4.0
+     * @param {string} userId Telegram user ID
+     * @returns {Promise<string>} Grindery Wallet address
+     */
+    getUserWalletAddress(userId: string): Promise<RpcRequestResults.getUserWalletAddress>;
     /**
      * @summary Adds a listener to the event
      * @public

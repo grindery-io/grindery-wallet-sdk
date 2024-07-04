@@ -686,6 +686,7 @@
     RpcMethodNames["request"] = "request";
     RpcMethodNames["waitForRequestResult"] = "waitForRequestResult";
     RpcMethodNames["disconnect"] = "disconnect";
+    RpcMethodNames["getUserWalletAddress"] = "getUserWalletAddress";
   })(RpcMethodNames || (RpcMethodNames = {}));
   /**
    * @summary The Grindery RPC API wrapper class
@@ -1617,12 +1618,47 @@
       return this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0];
     }
     /**
+     * @summary Exchange Telegram user ID to Grindery Wallet address
+     * @public
+     * @since 0.4.0
+     * @param {string} userId Telegram user ID
+     * @returns {Promise<string>} Grindery Wallet address
+     */;
+    _proto.getUserWalletAddress =
+    /*#__PURE__*/
+    function () {
+      var _getUserWalletAddress = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee6(userId) {
+        var rpc;
+        return _regeneratorRuntime().wrap(function _callee6$(_context6) {
+          while (1) switch (_context6.prev = _context6.next) {
+            case 0:
+              rpc = new Rpc();
+              _context6.next = 3;
+              return rpc.sendRpcApiRequest(RpcMethodNames.getUserWalletAddress, {
+                appId: getAppId(),
+                userId: userId
+              });
+            case 3:
+              return _context6.abrupt("return", _context6.sent);
+            case 4:
+            case "end":
+              return _context6.stop();
+          }
+        }, _callee6);
+      }));
+      function getUserWalletAddress(_x4) {
+        return _getUserWalletAddress.apply(this, arguments);
+      }
+      return getUserWalletAddress;
+    }()
+    /**
      * @summary Adds a listener to the event
      * @public
      * @param {ProviderEventName} event Event name
      * @param {Function} callback Callback function
      * @returns {EventEmitter} The instance of the class itself
-     */;
+     */
+    ;
     _proto.on = function on(event, callback) {
       this.provider.on(event, callback);
       return this;

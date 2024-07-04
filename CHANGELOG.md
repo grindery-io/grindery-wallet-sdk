@@ -1,5 +1,11 @@
 # Grindery Wallet SDK Changelog
 
+## v0.4.0 (2024-07-05)
+
+### Features
+
+- Added `getUserWalletAddress` SDK method, allowing to silently exchange Telegram user ID to EVM wallet address
+
 ## v0.3.0 (2024-06-18)
 
 ### Added support for BNB and opBNB chains

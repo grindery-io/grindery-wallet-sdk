@@ -21,6 +21,7 @@ The SDK enables your dapp to provide a seamless user experience for Grindery use
 - [Basic usage](#basic-usage)
   - [Server connection](#server-connection)
   - [Wallet connection](#wallet-connection)
+  - [Silently getting wallet address](#silently-getting-wallet-address)
   - [Sending transactions](#sending-transactions)
   - [Signing](#signing)
   - [Chain switching](#chain-switching)
@@ -170,6 +171,31 @@ WalletSDK.on('disconnect',  => {
 });
 
 WalletSDK.disconnect();
+```
+
+## Silently getting wallet address
+
+The SDK allows dApps to exchange Telegram user ID to user's EVM wallet address.
+
+The method doesn't require user to go through the [wallet connection process](#wallet-connection), and can be executed silently in the background. However, without fully connected wallet a dApp has read-only access, and can't request message signing or transactions sending. To do this ask user to connect the wallet first.
+
+```typescript
+WalletSDK.on('connect', async () => {
+  const userId = '123456';
+  const telegramUserWallet =
+    await window.Grindery.WalletSDK.getUserWalletAddress(userId);
+});
+```
+
+This can be especially usefull for Telegram mini-apps, where user ID can be detected automatically. For example:
+
+```typescript
+WalletSDK.on('connect', async () => {
+  const telegramUserWallet =
+    await window.Grindery.WalletSDK.getUserWalletAddress(
+      window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+    );
+});
 ```
 
 ## Sending transactions
