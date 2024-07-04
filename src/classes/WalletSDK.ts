@@ -1,8 +1,9 @@
 import { ProviderEventName, ProviderEvents } from './EventEmitter';
 import { Provider, ProviderMethodNames } from './Provider';
-import { RpcRequestResults } from './Rpc';
+import { Rpc, RpcMethodNames, RpcRequestResults } from './Rpc';
 import { SdkStorage, SdkStorageKeys } from './SdkStorage';
 import { CHAINS, hexChainId } from '../utils/chains';
+import { getAppId } from '../utils/getAppId';
 
 export type WalletSDKConfig = {
   appId?: string;
@@ -140,6 +141,23 @@ export class WalletSDK {
    */
   public getChain(): string {
     return this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0];
+  }
+
+  /**
+   * @summary Exchange Telegram user ID to Grindery Wallet address
+   * @public
+   * @since 0.4.0
+   * @param {string} userId Telegram user ID
+   * @returns {Promise<string>} Grindery Wallet address
+   */
+  public async getUserWalletAddress(
+    userId: string
+  ): Promise<RpcRequestResults.getUserWalletAddress> {
+    const rpc = new Rpc();
+    return await rpc.sendRpcApiRequest<RpcRequestResults.getUserWalletAddress>(
+      RpcMethodNames.getUserWalletAddress,
+      { appId: getAppId(), userId }
+    );
   }
 
   /**

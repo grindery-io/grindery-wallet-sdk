@@ -22,6 +22,26 @@ const showUsername = (target) => {
   }
 };
 
+const getAndShowWalletAddress = (target) => {
+  const WebApp = window && window.Telegram && window.Telegram.WebApp;
+  if (WebApp) {
+    const user = WebApp && WebApp.initDataUnsafe && WebApp.initDataUnsafe.user;
+    if (user && user.id && target) {
+      window.Grindery.WalletSDK.getUserWalletAddress(user.id)
+        .then((address) => {
+          if (address) {
+            target.innerHTML = `<p class="py-2 px-4 text-text text-center">Auto-detected wallet address: ${shortenAddress(
+              address
+            )}</p>`;
+          }
+        })
+        .catch((error) => {
+          console.error('getUserWalletAddress', error);
+        });
+    }
+  }
+};
+
 const showConnectButton = (target) => {
   if (!target) {
     return;
@@ -43,6 +63,7 @@ const showConnectedWallet = (address, target) => {
   if (!target || !address) {
     return;
   }
+  document.getElementById('wallet').innerHTML = '';
   target.innerHTML = `
         <p class="text-center mb-4">Grindery Wallet Connected to <span id="chain_name">${
           newChainId === 'eip155:204' ? 'Polygon' : 'opBNB'
@@ -252,6 +273,7 @@ const onProviderConnect = ({ chainId }) => {
   newChainName = chainId === '0xcc' ? 'Polygon' : 'opBNB';
   listenProviderEvents(targetEl);
   showUsername(targetEl);
+  getAndShowWalletAddress(document.getElementById('wallet'));
   showConnectButton(targetEl);
 };
 

@@ -6,7 +6,8 @@ export declare enum RpcMethodNames {
     waitForPairingResult = "waitForPairingResult",
     request = "request",
     waitForRequestResult = "waitForRequestResult",
-    'disconnect' = "disconnect"
+    'disconnect' = "disconnect",
+    getUserWalletAddress = "getUserWalletAddress"
 }
 /**
  * @summary The Grindery RPC API request results
@@ -53,6 +54,10 @@ export declare namespace RpcRequestResults {
      * @summary `disconnect` method result
      */
     type disconnect = boolean;
+    /**
+     * @summary `getUserWalletAddress` method result
+     */
+    type getUserWalletAddress = string;
 }
 /**
  * @summary The Grindery RPC API wrapper class
