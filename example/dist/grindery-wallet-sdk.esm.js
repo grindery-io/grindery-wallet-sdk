@@ -1699,9 +1699,6 @@ var WalletSDK = /*#__PURE__*/function () {
     var redirectUrl = "https://walletconnect.grindery.com/connect/wc?uri=" + shortToken;
     if (WebApp && WebApp.openTelegramLink && WebApp.platform && WebApp.platform !== 'unknown') {
       WebApp.openTelegramLink(connectUrlBrowser);
-      if (WebApp.close) {
-        window.Telegram.WebApp.close();
-      }
     } else {
       window.open(redirectUrl, '_blank');
     }
