@@ -1,5 +1,11 @@
 # Grindery Wallet SDK Changelog
 
+## v0.4.1 (2024-07-17)
+
+### Fixed
+
+- Fixed Telegram Mini App auto-closing [issue](https://github.com/grindery-io/grindery-wallet-sdk/issues/4) on wallet connection.
+
 ## v0.4.0 (2024-07-05)
 
 ### Features

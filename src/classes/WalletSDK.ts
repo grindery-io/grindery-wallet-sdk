@@ -231,9 +231,6 @@ export class WalletSDK {
       WebApp.platform !== 'unknown'
     ) {
       WebApp.openTelegramLink(connectUrlBrowser);
-      if (WebApp.close) {
-        window.Telegram.WebApp.close();
-      }
     } else {
       window.open(redirectUrl, '_blank');
     }
