@@ -11,6 +11,7 @@ export enum RpcMethodNames {
   waitForRequestResult = 'waitForRequestResult',
   'disconnect' = 'disconnect',
   getUserWalletAddress = 'getUserWalletAddress',
+  trackClientEvent = 'trackClientEvent',
 }
 
 /**
@@ -67,6 +68,11 @@ export namespace RpcRequestResults {
    * @summary `getUserWalletAddress` method result
    */
   export type getUserWalletAddress = string;
+
+  /**
+   * @summary `trackClientEvent` method result
+   */
+  export type trackClientEvent = true;
 }
 
 /**

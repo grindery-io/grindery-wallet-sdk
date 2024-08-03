@@ -685,6 +685,7 @@ var RpcMethodNames;
   RpcMethodNames["waitForRequestResult"] = "waitForRequestResult";
   RpcMethodNames["disconnect"] = "disconnect";
   RpcMethodNames["getUserWalletAddress"] = "getUserWalletAddress";
+  RpcMethodNames["trackClientEvent"] = "trackClientEvent";
 })(RpcMethodNames || (RpcMethodNames = {}));
 /**
  * @summary The Grindery RPC API wrapper class
@@ -1395,6 +1396,26 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
   return Provider;
 }(EventEmitter);
 
+var ClientEventNames;
+(function (ClientEventNames) {
+  /**
+   * @summary The event is triggered every time the app page is opened
+   */
+  ClientEventNames["appOpened"] = "appOpened";
+  /**
+   * @summary The event is triggered when the user wallet is connected
+   */
+  ClientEventNames["walletConnected"] = "walletConnected";
+  /**
+   * @summary The event is triggered when the user wallet is disconnected
+   */
+  ClientEventNames["walletDisconnected"] = "walletDisconnected";
+  /**
+   * @summary The event is triggered when the app requests user wallet address
+   */
+  ClientEventNames["walletAddressRequested"] = "walletAddressRequested";
+})(ClientEventNames || (ClientEventNames = {}));
+
 /**
  * @summary The Wallet SDK class
  * @since 0.2.0
@@ -1411,13 +1432,15 @@ var WalletSDK = /*#__PURE__*/function () {
      * @private
      */
     this.storage = new SdkStorage();
-    if (config != null && config.appId) {
+    if (config != null && config.appId || config != null && config.appUrl) {
       window.Grindery = _extends({}, window.Grindery || {}, {
-        appId: config == null ? void 0 : config.appId
+        appId: config == null ? void 0 : config.appId,
+        appUrl: config == null ? void 0 : config.appUrl
       });
     }
     this.storage.setValue(SdkStorageKeys.chainId, this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0]);
     this.provider = this.getWeb3Provider();
+    this.initTracking();
     this.provider.on(ProviderEvents.pair, this.handlePairing);
   }
   /**
@@ -1631,18 +1654,21 @@ var WalletSDK = /*#__PURE__*/function () {
         while (1) switch (_context6.prev = _context6.next) {
           case 0:
             rpc = new Rpc();
-            _context6.next = 3;
+            this.trackClientEvent(ClientEventNames.walletAddressRequested, {
+              userId: userId
+            });
+            _context6.next = 4;
             return rpc.sendRpcApiRequest(RpcMethodNames.getUserWalletAddress, {
               appId: getAppId(),
               userId: userId
             });
-          case 3:
-            return _context6.abrupt("return", _context6.sent);
           case 4:
+            return _context6.abrupt("return", _context6.sent);
+          case 5:
           case "end":
             return _context6.stop();
         }
-      }, _callee6);
+      }, _callee6, this);
     }));
     function getUserWalletAddress(_x4) {
       return _getUserWalletAddress.apply(this, arguments);
@@ -1706,6 +1732,83 @@ var WalletSDK = /*#__PURE__*/function () {
     } else {
       window.open(redirectUrl, '_blank');
     }
+  }
+  /**
+   * @summary Tracks client side event
+   * @since 0.4.2
+   * @private
+   * @param AppEvent
+   * @returns {Promise<void>}
+   */;
+  _proto.trackClientEvent =
+  /*#__PURE__*/
+  function () {
+    var _trackClientEvent = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee7(name, data) {
+      var _window$Grindery, _window$Telegram2;
+      var appUrl, appId, userTelegramId, _window$Telegram3, _window$Telegram4, _window$Telegram5, rpc;
+      return _regeneratorRuntime().wrap(function _callee7$(_context7) {
+        while (1) switch (_context7.prev = _context7.next) {
+          case 0:
+            appUrl = ((_window$Grindery = window.Grindery) == null ? void 0 : _window$Grindery.appUrl) || window.location.origin;
+            appId = getAppId();
+            userTelegramId = (_window$Telegram2 = window.Telegram) == null || (_window$Telegram2 = _window$Telegram2.WebApp) == null || (_window$Telegram2 = _window$Telegram2.initDataUnsafe) == null || (_window$Telegram2 = _window$Telegram2.user) == null ? void 0 : _window$Telegram2.id;
+            _context7.prev = 3;
+            rpc = new Rpc();
+            _context7.next = 7;
+            return rpc.sendRpcApiRequest(RpcMethodNames.trackClientEvent, {
+              name: name,
+              appUrl: appUrl,
+              userTelegramId: userTelegramId,
+              data: _extends({}, data || {}, {
+                pageUrl: window.location.href,
+                appId: appId,
+                sessionId: this.storage.getValue(SdkStorageKeys.sessionId),
+                clientId: this.storage.getValue(SdkStorageKeys.clientId),
+                isMiniApp: Boolean((_window$Telegram3 = window.Telegram) == null ? void 0 : _window$Telegram3.initDataUnsafe),
+                miniAppPlatform: (_window$Telegram4 = window.Telegram) == null || (_window$Telegram4 = _window$Telegram4.WebApp) == null ? void 0 : _window$Telegram4.platform,
+                miniAppSdkVersion: (_window$Telegram5 = window.Telegram) == null || (_window$Telegram5 = _window$Telegram5.WebApp) == null ? void 0 : _window$Telegram5.version,
+                userAgent: window.navigator.userAgent
+              })
+            });
+          case 7:
+            _context7.next = 11;
+            break;
+          case 9:
+            _context7.prev = 9;
+            _context7.t0 = _context7["catch"](3);
+          case 11:
+          case "end":
+            return _context7.stop();
+        }
+      }, _callee7, this, [[3, 9]]);
+    }));
+    function trackClientEvent(_x5, _x6) {
+      return _trackClientEvent.apply(this, arguments);
+    }
+    return trackClientEvent;
+  }()
+  /**
+   * @summary Initializes the tracking
+   * @since 0.4.2
+   * @private
+   * @returns {void}
+   */
+  ;
+  _proto.initTracking = function initTracking() {
+    var _this = this;
+    this.trackClientEvent(ClientEventNames.appOpened);
+    var onWalletConnect = function onWalletConnect(wallets) {
+      if (wallets.length > 0) {
+        _this.trackClientEvent(ClientEventNames.walletConnected, {
+          wallets: wallets
+        });
+      }
+    };
+    var onWalletDisconnect = function onWalletDisconnect() {
+      _this.trackClientEvent(ClientEventNames.walletDisconnected);
+    };
+    this.on(ProviderEvents.accountsChanged, onWalletConnect);
+    this.on(ProviderEvents.disconnect, onWalletDisconnect);
   };
   return WalletSDK;
 }();

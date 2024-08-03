@@ -4,9 +4,11 @@ import { Rpc, RpcMethodNames, RpcRequestResults } from './Rpc';
 import { SdkStorage, SdkStorageKeys } from './SdkStorage';
 import { CHAINS, hexChainId } from '../utils/chains';
 import { getAppId } from '../utils/getAppId';
+import { ClientEventName, ClientEventNames } from '../utils/clientEvents';
 
 export type WalletSDKConfig = {
   appId?: string;
+  appUrl?: string;
 };
 
 /**
@@ -21,17 +23,20 @@ export class WalletSDK {
   public provider: Provider;
 
   constructor(config?: WalletSDKConfig) {
-    if (config?.appId) {
+    if (config?.appId || config?.appUrl) {
       window.Grindery = {
         ...(window.Grindery || {}),
         appId: config?.appId,
+        appUrl: config?.appUrl,
       };
     }
+
     this.storage.setValue(
       SdkStorageKeys.chainId,
       this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0]
     );
     this.provider = this.getWeb3Provider();
+    this.initTracking();
     this.provider.on(ProviderEvents.pair, this.handlePairing);
   }
 
@@ -154,6 +159,7 @@ export class WalletSDK {
     userId: string
   ): Promise<RpcRequestResults.getUserWalletAddress> {
     const rpc = new Rpc();
+    this.trackClientEvent(ClientEventNames.walletAddressRequested, { userId });
     return await rpc.sendRpcApiRequest<RpcRequestResults.getUserWalletAddress>(
       RpcMethodNames.getUserWalletAddress,
       { appId: getAppId(), userId }
@@ -234,5 +240,71 @@ export class WalletSDK {
     } else {
       window.open(redirectUrl, '_blank');
     }
+  }
+
+  /**
+   * @summary Tracks client side event
+   * @since 0.4.2
+   * @private
+   * @param AppEvent
+   * @returns {Promise<void>}
+   */
+  private async trackClientEvent(
+    name: ClientEventName,
+    data?: Record<string, unknown>
+  ): Promise<void> {
+    const appUrl = window.Grindery?.appUrl || window.location.origin;
+    const appId = getAppId();
+    const userTelegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+
+    try {
+      const rpc = new Rpc();
+      await rpc.sendRpcApiRequest<RpcRequestResults.trackClientEvent>(
+        RpcMethodNames.trackClientEvent,
+        {
+          name,
+          appUrl,
+          userTelegramId,
+          data: {
+            ...(data || {}),
+            pageUrl: window.location.href,
+            appId,
+            sessionId: this.storage.getValue(SdkStorageKeys.sessionId),
+            clientId: this.storage.getValue(SdkStorageKeys.clientId),
+            isMiniApp: Boolean(window.Telegram?.initDataUnsafe),
+            miniAppPlatform: window.Telegram?.WebApp?.platform,
+            miniAppSdkVersion: window.Telegram?.WebApp?.version,
+            userAgent: window.navigator.userAgent,
+          },
+        }
+      );
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  /**
+   * @summary Initializes the tracking
+   * @since 0.4.2
+   * @private
+   * @returns {void}
+   */
+  private initTracking(): void {
+    this.trackClientEvent(ClientEventNames.appOpened);
+
+    const onWalletConnect = (wallets: string[]) => {
+      if (wallets.length > 0) {
+        this.trackClientEvent(ClientEventNames.walletConnected, {
+          wallets: wallets,
+        });
+      }
+    };
+
+    const onWalletDisconnect = () => {
+      this.trackClientEvent(ClientEventNames.walletDisconnected);
+    };
+
+    this.on(ProviderEvents.accountsChanged, onWalletConnect);
+    this.on(ProviderEvents.disconnect, onWalletDisconnect);
   }
 }

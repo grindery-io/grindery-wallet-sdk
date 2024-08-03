@@ -7,7 +7,8 @@ export declare enum RpcMethodNames {
     request = "request",
     waitForRequestResult = "waitForRequestResult",
     'disconnect' = "disconnect",
-    getUserWalletAddress = "getUserWalletAddress"
+    getUserWalletAddress = "getUserWalletAddress",
+    trackClientEvent = "trackClientEvent"
 }
 /**
  * @summary The Grindery RPC API request results
@@ -58,6 +59,10 @@ export declare namespace RpcRequestResults {
      * @summary `getUserWalletAddress` method result
      */
     type getUserWalletAddress = string;
+    /**
+     * @summary `trackClientEvent` method result
+     */
+    type trackClientEvent = true;
 }
 /**
  * @summary The Grindery RPC API wrapper class

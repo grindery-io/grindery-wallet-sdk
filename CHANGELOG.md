@@ -1,5 +1,9 @@
 # Grindery Wallet SDK Changelog
 
+## v0.4.2 (2024-08-03)
+
+- Added client events tracking
+
 ## v0.4.1 (2024-07-17)
 
 ### Fixed
