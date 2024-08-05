@@ -182,19 +182,17 @@ The method doesn't require user to go through the [wallet connection process](#w
 ```typescript
 WalletSDK.on('connect', async () => {
   const userId = '123456';
-  const telegramUserWallet =
-    await window.Grindery.WalletSDK.getUserWalletAddress(userId);
+  const telegramUserWallet = await WalletSDK.getUserWalletAddress(userId);
 });
 ```
 
-This can be especially usefull for Telegram mini-apps, where user ID can be detected automatically. For example:
+This can be especially usefull for [Telegram mini-apps](https://core.telegram.org/bots/webapps), where user ID can be detected automatically. For example:
 
 ```typescript
 WalletSDK.on('connect', async () => {
-  const telegramUserWallet =
-    await window.Grindery.WalletSDK.getUserWalletAddress(
-      window.Telegram?.WebApp?.initDataUnsafe?.user?.id
-    );
+  const telegramUserWallet = await WalletSDK.getUserWalletAddress(
+    window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+  );
 });
 ```
 

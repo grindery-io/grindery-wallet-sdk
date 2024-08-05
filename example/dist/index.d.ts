@@ -5,6 +5,7 @@ declare global {
         ethereum?: any;
         Grindery?: {
             appId?: string;
+            appUrl?: string;
             WalletSDK?: WalletSDK;
         };
     }

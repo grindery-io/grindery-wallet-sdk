@@ -3,6 +3,7 @@ import { Provider } from './Provider';
 import { RpcRequestResults } from './Rpc';
 export type WalletSDKConfig = {
     appId?: string;
+    appUrl?: string;
 };
 /**
  * @summary The Wallet SDK class
@@ -123,4 +124,19 @@ export declare class WalletSDK {
      * @returns {void}
      */
     private handlePairing;
+    /**
+     * @summary Tracks client side event
+     * @since 0.4.2
+     * @private
+     * @param AppEvent
+     * @returns {Promise<void>}
+     */
+    private trackClientEvent;
+    /**
+     * @summary Initializes the tracking
+     * @since 0.4.2
+     * @private
+     * @returns {void}
+     */
+    private initTracking;
 }
