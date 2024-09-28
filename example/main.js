@@ -230,9 +230,10 @@ const onPairing = (data, target) => {
   if (!target) {
     return;
   }
-  const redirectUrl = data.shortToken
-    ? `https://walletconnect.grindery.com/connect/wc?uri=${data.shortToken}`
-    : data.connectUrlBrowser || data.connectUrl || '';
+  const redirectUrl =
+    data.connectUrlBrowser || data.connectUrl || data.shortToken
+      ? `https://wallet.grindery.com/connect/wc?uri=${data.shortToken}`
+      : '';
   if (redirectUrl) {
     target.innerHTML = `
     <p class="text-center mb-4">Approve wallet connection in Grindery Bot</p>
