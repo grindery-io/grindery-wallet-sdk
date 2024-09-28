@@ -254,8 +254,8 @@ export class Provider extends EventEmitter {
           ProviderMethodNames.eth_accounts,
           params ? (Array.isArray(params) ? params : [params]) : []
         )) as ProviderRequestResults.eth_accounts;
-        this.emit(ProviderEvents.accountsChanged, result);
         this.storage.setValue(SdkStorageKeys.address, result[0] || '');
+        this.emit(ProviderEvents.accountsChanged, result);
         return result;
       } catch (error) {
         throw newProviderError(error);

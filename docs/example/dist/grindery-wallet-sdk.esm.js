@@ -1066,8 +1066,8 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
               return _this.rpc.sendAndWaitRpcRequest(ProviderMethodNames.eth_accounts, params ? Array.isArray(params) ? params : [params] : []);
             case 3:
               result = _context3.sent;
-              _this.emit(ProviderEvents.accountsChanged, result);
               _this.storage.setValue(SdkStorageKeys.address, result[0] || '');
+              _this.emit(ProviderEvents.accountsChanged, result);
               return _context3.abrupt("return", result);
             case 9:
               _context3.prev = 9;
@@ -1413,6 +1413,73 @@ var ClientEventNames;
 })(ClientEventNames || (ClientEventNames = {}));
 
 /**
+ * @summary The Grindery Wallet API wrapper class
+ * @since 0.5.0
+ */
+var WalletAPI = /*#__PURE__*/function () {
+  function WalletAPI() {}
+  var _proto = WalletAPI.prototype;
+  /**
+   * @summary Sends a request to the Grindery Wallet API
+   * @public
+   * @param {string} path API route path
+   * @param {string} method Optional. The request method. Default is 'GET'.
+   * @param {object} body Optional. The request body.
+   * @returns {T} The result of the API request
+   */
+  _proto.sendApiRequest =
+  /*#__PURE__*/
+  function () {
+    var _sendApiRequest = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(path, method, body) {
+      var storage, sessionId, address, response;
+      return _regeneratorRuntime().wrap(function _callee$(_context) {
+        while (1) switch (_context.prev = _context.next) {
+          case 0:
+            storage = new SdkStorage();
+            sessionId = storage.getValue(SdkStorageKeys.sessionId);
+            address = storage.getValue(SdkStorageKeys.address);
+            if (!(!sessionId || !address)) {
+              _context.next = 5;
+              break;
+            }
+            throw new Error('Not connected to the wallet');
+          case 5:
+            _context.next = 7;
+            return fetch("https://wallet-api.grindery.com" + (path.startsWith('/') ? path : '/' + path), {
+              method: method || 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: "Bearer " + address + ":" + sessionId
+              },
+              body: body ? JSON.stringify(body) : undefined
+            });
+          case 7:
+            response = _context.sent;
+            if (response.ok) {
+              _context.next = 10;
+              break;
+            }
+            throw new Error("Failed to fetch " + path);
+          case 10:
+            _context.next = 12;
+            return response.json();
+          case 12:
+            return _context.abrupt("return", _context.sent);
+          case 13:
+          case "end":
+            return _context.stop();
+        }
+      }, _callee);
+    }));
+    function sendApiRequest(_x, _x2, _x3) {
+      return _sendApiRequest.apply(this, arguments);
+    }
+    return sendApiRequest;
+  }();
+  return WalletAPI;
+}();
+
+/**
  * @summary The Wallet SDK class
  * @since 0.2.0
  */
@@ -1428,6 +1495,11 @@ var WalletSDK = /*#__PURE__*/function () {
      * @private
      */
     this.storage = new SdkStorage();
+    /**
+     * @summary The Grindery Wallet user
+     * @private
+     */
+    this.user = null;
     if (config != null && config.appId || config != null && config.appUrl) {
       window.Grindery = _extends({}, window.Grindery || {}, {
         appId: config == null ? void 0 : config.appId,
@@ -1693,7 +1765,50 @@ var WalletSDK = /*#__PURE__*/function () {
   _proto.removeListener = function removeListener(event, callback) {
     this.provider.removeListener(event, callback);
     return this;
-  };
+  }
+  /**
+   * @summary Gets the Grindery user information
+   * @public
+   * @since 0.5.0
+   * @returns {Promise<User>} The Grindery user information
+   */;
+  _proto.getUser =
+  /*#__PURE__*/
+  function () {
+    var _getUser = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee7() {
+      var api;
+      return _regeneratorRuntime().wrap(function _callee7$(_context7) {
+        while (1) switch (_context7.prev = _context7.next) {
+          case 0:
+            if (this.user) {
+              _context7.next = 11;
+              break;
+            }
+            api = new WalletAPI();
+            _context7.prev = 2;
+            _context7.next = 5;
+            return api.sendApiRequest('/v2/me');
+          case 5:
+            this.user = _context7.sent;
+            _context7.next = 11;
+            break;
+          case 8:
+            _context7.prev = 8;
+            _context7.t0 = _context7["catch"](2);
+            throw new Error(_context7.t0 instanceof Error ? _context7.t0.message : 'Failed to fetch user information');
+          case 11:
+            return _context7.abrupt("return", this.user);
+          case 12:
+          case "end":
+            return _context7.stop();
+        }
+      }, _callee7, this, [[2, 8]]);
+    }));
+    function getUser() {
+      return _getUser.apply(this, arguments);
+    }
+    return getUser;
+  }();
   /**
    * @summary Gets the Grindery Wallet ethereum provider
    * @returns {Provider} The Grindery Wallet ethereum provider
@@ -1739,18 +1854,18 @@ var WalletSDK = /*#__PURE__*/function () {
   _proto.trackClientEvent =
   /*#__PURE__*/
   function () {
-    var _trackClientEvent = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee7(name, data) {
+    var _trackClientEvent = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8(name, data) {
       var _window$Grindery, _window$Telegram2;
       var appUrl, appId, userTelegramId, _window$Telegram3, _window$Telegram4, _window$Telegram5, rpc;
-      return _regeneratorRuntime().wrap(function _callee7$(_context7) {
-        while (1) switch (_context7.prev = _context7.next) {
+      return _regeneratorRuntime().wrap(function _callee8$(_context8) {
+        while (1) switch (_context8.prev = _context8.next) {
           case 0:
             appUrl = ((_window$Grindery = window.Grindery) == null ? void 0 : _window$Grindery.appUrl) || window.location.origin;
             appId = getAppId();
             userTelegramId = (_window$Telegram2 = window.Telegram) == null || (_window$Telegram2 = _window$Telegram2.WebApp) == null || (_window$Telegram2 = _window$Telegram2.initDataUnsafe) == null || (_window$Telegram2 = _window$Telegram2.user) == null ? void 0 : _window$Telegram2.id;
-            _context7.prev = 3;
+            _context8.prev = 3;
             rpc = new Rpc();
-            _context7.next = 7;
+            _context8.next = 7;
             return rpc.sendRpcApiRequest(RpcMethodNames.trackClientEvent, {
               name: name,
               appUrl: appUrl,
@@ -1767,16 +1882,16 @@ var WalletSDK = /*#__PURE__*/function () {
               })
             });
           case 7:
-            _context7.next = 11;
+            _context8.next = 11;
             break;
           case 9:
-            _context7.prev = 9;
-            _context7.t0 = _context7["catch"](3);
+            _context8.prev = 9;
+            _context8.t0 = _context8["catch"](3);
           case 11:
           case "end":
-            return _context7.stop();
+            return _context8.stop();
         }
-      }, _callee7, this, [[3, 9]]);
+      }, _callee8, this, [[3, 9]]);
     }));
     function trackClientEvent(_x5, _x6) {
       return _trackClientEvent.apply(this, arguments);

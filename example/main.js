@@ -85,6 +85,11 @@ const showConnectedWallet = (address, target) => {
             </button>
         </div>
         <div class="mt-4">
+            <button id="getUser" class="py-2 px-4 bg-blue-500 text-white rounded-xl disabled:opacity-50">
+            Get user data
+            </button>
+        </div>
+        <div class="mt-4">
             <button id="gws_disconnect" class="py-2 px-4 bg-red-500 text-white rounded-xl disabled:opacity-50">
               Disconnect wallet
             </button>
@@ -182,6 +187,7 @@ const listenWalletButtonsClicks = (address, target) => {
   const signButton = target.querySelector('#personal_sign');
   const sendButton = target.querySelector('#eth_sendTransaction');
   const switchChainButton = target.querySelector('#wallet_switchEthereumChain');
+  const getUserButton = target.querySelector('#getUser');
   const disconnectButton = target.querySelector('#gws_disconnect');
   if (signButton) {
     signButton.addEventListener('click', (event) =>
@@ -197,6 +203,21 @@ const listenWalletButtonsClicks = (address, target) => {
     switchChainButton.addEventListener('click', (event) =>
       onSwitchChainButtonclick(event, switchChainButton)
     );
+  }
+  if (getUserButton) {
+    getUserButton.addEventListener('click', (event) => {
+      getUserButton.disabled = true;
+      WalletSDK.getUser()
+        .then((user) => {
+          alert(JSON.stringify(user));
+          getUserButton.disabled = false;
+        })
+        .catch((error) => {
+          console.error('getUser', error);
+          alert('Error: ' + error.message);
+          getUserButton.disabled = false;
+        });
+    });
   }
   if (disconnectButton) {
     disconnectButton.addEventListener('click', (event) =>

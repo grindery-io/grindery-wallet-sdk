@@ -5,6 +5,8 @@ import { SdkStorage, SdkStorageKeys } from './SdkStorage';
 import { CHAINS, hexChainId } from '../utils/chains';
 import { getAppId } from '../utils/getAppId';
 import { ClientEventName, ClientEventNames } from '../utils/clientEvents';
+import { User } from '../utils/user';
+import { WalletAPI } from './WalletAPI';
 
 export type WalletSDKConfig = {
   appId?: string;
@@ -191,10 +193,36 @@ export class WalletSDK {
   }
 
   /**
+   * @summary Gets the Grindery user information
+   * @public
+   * @since 0.5.0
+   * @returns {Promise<User>} The Grindery user information
+   */
+  public async getUser(): Promise<User> {
+    if (!this.user) {
+      const api = new WalletAPI();
+      try {
+        this.user = await api.sendApiRequest<User>('/v2/me');
+      } catch (e) {
+        throw new Error(
+          e instanceof Error ? e.message : 'Failed to fetch user information'
+        );
+      }
+    }
+    return this.user;
+  }
+
+  /**
    * @summary SdkStorage class instance
    * @private
    */
   private storage: SdkStorage = new SdkStorage();
+
+  /**
+   * @summary The Grindery Wallet user
+   * @private
+   */
+  private user: User | null = null;
 
   /**
    * @summary Gets the Grindery Wallet ethereum provider
