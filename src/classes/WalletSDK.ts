@@ -254,17 +254,21 @@ export class WalletSDK {
    */
   private handlePairing({
     shortToken,
+    connectUrl,
     connectUrlBrowser,
   }: RpcRequestResults.requestPairing): void {
     const WebApp = window.Telegram?.WebApp;
-    const redirectUrl = `https://walletconnect.grindery.com/connect/wc?uri=${shortToken}`;
+    const redirectUrl =
+      connectUrlBrowser ||
+      `https://wallet.grindery.com/connect/wc?uri=${shortToken}`;
     if (
       WebApp &&
       WebApp.openTelegramLink &&
       WebApp.platform &&
-      WebApp.platform !== 'unknown'
+      WebApp.platform !== 'unknown' &&
+      connectUrl
     ) {
-      WebApp.openTelegramLink(connectUrlBrowser);
+      WebApp.openTelegramLink(connectUrl);
     } else {
       window.open(redirectUrl, '_blank');
     }

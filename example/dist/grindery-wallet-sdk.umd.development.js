@@ -1841,11 +1841,12 @@
     _proto.handlePairing = function handlePairing(_ref) {
       var _window$Telegram;
       var shortToken = _ref.shortToken,
+        connectUrl = _ref.connectUrl,
         connectUrlBrowser = _ref.connectUrlBrowser;
       var WebApp = (_window$Telegram = window.Telegram) == null ? void 0 : _window$Telegram.WebApp;
-      var redirectUrl = "https://walletconnect.grindery.com/connect/wc?uri=" + shortToken;
-      if (WebApp && WebApp.openTelegramLink && WebApp.platform && WebApp.platform !== 'unknown') {
-        WebApp.openTelegramLink(connectUrlBrowser);
+      var redirectUrl = connectUrlBrowser || "https://wallet.grindery.com/connect/wc?uri=" + shortToken;
+      if (WebApp && WebApp.openTelegramLink && WebApp.platform && WebApp.platform !== 'unknown' && connectUrl) {
+        WebApp.openTelegramLink(connectUrl);
       } else {
         window.open(redirectUrl, '_blank');
       }

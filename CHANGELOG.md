@@ -2,8 +2,14 @@
 
 ## v0.5.0 (2024-09-27)
 
-- Added [`WalletAPI` class](https://grindery-io.github.io/grindery-wallet-sdk/classes/classes_WalletAPI.WalletAPI.html), a simple wrapper for Grindery Wallet API
-- Added [`getUser` SDK method](https://github.com/grindery-io/grindery-wallet-sdk#getting-user-information), allowing to get information about connected Grindery user
+### Added
+
+- [`WalletAPI` class](https://grindery-io.github.io/grindery-wallet-sdk/classes/classes_WalletAPI.WalletAPI.html), a simple wrapper for Grindery Wallet API
+- [`getUser` SDK method](https://github.com/grindery-io/grindery-wallet-sdk#getting-user-information), allowing to get information about connected Grindery user
+
+### Fixed
+
+- Pairing redirect [issue](https://github.com/grindery-io/grindery-wallet-sdk/issues/8) when SDK used in the Telegram Mini App
 
 ## v0.4.2 (2024-08-03)
 

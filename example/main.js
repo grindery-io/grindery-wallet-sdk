@@ -231,7 +231,7 @@ const onPairing = (data, target) => {
     return;
   }
   const redirectUrl =
-    data.connectUrlBrowser || data.connectUrl || data.shortToken
+    data.connectUrlBrowser || data.shortToken
       ? `https://wallet.grindery.com/connect/wc?uri=${data.shortToken}`
       : '';
   if (redirectUrl) {
