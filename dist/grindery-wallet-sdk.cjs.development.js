@@ -1847,7 +1847,7 @@ var WalletSDK = /*#__PURE__*/function () {
       connectUrl = _ref.connectUrl,
       connectUrlBrowser = _ref.connectUrlBrowser;
     var WebApp = (_window$Telegram = window.Telegram) == null ? void 0 : _window$Telegram.WebApp;
-    var redirectUrl = connectUrlBrowser || "https://wallet.grindery.com/connect/wc?uri=" + shortToken;
+    var redirectUrl = connectUrlBrowser || "https://www.grindery.com/connect/wc?uri=" + shortToken;
     if (WebApp && WebApp.openTelegramLink && WebApp.platform && WebApp.platform !== 'unknown' && connectUrl) {
       WebApp.openTelegramLink(connectUrl);
     } else {

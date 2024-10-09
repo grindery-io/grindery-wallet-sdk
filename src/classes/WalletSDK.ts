@@ -260,7 +260,7 @@ export class WalletSDK {
     const WebApp = window.Telegram?.WebApp;
     const redirectUrl =
       connectUrlBrowser ||
-      `https://wallet.grindery.com/connect/wc?uri=${shortToken}`;
+      `https://www.grindery.com/connect/wc?uri=${shortToken}`;
     if (
       WebApp &&
       WebApp.openTelegramLink &&
