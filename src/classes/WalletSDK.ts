@@ -202,7 +202,7 @@ export class WalletSDK {
     if (!this.user) {
       const api = new WalletAPI();
       try {
-        this.user = await api.sendApiRequest<User>('/v2/me');
+        this.user = await api.sendApiRequest<User>('gw_getMe');
       } catch (e) {
         throw new Error(
           e instanceof Error ? e.message : 'Failed to fetch user information'

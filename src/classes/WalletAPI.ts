@@ -8,40 +8,35 @@ export class WalletAPI {
   /**
    * @summary Sends a request to the Grindery Wallet API
    * @public
-   * @param {string} path API route path
-   * @param {string} method Optional. The request method. Default is 'GET'.
-   * @param {object} body Optional. The request body.
+   * @param {string} method JSON-RPC method name
+   * @param {object} params JSON-RPC method parameters, optional
    * @returns {T} The result of the API request
    */
-  public async sendApiRequest<T>(
-    path: string,
-    method?: string,
-    body?: object
-  ): Promise<T> {
+  public async sendApiRequest<T>(method: string, params?: object): Promise<T> {
     const storage = new SdkStorage();
     const sessionId = storage.getValue(SdkStorageKeys.sessionId);
     const address = storage.getValue(SdkStorageKeys.address);
     if (!sessionId || !address) {
       throw new Error('Not connected to the wallet');
     }
-    const response = await fetch(
-      `https://wallet-api.grindery.com${
-        path.startsWith('/') ? path : '/' + path
-      }`,
-      {
-        method: method || 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${address}:${sessionId}`,
-        },
-        body: body ? JSON.stringify(body) : undefined,
-      }
-    );
+    const response = await fetch(`https://wallet-api.grindery.com/v3`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${address}:${sessionId}`,
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method,
+        params: params || {},
+      }),
+    });
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch ${path}`);
+      throw new Error(`Failed to call ${method}`);
     }
-
-    return (await response.json()) as T;
+    const json = await response.json();
+    return json.result as T;
   }
 }

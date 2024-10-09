@@ -6,10 +6,9 @@ export declare class WalletAPI {
     /**
      * @summary Sends a request to the Grindery Wallet API
      * @public
-     * @param {string} path API route path
-     * @param {string} method Optional. The request method. Default is 'GET'.
-     * @param {object} body Optional. The request body.
+     * @param {string} method JSON-RPC method name
+     * @param {object} params JSON-RPC method parameters, optional
      * @returns {T} The result of the API request
      */
-    sendApiRequest<T>(path: string, method?: string, body?: object): Promise<T>;
+    sendApiRequest<T>(method: string, params?: object): Promise<T>;
 }

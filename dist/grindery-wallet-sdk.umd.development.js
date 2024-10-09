@@ -1428,16 +1428,15 @@
     /**
      * @summary Sends a request to the Grindery Wallet API
      * @public
-     * @param {string} path API route path
-     * @param {string} method Optional. The request method. Default is 'GET'.
-     * @param {object} body Optional. The request body.
+     * @param {string} method JSON-RPC method name
+     * @param {object} params JSON-RPC method parameters, optional
      * @returns {T} The result of the API request
      */
     _proto.sendApiRequest =
     /*#__PURE__*/
     function () {
-      var _sendApiRequest = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(path, method, body) {
-        var storage, sessionId, address, response;
+      var _sendApiRequest = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(method, params) {
+        var storage, sessionId, address, response, json;
         return _regeneratorRuntime().wrap(function _callee$(_context) {
           while (1) switch (_context.prev = _context.next) {
             case 0:
@@ -1451,13 +1450,18 @@
               throw new Error('Not connected to the wallet');
             case 5:
               _context.next = 7;
-              return fetch("https://wallet-api.grindery.com" + (path.startsWith('/') ? path : '/' + path), {
-                method: method || 'GET',
+              return fetch("https://wallet-api.grindery.com/v3", {
+                method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
                   Authorization: "Bearer " + address + ":" + sessionId
                 },
-                body: body ? JSON.stringify(body) : undefined
+                body: JSON.stringify({
+                  jsonrpc: '2.0',
+                  id: 1,
+                  method: method,
+                  params: params || {}
+                })
               });
             case 7:
               response = _context.sent;
@@ -1465,19 +1469,20 @@
                 _context.next = 10;
                 break;
               }
-              throw new Error("Failed to fetch " + path);
+              throw new Error("Failed to call " + method);
             case 10:
               _context.next = 12;
               return response.json();
             case 12:
-              return _context.abrupt("return", _context.sent);
-            case 13:
+              json = _context.sent;
+              return _context.abrupt("return", json.result);
+            case 14:
             case "end":
               return _context.stop();
           }
         }, _callee);
       }));
-      function sendApiRequest(_x, _x2, _x3) {
+      function sendApiRequest(_x, _x2) {
         return _sendApiRequest.apply(this, arguments);
       }
       return sendApiRequest;
@@ -1793,7 +1798,7 @@
               api = new WalletAPI();
               _context7.prev = 2;
               _context7.next = 5;
-              return api.sendApiRequest('/v2/me');
+              return api.sendApiRequest('gw_getMe');
             case 5:
               this.user = _context7.sent;
               _context7.next = 11;
