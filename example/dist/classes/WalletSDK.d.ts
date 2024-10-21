@@ -1,6 +1,7 @@
 import { ProviderEventName } from './EventEmitter';
 import { Provider } from './Provider';
 import { RpcRequestResults } from './Rpc';
+import { User } from '../utils/user';
 export type WalletSDKConfig = {
     appId?: string;
     appUrl?: string;
@@ -108,10 +109,22 @@ export declare class WalletSDK {
      */
     removeListener(event: ProviderEventName, callback: Function): this;
     /**
+     * @summary Gets the Grindery user information
+     * @public
+     * @since 0.5.0
+     * @returns {Promise<User>} The Grindery user information
+     */
+    getUser(): Promise<User>;
+    /**
      * @summary SdkStorage class instance
      * @private
      */
     private storage;
+    /**
+     * @summary The Grindery Wallet user
+     * @private
+     */
+    private user;
     /**
      * @summary Gets the Grindery Wallet ethereum provider
      * @returns {Provider} The Grindery Wallet ethereum provider

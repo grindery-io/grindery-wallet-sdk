@@ -25,6 +25,7 @@ The SDK enables your dapp to provide a seamless user experience for Grindery use
   - [Sending transactions](#sending-transactions)
   - [Signing](#signing)
   - [Chain switching](#chain-switching)
+  - [Getting user information](#getting-user-information)
 - [Advanced usage](#advanced-usage)
   - [Full documentation](#full-documentation)
   - [Injected Ethereum Provider](#injected-ethereum-provider)
@@ -236,6 +237,16 @@ To get the current network use [`getChain()`](https://grindery-io.github.io/grin
 ```typescript
 WalletSDK.on('accountsChanged', () => {
   console.log('chainId', WalletSDK.getChain());
+});
+```
+
+## Getting user information
+
+To get information about connected Grindery Wallet User use [`getUser()`](https://grindery-io.github.io/grindery-wallet-sdk/classes/classes_WalletSDK.WalletSDK.html#getUser) method, once the wallet is connected:
+
+```typescript
+WalletSDK.on('accountsChanged', async () => {
+  console.log('user', await WalletSDK.getUser());
 });
 ```
 
