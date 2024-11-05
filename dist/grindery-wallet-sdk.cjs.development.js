@@ -1512,12 +1512,7 @@ var getConfigFromDataAttributes = function getConfigFromDataAttributes() {
  */
 var WalletSDK = /*#__PURE__*/function () {
   function WalletSDK(config) {
-    var _window$Grindery,
-      _window$Grindery2,
-      _window$Grindery3,
-      _window$Grindery4,
-      _window$Grindery5,
-      _this = this;
+    var _window$Grindery, _window$Grindery2, _window$Grindery3, _window$Grindery4, _window$Grindery5;
     /**
      * @summary The provider instance
      * @public
@@ -1550,10 +1545,8 @@ var WalletSDK = /*#__PURE__*/function () {
     window.Grindery = _extends({}, window.Grindery, this.config);
     this.storage.setValue(SdkStorageKeys.chainId, this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0]);
     this.provider = this.getWeb3Provider();
-    setTimeout(function () {
-      _this.initTracking();
-      _this.provider.on(ProviderEvents.pair, _this.handlePairing);
-    }, 500);
+    this.initTracking();
+    this.provider.on(ProviderEvents.pair, this.handlePairing);
   }
   /**
    * @summary Checks if the provider is connected to the server
@@ -1902,7 +1895,7 @@ var WalletSDK = /*#__PURE__*/function () {
    * @returns {void}
    */;
   _proto.handlePairing = function handlePairing(_ref) {
-    var _window$Telegram;
+    var _window$Telegram, _this$config;
     var shortToken = _ref.shortToken,
       connectUrl = _ref.connectUrl,
       connectUrlBrowser = _ref.connectUrlBrowser,
@@ -1910,7 +1903,7 @@ var WalletSDK = /*#__PURE__*/function () {
     var WebApp = (_window$Telegram = window.Telegram) == null ? void 0 : _window$Telegram.WebApp;
     var redirectUrl = connectUrlBrowser || "https://www.grindery.com/connect/wc?uri=" + shortToken;
     var miniAppUrl = "https://t.me/GrinderyConnectTestBot/confirm?startapp=" + (miniAppPairingToken == null ? void 0 : miniAppPairingToken.replaceAll('.', '___'));
-    if (miniAppPairingToken && this.config && this.config.redirectMode && this.config.redirectMode === 'tg') {
+    if (miniAppPairingToken && (this == null || (_this$config = this.config) == null ? void 0 : _this$config.redirectMode) === 'tg') {
       try {
         var _window$Telegram2;
         (_window$Telegram2 = window.Telegram) == null || (_window$Telegram2 = _window$Telegram2.WebApp) == null || _window$Telegram2.openTelegramLink == null || _window$Telegram2.openTelegramLink(miniAppUrl);
@@ -1987,16 +1980,16 @@ var WalletSDK = /*#__PURE__*/function () {
    */
   ;
   _proto.initTracking = function initTracking() {
-    var _this2 = this;
+    var _this = this;
     var onWalletConnect = function onWalletConnect(wallets) {
       if (wallets.length > 0) {
-        _this2.trackClientEvent(ClientEventNames.walletConnected, {
+        _this.trackClientEvent(ClientEventNames.walletConnected, {
           wallets: wallets
         });
       }
     };
     var onWalletDisconnect = function onWalletDisconnect() {
-      _this2.trackClientEvent(ClientEventNames.walletDisconnected);
+      _this.trackClientEvent(ClientEventNames.walletDisconnected);
     };
     this.on(ProviderEvents.accountsChanged, onWalletConnect);
     this.on(ProviderEvents.disconnect, onWalletDisconnect);

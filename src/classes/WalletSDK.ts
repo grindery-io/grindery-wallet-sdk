@@ -74,10 +74,8 @@ export class WalletSDK {
       this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0]
     );
     this.provider = this.getWeb3Provider();
-    setTimeout(() => {
-      this.initTracking();
-      this.provider.on(ProviderEvents.pair, this.handlePairing);
-    }, 500);
+    this.initTracking();
+    this.provider.on(ProviderEvents.pair, this.handlePairing);
   }
 
   /**
@@ -334,12 +332,7 @@ export class WalletSDK {
       '.',
       '___'
     )}`;
-    if (
-      miniAppPairingToken &&
-      this.config &&
-      this.config.redirectMode &&
-      this.config.redirectMode === 'tg'
-    ) {
+    if (miniAppPairingToken && this?.config?.redirectMode === 'tg') {
       try {
         window.Telegram?.WebApp?.openTelegramLink?.(miniAppUrl);
       } catch (e) {
