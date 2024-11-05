@@ -19,19 +19,23 @@ export class WalletAPI {
     if (!sessionId || !address) {
       throw new Error('Not connected to the wallet');
     }
-    const response = await fetch(`https://wallet-api.grindery.com/v3`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${address}:${sessionId}`,
-      },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        id: 1,
-        method,
-        params: params || {},
-      }),
-    });
+    const response = await fetch(
+      window.Grindery?.WalletSDK?.config.walletApiUrl ||
+        'https://wallet-api.grindery.com/v3',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${address}:${sessionId}`,
+        },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: 1,
+          method,
+          params: params || {},
+        }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`Failed to call ${method}`);

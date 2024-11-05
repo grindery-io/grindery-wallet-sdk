@@ -232,7 +232,7 @@ const onPairing = (data, target) => {
   }
   const redirectUrl =
     data.connectUrlBrowser || data.shortToken
-      ? `https://wallet.grindery.com/connect/wc?uri=${data.shortToken}`
+      ? `https://www.grindery.com/connect/wc?uri=${data.shortToken}`
       : '';
   if (redirectUrl) {
     target.innerHTML = `
@@ -291,11 +291,17 @@ const listenProviderEvents = (target) => {
 
 const onProviderConnect = ({ chainId }) => {
   const targetEl = document.getElementById('sdk-example');
+
   newChainId = chainId === '0xcc' ? 'eip155:137' : 'eip155:204';
+
   newChainName = chainId === '0xcc' ? 'Polygon' : 'opBNB';
+
   listenProviderEvents(targetEl);
+
   showUsername(targetEl);
+
   getAndShowWalletAddress(document.getElementById('wallet'));
+
   showConnectButton(targetEl);
 };
 

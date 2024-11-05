@@ -1,4 +1,5 @@
 import { EventEmitter } from './EventEmitter';
+import { WalletSDKConfig } from './WalletSDK';
 /**
  * @summary The Grindery wallet provider methods
  * @since 0.2.0
@@ -56,7 +57,8 @@ export interface ProviderRequestArguments {
  */
 export declare class Provider extends EventEmitter {
     isGrinderyWallet: boolean;
-    constructor();
+    private config;
+    constructor(config: WalletSDKConfig);
     /**
      * @public
      * @returns {boolean} True if the provider is connected to the server.

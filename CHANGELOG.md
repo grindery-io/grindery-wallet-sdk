@@ -1,5 +1,11 @@
 # Grindery Wallet SDK Changelog
 
+## v0.5.1 (2024-11-05)
+
+### Added
+
+- New config options for testing and developing purposes
+
 ## v0.5.0 (2024-09-27)
 
 ### Added

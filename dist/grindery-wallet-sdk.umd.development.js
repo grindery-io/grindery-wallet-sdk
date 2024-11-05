@@ -498,29 +498,6 @@
   }();
 
   /**
-   * @summary Get the app id from the script tag or window object
-   * @returns {string} The app id
-   */
-  var getAppId = function getAppId() {
-    var _window$Grindery;
-    var appId = '';
-    var elements = document.querySelectorAll('[data-app-id]');
-    for (var i = 0; i < elements.length; i++) {
-      var element = elements[i];
-      var value = element.getAttribute('data-app-id');
-      var src = element.getAttribute('src');
-      var isGrinderySrc = src && src.includes('grindery-wallet-sdk');
-      if (value && isGrinderySrc) {
-        appId = value;
-      }
-    }
-    if ((_window$Grindery = window.Grindery) != null && _window$Grindery.appId) {
-      appId = window.Grindery.appId;
-    }
-    return appId;
-  };
-
-  /**
    * @summary Generates a Version 4 (pseudorandom) UUID
    * @returns {string} The UUID
    */
@@ -694,8 +671,10 @@
    * @since 0.2.0
    */
   var Rpc = /*#__PURE__*/function () {
-    function Rpc() {}
-    var _proto = Rpc.prototype;
+    function Rpc(config) {
+      this.config = void 0;
+      this.config = config;
+    }
     /**
      * @summary Sends a provider request to the Grindery RPC API and waits for the result.
      * @public
@@ -704,6 +683,7 @@
      * @param {number} timeout Optional. The time in milliseconds to wait for the request result. Default is 30000.
      * @returns The result of the provider request
      */
+    var _proto = Rpc.prototype;
     _proto.sendAndWaitRpcRequest =
     /*#__PURE__*/
     function () {
@@ -821,7 +801,7 @@
             case 0:
               _context4.prev = 0;
               _context4.next = 3;
-              return fetch('https://walletconnect-api.grindery.com', {
+              return fetch(this.config.pairingApiUrl || 'https://walletconnect-api.grindery.com', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json'
@@ -866,7 +846,7 @@
             case "end":
               return _context4.stop();
           }
-        }, _callee4, null, [[0, 14]]);
+        }, _callee4, this, [[0, 14]]);
       }));
       function sendRpcApiRequest(_x8, _x9) {
         return _sendRpcApiRequest.apply(this, arguments);
@@ -898,13 +878,14 @@
    * @extends EventEmitter
    */
   var Provider = /*#__PURE__*/function (_EventEmitter) {
-    function Provider() {
+    function Provider(config) {
       var _this$methods;
       var _this;
       _this = _EventEmitter.call(this) || this;
       _this.isGrinderyWallet = true;
+      _this.config = void 0;
       _this.storage = new SdkStorage();
-      _this.rpc = new Rpc();
+      _this.rpc = void 0;
       /**
        * @summary Switches the chain
        * @since 0.3.0
@@ -1004,8 +985,10 @@
                 _this.storage.clear();
                 _context2.next = 31;
                 return _this.rpc.sendRpcApiRequest(RpcMethodNames.requestPairing, {
-                  appId: getAppId(),
-                  clientId: _this.storage.getValue(SdkStorageKeys.clientId)
+                  appId: _this.config.appId || '',
+                  clientId: _this.storage.getValue(SdkStorageKeys.clientId),
+                  redirectMode: _this.config.redirectMode,
+                  redirectUrl: _this.config.appUrl
                 });
               case 31:
                 result = _context2.sent;
@@ -1022,7 +1005,8 @@
                 _this.emit(ProviderEvents.pair, {
                   shortToken: result.shortToken,
                   connectUrl: result.connectUrl,
-                  connectUrlBrowser: result.connectUrlBrowser
+                  connectUrlBrowser: result.connectUrlBrowser,
+                  miniAppPairingToken: result.miniAppPairingToken
                 });
                 _context2.next = 41;
                 return _this.rpc.sendRpcApiRequest(RpcMethodNames.waitForPairingResult, {
@@ -1196,6 +1180,8 @@
           return _ref10.apply(this, arguments);
         };
       }(), _this$methods);
+      _this.config = config;
+      _this.rpc = new Rpc(_this.config);
       _this.injectProvider();
       _this.listenForRequestProviderEvents();
       _this.announceProvider();
@@ -1436,6 +1422,7 @@
     /*#__PURE__*/
     function () {
       var _sendApiRequest = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(method, params) {
+        var _window$Grindery;
         var storage, sessionId, address, response, json;
         return _regeneratorRuntime().wrap(function _callee$(_context) {
           while (1) switch (_context.prev = _context.next) {
@@ -1450,7 +1437,7 @@
               throw new Error('Not connected to the wallet');
             case 5:
               _context.next = 7;
-              return fetch("https://wallet-api.grindery.com/v3", {
+              return fetch(((_window$Grindery = window.Grindery) == null || (_window$Grindery = _window$Grindery.WalletSDK) == null ? void 0 : _window$Grindery.config.walletApiUrl) || 'https://wallet-api.grindery.com/v3', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -1491,16 +1478,60 @@
   }();
 
   /**
+   * @summary Get the SDK config from the script tag data attributes
+   * @returns {object} The SDK config object
+   */
+  var getConfigFromDataAttributes = function getConfigFromDataAttributes() {
+    var config = {};
+    var attributesMap = {
+      'data-app-id': 'appId',
+      'data-wallet-api-url': 'walletApiUrl',
+      'data-pairing-api-url': 'pairingApiUrl',
+      'data-app-url': 'appUrl',
+      'data-redirect-mode': 'redirectMode'
+    };
+    for (var _i = 0, _Object$entries = Object.entries(attributesMap); _i < _Object$entries.length; _i++) {
+      var _Object$entries$_i = _Object$entries[_i],
+        attribute = _Object$entries$_i[0],
+        key = _Object$entries$_i[1];
+      var elements = document.querySelectorAll("[" + attribute + "]");
+      for (var j = 0; j < elements.length; j++) {
+        var element = elements[j];
+        var value = element.getAttribute(attribute);
+        var src = element.getAttribute('src');
+        var isGrinderySrc = src && src.includes('grindery-wallet-sdk');
+        if (isGrinderySrc && value) {
+          config[key] = value;
+        }
+      }
+    }
+    return config;
+  };
+
+  /**
    * @summary The Wallet SDK class
    * @since 0.2.0
    */
   var WalletSDK = /*#__PURE__*/function () {
     function WalletSDK(config) {
+      var _window$Grindery,
+        _window$Grindery2,
+        _window$Grindery3,
+        _window$Grindery4,
+        _window$Grindery5,
+        _this = this;
       /**
        * @summary The provider instance
        * @public
        */
       this.provider = void 0;
+      this.config = {
+        appId: ((_window$Grindery = window.Grindery) == null ? void 0 : _window$Grindery.appId) || '',
+        appUrl: ((_window$Grindery2 = window.Grindery) == null ? void 0 : _window$Grindery2.appUrl) || window.location.origin,
+        redirectMode: (_window$Grindery3 = window.Grindery) == null ? void 0 : _window$Grindery3.redirectMode,
+        pairingApiUrl: (_window$Grindery4 = window.Grindery) == null ? void 0 : _window$Grindery4.pairingApiUrl,
+        walletApiUrl: (_window$Grindery5 = window.Grindery) == null ? void 0 : _window$Grindery5.walletApiUrl
+      };
       /**
        * @summary SdkStorage class instance
        * @private
@@ -1511,16 +1542,19 @@
        * @private
        */
       this.user = null;
-      if (config != null && config.appId || config != null && config.appUrl) {
-        window.Grindery = _extends({}, window.Grindery || {}, {
-          appId: config == null ? void 0 : config.appId,
-          appUrl: config == null ? void 0 : config.appUrl
-        });
+      this.config = _extends({}, this.config, config || getConfigFromDataAttributes() || {});
+      if (!this.config.appId) {
+        throw new Error('App ID is required');
+      }
+      if (!this.config.appUrl) {
+        throw new Error('App URL is required');
       }
       this.storage.setValue(SdkStorageKeys.chainId, this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0]);
       this.provider = this.getWeb3Provider();
-      this.initTracking();
-      this.provider.on(ProviderEvents.pair, this.handlePairing);
+      setTimeout(function () {
+        _this.initTracking();
+        _this.provider.on(ProviderEvents.pair, _this.handlePairing);
+      }, 500);
     }
     /**
      * @summary Checks if the provider is connected to the server
@@ -1732,13 +1766,13 @@
         return _regeneratorRuntime().wrap(function _callee6$(_context6) {
           while (1) switch (_context6.prev = _context6.next) {
             case 0:
-              rpc = new Rpc();
+              rpc = new Rpc(this.config);
               this.trackClientEvent(ClientEventNames.walletAddressRequested, {
                 userId: userId
               });
               _context6.next = 4;
               return rpc.sendRpcApiRequest(RpcMethodNames.getUserWalletAddress, {
-                appId: getAppId(),
+                appId: this.config.appId,
                 userId: userId
               });
             case 4:
@@ -1819,7 +1853,28 @@
         return _getUser.apply(this, arguments);
       }
       return getUser;
-    }();
+    }()
+    /**
+     * @summary Sets the application ID
+     * @public
+     * @since 0.5.1
+     * @param {string} appId The application ID
+     * @returns {void}
+     */
+    ;
+    _proto.setAppId = function setAppId(appId) {
+      this.config.appId = appId;
+    }
+    /**
+     * @summary Sets the SDK config
+     * @public
+     * @since 0.5.1
+     * @param {object} config The partial SDK config object
+     * @returns {void}
+     */;
+    _proto.setConfig = function setConfig(config) {
+      this.config = _extends({}, this.config, config);
+    };
     /**
      * @summary Gets the Grindery Wallet ethereum provider
      * @returns {Provider} The Grindery Wallet ethereum provider
@@ -1833,7 +1888,7 @@
         provider = window.ethereum;
       }
       if (!provider) {
-        provider = new Provider();
+        provider = new Provider(this.config);
       }
       return provider;
     }
@@ -1847,9 +1902,20 @@
       var _window$Telegram;
       var shortToken = _ref.shortToken,
         connectUrl = _ref.connectUrl,
-        connectUrlBrowser = _ref.connectUrlBrowser;
+        connectUrlBrowser = _ref.connectUrlBrowser,
+        miniAppPairingToken = _ref.miniAppPairingToken;
       var WebApp = (_window$Telegram = window.Telegram) == null ? void 0 : _window$Telegram.WebApp;
       var redirectUrl = connectUrlBrowser || "https://www.grindery.com/connect/wc?uri=" + shortToken;
+      var miniAppUrl = "https://t.me/GrinderyConnectTestBot/confirm?startapp=" + (miniAppPairingToken == null ? void 0 : miniAppPairingToken.replaceAll('.', '___'));
+      if (miniAppPairingToken && this.config.redirectMode === 'tg') {
+        try {
+          var _window$Telegram2;
+          (_window$Telegram2 = window.Telegram) == null || (_window$Telegram2 = _window$Telegram2.WebApp) == null || _window$Telegram2.openTelegramLink == null || _window$Telegram2.openTelegramLink(miniAppUrl);
+        } catch (e) {
+          window.open(miniAppUrl, '_blank');
+        }
+        return;
+      }
       if (WebApp && WebApp.openTelegramLink && WebApp.platform && WebApp.platform !== 'unknown' && connectUrl) {
         WebApp.openTelegramLink(connectUrl);
       } else {
@@ -1867,16 +1933,16 @@
     /*#__PURE__*/
     function () {
       var _trackClientEvent = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8(name, data) {
-        var _window$Grindery, _window$Telegram2;
-        var appUrl, appId, userTelegramId, _window$Telegram3, _window$Telegram4, _window$Telegram5, rpc;
+        var _window$Telegram3;
+        var appUrl, appId, userTelegramId, _window$Telegram4, _window$Telegram5, _window$Telegram6, rpc;
         return _regeneratorRuntime().wrap(function _callee8$(_context8) {
           while (1) switch (_context8.prev = _context8.next) {
             case 0:
-              appUrl = ((_window$Grindery = window.Grindery) == null ? void 0 : _window$Grindery.appUrl) || window.location.origin;
-              appId = getAppId();
-              userTelegramId = (_window$Telegram2 = window.Telegram) == null || (_window$Telegram2 = _window$Telegram2.WebApp) == null || (_window$Telegram2 = _window$Telegram2.initDataUnsafe) == null || (_window$Telegram2 = _window$Telegram2.user) == null ? void 0 : _window$Telegram2.id;
+              appUrl = this.config.appUrl;
+              appId = this.config.appId;
+              userTelegramId = String(((_window$Telegram3 = window.Telegram) == null || (_window$Telegram3 = _window$Telegram3.WebApp) == null || (_window$Telegram3 = _window$Telegram3.initDataUnsafe) == null || (_window$Telegram3 = _window$Telegram3.user) == null ? void 0 : _window$Telegram3.id) || '');
               _context8.prev = 3;
-              rpc = new Rpc();
+              rpc = new Rpc(this.config);
               _context8.next = 7;
               return rpc.sendRpcApiRequest(RpcMethodNames.trackClientEvent, {
                 name: name,
@@ -1887,9 +1953,9 @@
                   appId: appId,
                   sessionId: this.storage.getValue(SdkStorageKeys.sessionId),
                   clientId: this.storage.getValue(SdkStorageKeys.clientId),
-                  isMiniApp: Boolean((_window$Telegram3 = window.Telegram) == null ? void 0 : _window$Telegram3.initDataUnsafe),
-                  miniAppPlatform: (_window$Telegram4 = window.Telegram) == null || (_window$Telegram4 = _window$Telegram4.WebApp) == null ? void 0 : _window$Telegram4.platform,
-                  miniAppSdkVersion: (_window$Telegram5 = window.Telegram) == null || (_window$Telegram5 = _window$Telegram5.WebApp) == null ? void 0 : _window$Telegram5.version,
+                  isMiniApp: Boolean((_window$Telegram4 = window.Telegram) == null ? void 0 : _window$Telegram4.initDataUnsafe),
+                  miniAppPlatform: (_window$Telegram5 = window.Telegram) == null || (_window$Telegram5 = _window$Telegram5.WebApp) == null ? void 0 : _window$Telegram5.platform,
+                  miniAppSdkVersion: (_window$Telegram6 = window.Telegram) == null || (_window$Telegram6 = _window$Telegram6.WebApp) == null ? void 0 : _window$Telegram6.version,
                   userAgent: window.navigator.userAgent
                 })
               });
@@ -1918,17 +1984,16 @@
      */
     ;
     _proto.initTracking = function initTracking() {
-      var _this = this;
-      this.trackClientEvent(ClientEventNames.appOpened);
+      var _this2 = this;
       var onWalletConnect = function onWalletConnect(wallets) {
         if (wallets.length > 0) {
-          _this.trackClientEvent(ClientEventNames.walletConnected, {
+          _this2.trackClientEvent(ClientEventNames.walletConnected, {
             wallets: wallets
           });
         }
       };
       var onWalletDisconnect = function onWalletDisconnect() {
-        _this.trackClientEvent(ClientEventNames.walletDisconnected);
+        _this2.trackClientEvent(ClientEventNames.walletDisconnected);
       };
       this.on(ProviderEvents.accountsChanged, onWalletConnect);
       this.on(ProviderEvents.disconnect, onWalletDisconnect);
