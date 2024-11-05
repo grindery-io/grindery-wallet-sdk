@@ -334,7 +334,12 @@ export class WalletSDK {
       '.',
       '___'
     )}`;
-    if (miniAppPairingToken && this.config.redirectMode === 'tg') {
+    if (
+      miniAppPairingToken &&
+      this.config &&
+      this.config.redirectMode &&
+      this.config.redirectMode === 'tg'
+    ) {
       try {
         window.Telegram?.WebApp?.openTelegramLink?.(miniAppUrl);
       } catch (e) {

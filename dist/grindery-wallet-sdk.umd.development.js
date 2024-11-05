@@ -1912,7 +1912,7 @@
       var WebApp = (_window$Telegram = window.Telegram) == null ? void 0 : _window$Telegram.WebApp;
       var redirectUrl = connectUrlBrowser || "https://www.grindery.com/connect/wc?uri=" + shortToken;
       var miniAppUrl = "https://t.me/GrinderyConnectTestBot/confirm?startapp=" + (miniAppPairingToken == null ? void 0 : miniAppPairingToken.replaceAll('.', '___'));
-      if (miniAppPairingToken && this.config.redirectMode === 'tg') {
+      if (miniAppPairingToken && this.config && this.config.redirectMode && this.config.redirectMode === 'tg') {
         try {
           var _window$Telegram2;
           (_window$Telegram2 = window.Telegram) == null || (_window$Telegram2 = _window$Telegram2.WebApp) == null || _window$Telegram2.openTelegramLink == null || _window$Telegram2.openTelegramLink(miniAppUrl);
