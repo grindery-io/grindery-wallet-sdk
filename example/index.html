@@ -25,16 +25,19 @@
         appId: staging
           ? 'fd5d46af-7f31-4bae-b39e-c13336fe0e0d'
           : '763d2695-d237-45fe-bfe8-2e4e26ff707b',
-        appUrl:
-          window.Telegram &&
-          window.Telegram.WebApp &&
-          window.Telegram.WebApp.initData
-            ? `https://t.me/yrednirgdevtestbot/walletsdk${
-                staging ? '?staging=true' : ''
-              }`
-            : `https://grindery-io.github.io/grindery-wallet-sdk/example${
-                staging ? '?staging=true' : ''
-              }`,
+        appUrl: staging
+          ? `https://t.me/yrednirgdevtestbot/walletsdk${
+              staging ? '?staging=true' : ''
+            }`
+          : window.Telegram &&
+            window.Telegram.WebApp &&
+            window.Telegram.WebApp.initData
+          ? `https://t.me/yrednirgdevtestbot/walletsdk${
+              staging ? '?staging=true' : ''
+            }`
+          : `https://grindery-io.github.io/grindery-wallet-sdk/example${
+              staging ? '?staging=true' : ''
+            }`,
       };
     </script>
     <script src="dist/grindery-wallet-sdk.umd.production.min.js"></script>
