@@ -64,6 +64,11 @@ export class WalletSDK {
       throw new Error('App URL is required');
     }
 
+    window.Grindery = {
+      ...window.Grindery,
+      ...this.config,
+    };
+
     this.storage.setValue(
       SdkStorageKeys.chainId,
       this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0]
@@ -254,6 +259,10 @@ export class WalletSDK {
    */
   public setAppId(appId: string): void {
     this.config.appId = appId;
+    window.Grindery = {
+      ...window.Grindery,
+      appId,
+    };
   }
 
   /**
@@ -265,6 +274,10 @@ export class WalletSDK {
    */
   public setConfig(config: Partial<WalletSDKConfig>): void {
     this.config = { ...this.config, ...config };
+    window.Grindery = {
+      ...window.Grindery,
+      ...this.config,
+    };
   }
 
   /**

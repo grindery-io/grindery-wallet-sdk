@@ -4,7 +4,7 @@ describe('Rpc', () => {
   let rpc: Rpc;
 
   beforeEach(() => {
-    rpc = new Rpc();
+    rpc = new Rpc({ appId: '1234', appUrl: 'https://example.com' });
   });
 
   describe('sendAndWaitRpcRequest', () => {

@@ -1549,6 +1549,7 @@
       if (!this.config.appUrl) {
         throw new Error('App URL is required');
       }
+      window.Grindery = _extends({}, window.Grindery, this.config);
       this.storage.setValue(SdkStorageKeys.chainId, this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0]);
       this.provider = this.getWeb3Provider();
       setTimeout(function () {
@@ -1864,6 +1865,9 @@
     ;
     _proto.setAppId = function setAppId(appId) {
       this.config.appId = appId;
+      window.Grindery = _extends({}, window.Grindery, {
+        appId: appId
+      });
     }
     /**
      * @summary Sets the SDK config
@@ -1874,6 +1878,7 @@
      */;
     _proto.setConfig = function setConfig(config) {
       this.config = _extends({}, this.config, config);
+      window.Grindery = _extends({}, window.Grindery, this.config);
     };
     /**
      * @summary Gets the Grindery Wallet ethereum provider
