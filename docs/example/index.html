@@ -7,37 +7,14 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      const staging =
-        new URLSearchParams(window.location.search).get('staging') === 'true';
       window.Grindery = {
-        pairingApiUrl: staging
-          ? 'https://walletconnect-api-staging.grindery.com'
-          : 'https://walletconnect-api.grindery.com',
-        walletApiUrl: staging
-          ? 'https://wallet-api-staging.grindery.com/v3'
-          : 'https://wallet-api.grindery.com/v3',
-        redirectMode: staging ? 'tg' : undefined,
-        redirectUrl: staging
-          ? `https://t.me/yrednirgdevtestbot/walletsdk${
-              staging ? '?staging=true' : ''
-            }`
-          : undefined,
-        appId: staging
-          ? 'fd5d46af-7f31-4bae-b39e-c13336fe0e0d'
-          : '763d2695-d237-45fe-bfe8-2e4e26ff707b',
-        appUrl: staging
-          ? `https://t.me/yrednirgdevtestbot/walletsdk${
-              staging ? '?staging=true' : ''
-            }`
-          : window.Telegram &&
-            window.Telegram.WebApp &&
-            window.Telegram.WebApp.initData
-          ? `https://t.me/yrednirgdevtestbot/walletsdk${
-              staging ? '?staging=true' : ''
-            }`
-          : `https://grindery-io.github.io/grindery-wallet-sdk/example${
-              staging ? '?staging=true' : ''
-            }`,
+        appId: '763d2695-d237-45fe-bfe8-2e4e26ff707b',
+        appUrl:
+          window.Telegram &&
+          window.Telegram.WebApp &&
+          window.Telegram.WebApp.initData
+            ? 'https://t.me/yrednirgdevtestbot/walletsdk'
+            : 'https://grindery-io.github.io/grindery-wallet-sdk/example',
       };
     </script>
     <script src="dist/grindery-wallet-sdk.umd.production.min.js"></script>
