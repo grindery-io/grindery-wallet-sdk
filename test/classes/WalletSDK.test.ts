@@ -6,7 +6,9 @@ describe('WalletSDK', () => {
   let walletSDK: WalletSDK;
 
   beforeEach(() => {
-    walletSDK = new WalletSDK();
+    walletSDK = new WalletSDK({
+      appId: '1234',
+    });
   });
 
   it('should create an instance of WalletSDK', () => {
@@ -88,6 +90,7 @@ describe('WalletSDK', () => {
 
   it('should set an app id if provided', () => {
     new WalletSDK({ appId: '1234' });
+    // @ts-ignore
     expect(window.Grindery).toHaveProperty('appId', '1234');
   });
 });

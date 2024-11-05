@@ -1,5 +1,6 @@
 import { ProviderError, ProviderErrors } from './ProviderError';
 import { SdkStorage, SdkStorageKeys } from './SdkStorage';
+import { WalletSDKConfig } from './WalletSDK';
 
 /**
  * @summary The Grindery RPC API method names
@@ -45,6 +46,7 @@ export namespace RpcRequestResults {
     connectUrl: string;
     connectUrlBrowser: string;
     shortToken: string;
+    miniAppPairingToken?: string;
   };
 
   /**
@@ -80,6 +82,12 @@ export namespace RpcRequestResults {
  * @since 0.2.0
  */
 export class Rpc {
+  private config: WalletSDKConfig;
+
+  constructor(config: WalletSDKConfig) {
+    this.config = config;
+  }
+
   /**
    * @summary Sends a provider request to the Grindery RPC API and waits for the result.
    * @public
@@ -154,18 +162,21 @@ export class Rpc {
     params?: unknown[] | object
   ): Promise<T> {
     try {
-      const response = await fetch('https://walletconnect-api.grindery.com', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          id: 1,
-          method: `gws_${method}`,
-          params: params || [],
-        }),
-      });
+      const response = await fetch(
+        this.config.pairingApiUrl || 'https://walletconnect-api.grindery.com',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: 1,
+            method: `gws_${method}`,
+            params: params || [],
+          }),
+        }
+      );
       const data = await response.json();
       if (data.error) {
         throw new ProviderError(data.error.message, data.error.code);

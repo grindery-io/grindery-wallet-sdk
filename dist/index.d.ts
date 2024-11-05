@@ -6,6 +6,9 @@ declare global {
         Grindery?: {
             appId?: string;
             appUrl?: string;
+            redirectMode?: string;
+            pairingApiUrl?: string;
+            walletApiUrl?: string;
             WalletSDK?: WalletSDK;
         };
     }

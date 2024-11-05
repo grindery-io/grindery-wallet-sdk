@@ -3,14 +3,33 @@ import { Provider, ProviderMethodNames } from './Provider';
 import { Rpc, RpcMethodNames, RpcRequestResults } from './Rpc';
 import { SdkStorage, SdkStorageKeys } from './SdkStorage';
 import { CHAINS, hexChainId } from '../utils/chains';
-import { getAppId } from '../utils/getAppId';
 import { ClientEventName, ClientEventNames } from '../utils/clientEvents';
 import { User } from '../utils/user';
 import { WalletAPI } from './WalletAPI';
+import { getConfigFromDataAttributes } from '../utils/getConfigFromDataAttributes';
 
 export type WalletSDKConfig = {
-  appId?: string;
-  appUrl?: string;
+  /**
+   * @summary The application ID, obtained in the Grindery bot by the dApp developer.
+   */
+  appId: string;
+  /**
+   * @summary The application URL. If not provided, the current page URL will be used.
+   */
+  appUrl: string;
+  /**
+   * @summary The pairing API URL. If not provided, the default Grindery API URL will be used.
+   */
+  pairingApiUrl?: string;
+  /**
+   * @summary The wallet API URL. If not provided, the default Grindery API URL will be used.
+   */
+  walletApiUrl?: string;
+  /**
+   * @summary The redirect mode for the pairing request.
+   * @example 'tg' | 'url' | 'close'
+   */
+  redirectMode?: string;
 };
 
 /**
@@ -24,22 +43,41 @@ export class WalletSDK {
    */
   public provider: Provider;
 
-  constructor(config?: WalletSDKConfig) {
-    if (config?.appId || config?.appUrl) {
-      window.Grindery = {
-        ...(window.Grindery || {}),
-        appId: config?.appId,
-        appUrl: config?.appUrl,
-      };
+  public config: WalletSDKConfig = {
+    appId: window.Grindery?.appId || '',
+    appUrl: window.Grindery?.appUrl || window.location.origin,
+    redirectMode: window.Grindery?.redirectMode,
+    pairingApiUrl: window.Grindery?.pairingApiUrl,
+    walletApiUrl: window.Grindery?.walletApiUrl,
+  };
+
+  constructor(config?: Partial<WalletSDKConfig>) {
+    this.config = {
+      ...this.config,
+      ...(config || getConfigFromDataAttributes() || {}),
+    };
+
+    if (!this.config.appId) {
+      throw new Error('App ID is required');
     }
+    if (!this.config.appUrl) {
+      throw new Error('App URL is required');
+    }
+
+    window.Grindery = {
+      ...window.Grindery,
+      ...this.config,
+    };
 
     this.storage.setValue(
       SdkStorageKeys.chainId,
       this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0]
     );
     this.provider = this.getWeb3Provider();
-    this.initTracking();
-    this.provider.on(ProviderEvents.pair, this.handlePairing);
+    setTimeout(() => {
+      this.initTracking();
+      this.provider.on(ProviderEvents.pair, this.handlePairing);
+    }, 500);
   }
 
   /**
@@ -160,11 +198,11 @@ export class WalletSDK {
   public async getUserWalletAddress(
     userId: string
   ): Promise<RpcRequestResults.getUserWalletAddress> {
-    const rpc = new Rpc();
+    const rpc = new Rpc(this.config);
     this.trackClientEvent(ClientEventNames.walletAddressRequested, { userId });
     return await rpc.sendRpcApiRequest<RpcRequestResults.getUserWalletAddress>(
       RpcMethodNames.getUserWalletAddress,
-      { appId: getAppId(), userId }
+      { appId: this.config.appId, userId }
     );
   }
 
@@ -213,6 +251,36 @@ export class WalletSDK {
   }
 
   /**
+   * @summary Sets the application ID
+   * @public
+   * @since 0.5.1
+   * @param {string} appId The application ID
+   * @returns {void}
+   */
+  public setAppId(appId: string): void {
+    this.config.appId = appId;
+    window.Grindery = {
+      ...window.Grindery,
+      appId,
+    };
+  }
+
+  /**
+   * @summary Sets the SDK config
+   * @public
+   * @since 0.5.1
+   * @param {object} config The partial SDK config object
+   * @returns {void}
+   */
+  public setConfig(config: Partial<WalletSDKConfig>): void {
+    this.config = { ...this.config, ...config };
+    window.Grindery = {
+      ...window.Grindery,
+      ...this.config,
+    };
+  }
+
+  /**
    * @summary SdkStorage class instance
    * @private
    */
@@ -241,7 +309,7 @@ export class WalletSDK {
       provider = window.ethereum;
     }
     if (!provider) {
-      provider = new Provider();
+      provider = new Provider(this.config);
     }
     return provider;
   }
@@ -256,11 +324,24 @@ export class WalletSDK {
     shortToken,
     connectUrl,
     connectUrlBrowser,
+    miniAppPairingToken,
   }: RpcRequestResults.requestPairing): void {
     const WebApp = window.Telegram?.WebApp;
     const redirectUrl =
       connectUrlBrowser ||
       `https://www.grindery.com/connect/wc?uri=${shortToken}`;
+    const miniAppUrl = `https://t.me/GrinderyConnectTestBot/confirm?startapp=${miniAppPairingToken?.replaceAll(
+      '.',
+      '___'
+    )}`;
+    if (miniAppPairingToken && this.config.redirectMode === 'tg') {
+      try {
+        window.Telegram?.WebApp?.openTelegramLink?.(miniAppUrl);
+      } catch (e) {
+        window.open(miniAppUrl, '_blank');
+      }
+      return;
+    }
     if (
       WebApp &&
       WebApp.openTelegramLink &&
@@ -285,12 +366,14 @@ export class WalletSDK {
     name: ClientEventName,
     data?: Record<string, unknown>
   ): Promise<void> {
-    const appUrl = window.Grindery?.appUrl || window.location.origin;
-    const appId = getAppId();
-    const userTelegramId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+    const appUrl = this.config.appUrl;
+    const appId = this.config.appId;
+    const userTelegramId = String(
+      window.Telegram?.WebApp?.initDataUnsafe?.user?.id || ''
+    );
 
     try {
-      const rpc = new Rpc();
+      const rpc = new Rpc(this.config);
       await rpc.sendRpcApiRequest<RpcRequestResults.trackClientEvent>(
         RpcMethodNames.trackClientEvent,
         {
@@ -322,8 +405,6 @@ export class WalletSDK {
    * @returns {void}
    */
   private initTracking(): void {
-    this.trackClientEvent(ClientEventNames.appOpened);
-
     const onWalletConnect = (wallets: string[]) => {
       if (wallets.length > 0) {
         this.trackClientEvent(ClientEventNames.walletConnected, {

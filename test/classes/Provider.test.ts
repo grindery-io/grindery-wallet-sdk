@@ -6,7 +6,7 @@ describe('Provider', () => {
   let provider: Provider;
 
   beforeEach(() => {
-    provider = new Provider();
+    provider = new Provider({ appId: '1234', appUrl: 'https://example.com' });
   });
 
   it('should be an instance of Provider', () => {

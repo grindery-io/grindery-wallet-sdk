@@ -1,3 +1,4 @@
+import { WalletSDKConfig } from './WalletSDK';
 /**
  * @summary The Grindery RPC API method names
  */
@@ -40,6 +41,7 @@ export declare namespace RpcRequestResults {
         connectUrl: string;
         connectUrlBrowser: string;
         shortToken: string;
+        miniAppPairingToken?: string;
     };
     /**
      * @summary `request` method result
@@ -69,6 +71,8 @@ export declare namespace RpcRequestResults {
  * @since 0.2.0
  */
 export declare class Rpc {
+    private config;
+    constructor(config: WalletSDKConfig);
     /**
      * @summary Sends a provider request to the Grindery RPC API and waits for the result.
      * @public

@@ -1,10 +1,10 @@
-import { getAppId } from '../utils/getAppId';
 import { providerInfo } from '../utils/providerInfo';
 import { EventEmitter, ProviderEvents } from './EventEmitter';
 import { ProviderErrors, newProviderError } from './ProviderError';
 import { Rpc, RpcMethodNames, RpcRequestResults } from './Rpc';
 import { SdkStorage, SdkStorageKeys } from './SdkStorage';
 import { CHAINS, hexChainId, unhexChainId } from '../utils/chains';
+import { WalletSDKConfig } from './WalletSDK';
 
 /**
  * @summary The Grindery wallet provider methods
@@ -71,10 +71,12 @@ export interface ProviderRequestArguments {
  */
 export class Provider extends EventEmitter {
   public isGrinderyWallet: boolean = true;
+  private config: WalletSDKConfig;
 
-  constructor() {
+  constructor(config: WalletSDKConfig) {
     super();
-
+    this.config = config;
+    this.rpc = new Rpc(this.config);
     this.injectProvider();
     this.listenForRequestProviderEvents();
     this.announceProvider();
@@ -115,7 +117,7 @@ export class Provider extends EventEmitter {
 
   private storage: SdkStorage = new SdkStorage();
 
-  private rpc: Rpc = new Rpc();
+  private rpc: Rpc;
 
   /**
    * @summary Switches the chain
@@ -158,14 +160,14 @@ export class Provider extends EventEmitter {
       if (this.storage.getValue('pairingToken')) {
         try {
           const pairResult =
-            (await this.rpc.sendRpcApiRequest<RpcRequestResults.waitForPairingResult>(
+            await this.rpc.sendRpcApiRequest<RpcRequestResults.waitForPairingResult>(
               RpcMethodNames.waitForPairingResult,
               {
                 pairingToken: this.storage.getValue(
                   SdkStorageKeys.pairingToken
                 ),
               }
-            )) as RpcRequestResults.waitForPairingResult;
+            );
 
           this.storage.clear();
           this.storage.setValue(
@@ -189,13 +191,15 @@ export class Provider extends EventEmitter {
       try {
         this.storage.clear();
         const result =
-          (await this.rpc.sendRpcApiRequest<RpcRequestResults.requestPairing>(
+          await this.rpc.sendRpcApiRequest<RpcRequestResults.requestPairing>(
             RpcMethodNames.requestPairing,
             {
-              appId: getAppId(),
+              appId: this.config.appId || '',
               clientId: this.storage.getValue(SdkStorageKeys.clientId),
+              redirectMode: this.config.redirectMode,
+              redirectUrl: this.config.appUrl,
             }
-          )) as RpcRequestResults.requestPairing;
+          );
 
         if (!result.pairingToken || !result.connectUrl) {
           throw ProviderErrors.PairingFailed;
@@ -212,14 +216,15 @@ export class Provider extends EventEmitter {
           shortToken: result.shortToken,
           connectUrl: result.connectUrl,
           connectUrlBrowser: result.connectUrlBrowser,
+          miniAppPairingToken: result.miniAppPairingToken,
         });
         const pairResult =
-          (await this.rpc.sendRpcApiRequest<RpcRequestResults.waitForPairingResult>(
+          await this.rpc.sendRpcApiRequest<RpcRequestResults.waitForPairingResult>(
             RpcMethodNames.waitForPairingResult,
             {
               pairingToken: result.pairingToken,
             }
-          )) as RpcRequestResults.waitForPairingResult;
+          );
 
         this.storage.setValue(
           SdkStorageKeys.sessionId,

@@ -3,8 +3,27 @@ import { Provider } from './Provider';
 import { RpcRequestResults } from './Rpc';
 import { User } from '../utils/user';
 export type WalletSDKConfig = {
-    appId?: string;
-    appUrl?: string;
+    /**
+     * @summary The application ID, obtained in the Grindery bot by the dApp developer.
+     */
+    appId: string;
+    /**
+     * @summary The application URL. If not provided, the current page URL will be used.
+     */
+    appUrl: string;
+    /**
+     * @summary The pairing API URL. If not provided, the default Grindery API URL will be used.
+     */
+    pairingApiUrl?: string;
+    /**
+     * @summary The wallet API URL. If not provided, the default Grindery API URL will be used.
+     */
+    walletApiUrl?: string;
+    /**
+     * @summary The redirect mode for the pairing request.
+     * @example 'tg' | 'url' | 'close'
+     */
+    redirectMode?: string;
 };
 /**
  * @summary The Wallet SDK class
@@ -16,7 +35,8 @@ export declare class WalletSDK {
      * @public
      */
     provider: Provider;
-    constructor(config?: WalletSDKConfig);
+    config: WalletSDKConfig;
+    constructor(config?: Partial<WalletSDKConfig>);
     /**
      * @summary Checks if the provider is connected to the server
      * @returns {boolean} True if the provider is connected to the server.
@@ -115,6 +135,22 @@ export declare class WalletSDK {
      * @returns {Promise<User>} The Grindery user information
      */
     getUser(): Promise<User>;
+    /**
+     * @summary Sets the application ID
+     * @public
+     * @since 0.5.1
+     * @param {string} appId The application ID
+     * @returns {void}
+     */
+    setAppId(appId: string): void;
+    /**
+     * @summary Sets the SDK config
+     * @public
+     * @since 0.5.1
+     * @param {object} config The partial SDK config object
+     * @returns {void}
+     */
+    setConfig(config: Partial<WalletSDKConfig>): void;
     /**
      * @summary SdkStorage class instance
      * @private
