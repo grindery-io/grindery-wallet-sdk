@@ -1001,6 +1001,7 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
               _this.storage.setValue(SdkStorageKeys.connectUrlBrowser, result.connectUrlBrowser);
               _this.storage.setValue(SdkStorageKeys.shortToken, result.shortToken);
               _this.emit(ProviderEvents.pair, {
+                config: _this.config,
                 shortToken: result.shortToken,
                 connectUrl: result.connectUrl,
                 connectUrlBrowser: result.connectUrlBrowser,
@@ -1895,15 +1896,16 @@ var WalletSDK = /*#__PURE__*/function () {
    * @returns {void}
    */;
   _proto.handlePairing = function handlePairing(_ref) {
-    var _window$Telegram, _this$config;
-    var shortToken = _ref.shortToken,
+    var _window$Telegram;
+    var config = _ref.config,
+      shortToken = _ref.shortToken,
       connectUrl = _ref.connectUrl,
       connectUrlBrowser = _ref.connectUrlBrowser,
       miniAppPairingToken = _ref.miniAppPairingToken;
     var WebApp = (_window$Telegram = window.Telegram) == null ? void 0 : _window$Telegram.WebApp;
     var redirectUrl = connectUrlBrowser || "https://www.grindery.com/connect/wc?uri=" + shortToken;
-    var miniAppUrl = "https://t.me/GrinderyConnectTestBot/confirm?startapp=" + (miniAppPairingToken == null ? void 0 : miniAppPairingToken.replaceAll('.', '___'));
-    if (miniAppPairingToken && (this == null || (_this$config = this.config) == null ? void 0 : _this$config.redirectMode) === 'tg') {
+    var miniAppUrl = miniAppPairingToken ? "https://t.me/GrinderyConnectTestBot/confirm?startapp=" + miniAppPairingToken.replaceAll('.', '___') : '';
+    if (miniAppUrl && (config == null ? void 0 : config.redirectMode) === 'tg') {
       try {
         var _window$Telegram2;
         (_window$Telegram2 = window.Telegram) == null || (_window$Telegram2 = _window$Telegram2.WebApp) == null || _window$Telegram2.openTelegramLink == null || _window$Telegram2.openTelegramLink(miniAppUrl);

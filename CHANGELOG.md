@@ -1,5 +1,11 @@
 # Grindery Wallet SDK Changelog
 
+## v0.5.2 (2024-11-06)
+
+### Fixed
+
+- Minor issues in staging (testing) mode
+
 ## v0.5.1 (2024-11-05)
 
 ### Added

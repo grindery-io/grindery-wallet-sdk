@@ -42,6 +42,7 @@ export namespace RpcRequestResults {
    * @summary `requestPairing` method result
    */
   export type requestPairing = {
+    config?: WalletSDKConfig;
     pairingToken: string;
     connectUrl: string;
     connectUrlBrowser: string;

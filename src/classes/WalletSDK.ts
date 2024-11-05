@@ -319,6 +319,7 @@ export class WalletSDK {
    * @returns {void}
    */
   private handlePairing({
+    config,
     shortToken,
     connectUrl,
     connectUrlBrowser,
@@ -328,11 +329,13 @@ export class WalletSDK {
     const redirectUrl =
       connectUrlBrowser ||
       `https://www.grindery.com/connect/wc?uri=${shortToken}`;
-    const miniAppUrl = `https://t.me/GrinderyConnectTestBot/confirm?startapp=${miniAppPairingToken?.replaceAll(
-      '.',
-      '___'
-    )}`;
-    if (miniAppPairingToken && this?.config?.redirectMode === 'tg') {
+    const miniAppUrl = miniAppPairingToken
+      ? `https://t.me/GrinderyConnectTestBot/confirm?startapp=${miniAppPairingToken.replaceAll(
+          '.',
+          '___'
+        )}`
+      : '';
+    if (miniAppUrl && config?.redirectMode === 'tg') {
       try {
         window.Telegram?.WebApp?.openTelegramLink?.(miniAppUrl);
       } catch (e) {

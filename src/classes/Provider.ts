@@ -213,6 +213,7 @@ export class Provider extends EventEmitter {
         );
         this.storage.setValue(SdkStorageKeys.shortToken, result.shortToken);
         this.emit(ProviderEvents.pair, {
+          config: this.config,
           shortToken: result.shortToken,
           connectUrl: result.connectUrl,
           connectUrlBrowser: result.connectUrlBrowser,
