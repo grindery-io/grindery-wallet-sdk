@@ -24,6 +24,10 @@ export type WalletSDKConfig = {
      * @example 'tg' | 'url' | 'close'
      */
     redirectMode?: string;
+    /**
+     * @summary The default chain ID in CAIP-2 format.
+     */
+    chainId?: string;
 };
 /**
  * @summary The Wallet SDK class

@@ -9,6 +9,7 @@ declare global {
             redirectMode?: string;
             pairingApiUrl?: string;
             walletApiUrl?: string;
+            chainId?: string;
             WalletSDK?: WalletSDK;
         };
     }

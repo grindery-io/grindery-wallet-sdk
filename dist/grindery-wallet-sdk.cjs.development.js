@@ -1135,7 +1135,7 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
         return _regeneratorRuntime().wrap(function _callee7$(_context7) {
           while (1) switch (_context7.prev = _context7.next) {
             case 0:
-              return _context7.abrupt("return", hexChainId(_this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0]));
+              return _context7.abrupt("return", hexChainId(_this.storage.getValue(SdkStorageKeys.chainId) || _this.config.chainId || CHAINS[0]));
             case 1:
             case "end":
               return _context7.stop();
@@ -1186,7 +1186,7 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
     _this.announceProvider();
     window.addEventListener('load', function () {
       _this.emit(ProviderEvents.connect, {
-        chainId: hexChainId(_this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0])
+        chainId: hexChainId(_this.storage.getValue(SdkStorageKeys.chainId) || _this.config.chainId || CHAINS[0])
       });
       _this.restorePairing();
       _this.restoreSession();
@@ -1487,7 +1487,8 @@ var getConfigFromDataAttributes = function getConfigFromDataAttributes() {
     'data-wallet-api-url': 'walletApiUrl',
     'data-pairing-api-url': 'pairingApiUrl',
     'data-app-url': 'appUrl',
-    'data-redirect-mode': 'redirectMode'
+    'data-redirect-mode': 'redirectMode',
+    'data-chain-id': 'chainId'
   };
   for (var _i = 0, _Object$entries = Object.entries(attributesMap); _i < _Object$entries.length; _i++) {
     var _Object$entries$_i = _Object$entries[_i],
@@ -1513,7 +1514,7 @@ var getConfigFromDataAttributes = function getConfigFromDataAttributes() {
  */
 var WalletSDK = /*#__PURE__*/function () {
   function WalletSDK(config) {
-    var _window$Grindery, _window$Grindery2, _window$Grindery3, _window$Grindery4, _window$Grindery5;
+    var _window$Grindery, _window$Grindery2, _window$Grindery3, _window$Grindery4, _window$Grindery5, _window$Grindery6;
     /**
      * @summary The provider instance
      * @public
@@ -1524,7 +1525,8 @@ var WalletSDK = /*#__PURE__*/function () {
       appUrl: ((_window$Grindery2 = window.Grindery) == null ? void 0 : _window$Grindery2.appUrl) || window.location.origin,
       redirectMode: (_window$Grindery3 = window.Grindery) == null ? void 0 : _window$Grindery3.redirectMode,
       pairingApiUrl: (_window$Grindery4 = window.Grindery) == null ? void 0 : _window$Grindery4.pairingApiUrl,
-      walletApiUrl: (_window$Grindery5 = window.Grindery) == null ? void 0 : _window$Grindery5.walletApiUrl
+      walletApiUrl: (_window$Grindery5 = window.Grindery) == null ? void 0 : _window$Grindery5.walletApiUrl,
+      chainId: (_window$Grindery6 = window.Grindery) == null ? void 0 : _window$Grindery6.chainId
     };
     /**
      * @summary SdkStorage class instance
@@ -1544,7 +1546,7 @@ var WalletSDK = /*#__PURE__*/function () {
       throw new Error('App URL is required');
     }
     window.Grindery = _extends({}, window.Grindery, this.config);
-    this.storage.setValue(SdkStorageKeys.chainId, this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0]);
+    this.storage.setValue(SdkStorageKeys.chainId, this.storage.getValue(SdkStorageKeys.chainId) || this.config.chainId || CHAINS[0]);
     this.detectPairingToken();
     this.provider = this.getWeb3Provider();
     this.initTracking();
@@ -1743,7 +1745,7 @@ var WalletSDK = /*#__PURE__*/function () {
    */
   ;
   _proto.getChain = function getChain() {
-    return this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0];
+    return this.storage.getValue(SdkStorageKeys.chainId) || this.config.chainId || CHAINS[0];
   }
   /**
    * @summary Exchange Telegram user ID to Grindery Wallet address

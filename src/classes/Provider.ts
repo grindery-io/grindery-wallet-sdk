@@ -83,7 +83,9 @@ export class Provider extends EventEmitter {
     window.addEventListener('load', () => {
       this.emit(ProviderEvents.connect, {
         chainId: hexChainId(
-          this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0]
+          this.storage.getValue(SdkStorageKeys.chainId) ||
+            this.config.chainId ||
+            CHAINS[0]
         ),
       });
       this.restorePairing();
@@ -322,7 +324,9 @@ export class Provider extends EventEmitter {
       _?: ProviderRequestArgumentsParams
     ): Promise<ProviderRequestResults.eth_chainId> => {
       return hexChainId(
-        this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0]
+        this.storage.getValue(SdkStorageKeys.chainId) ||
+          this.config.chainId ||
+          CHAINS[0]
       );
     },
 

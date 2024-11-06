@@ -30,6 +30,10 @@ export type WalletSDKConfig = {
    * @example 'tg' | 'url' | 'close'
    */
   redirectMode?: string;
+  /**
+   * @summary The default chain ID in CAIP-2 format.
+   */
+  chainId?: string;
 };
 
 /**
@@ -49,6 +53,7 @@ export class WalletSDK {
     redirectMode: window.Grindery?.redirectMode,
     pairingApiUrl: window.Grindery?.pairingApiUrl,
     walletApiUrl: window.Grindery?.walletApiUrl,
+    chainId: window.Grindery?.chainId,
   };
 
   constructor(config?: Partial<WalletSDKConfig>) {
@@ -71,7 +76,9 @@ export class WalletSDK {
 
     this.storage.setValue(
       SdkStorageKeys.chainId,
-      this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0]
+      this.storage.getValue(SdkStorageKeys.chainId) ||
+        this.config.chainId ||
+        CHAINS[0]
     );
     this.detectPairingToken();
     this.provider = this.getWeb3Provider();
@@ -184,7 +191,11 @@ export class WalletSDK {
    * @returns {string} Returns chain id in CAIP-2 format
    */
   public getChain(): string {
-    return this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0];
+    return (
+      this.storage.getValue(SdkStorageKeys.chainId) ||
+      this.config.chainId ||
+      CHAINS[0]
+    );
   }
 
   /**

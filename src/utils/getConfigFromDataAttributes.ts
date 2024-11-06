@@ -12,6 +12,7 @@ export const getConfigFromDataAttributes = (): Partial<WalletSDKConfig> => {
     'data-pairing-api-url': 'pairingApiUrl',
     'data-app-url': 'appUrl',
     'data-redirect-mode': 'redirectMode',
+    'data-chain-id': 'chainId',
   };
   for (const [attribute, key] of Object.entries(attributesMap)) {
     const elements = document.querySelectorAll(`[${attribute}]`);
