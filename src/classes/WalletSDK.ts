@@ -73,6 +73,7 @@ export class WalletSDK {
       SdkStorageKeys.chainId,
       this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0]
     );
+    this.detectPairingToken();
     this.provider = this.getWeb3Provider();
     this.initTracking();
     this.provider.on(ProviderEvents.pair, this.handlePairing);
@@ -420,5 +421,15 @@ export class WalletSDK {
 
     this.on(ProviderEvents.accountsChanged, onWalletConnect);
     this.on(ProviderEvents.disconnect, onWalletDisconnect);
+  }
+
+  private detectPairingToken(): void {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token =
+      urlParams.get('_grinderyPairingToken') ||
+      urlParams.get('tgWebAppStartParam');
+    if (token) {
+      this.storage.setValue(SdkStorageKeys.pairingToken, token);
+    }
   }
 }

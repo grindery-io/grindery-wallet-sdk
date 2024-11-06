@@ -1,5 +1,11 @@
 # Grindery Wallet SDK Changelog
 
+## v0.5.3 (2024-11-06)
+
+### Added
+
+- Automatic `pairingToken` detection for click-less app pairing
+
 ## v0.5.2 (2024-11-06)
 
 ### Fixed

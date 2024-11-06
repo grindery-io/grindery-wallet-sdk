@@ -1545,6 +1545,7 @@ var WalletSDK = /*#__PURE__*/function () {
     }
     window.Grindery = _extends({}, window.Grindery, this.config);
     this.storage.setValue(SdkStorageKeys.chainId, this.storage.getValue(SdkStorageKeys.chainId) || CHAINS[0]);
+    this.detectPairingToken();
     this.provider = this.getWeb3Provider();
     this.initTracking();
     this.provider.on(ProviderEvents.pair, this.handlePairing);
@@ -1995,6 +1996,13 @@ var WalletSDK = /*#__PURE__*/function () {
     };
     this.on(ProviderEvents.accountsChanged, onWalletConnect);
     this.on(ProviderEvents.disconnect, onWalletDisconnect);
+  };
+  _proto.detectPairingToken = function detectPairingToken() {
+    var urlParams = new URLSearchParams(window.location.search);
+    var token = urlParams.get('_grinderyPairingToken') || urlParams.get('tgWebAppStartParam');
+    if (token) {
+      this.storage.setValue(SdkStorageKeys.pairingToken, token);
+    }
   };
   return WalletSDK;
 }();

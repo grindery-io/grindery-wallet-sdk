@@ -188,4 +188,5 @@ export declare class WalletSDK {
      * @returns {void}
      */
     private initTracking;
+    private detectPairingToken;
 }
