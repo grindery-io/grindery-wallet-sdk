@@ -1231,7 +1231,29 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
       return _request.apply(this, arguments);
     }
     return request;
-  }();
+  }()
+  /**
+   * @summary Sends a request to the provider (legacy)
+   * @public
+   * @param {ProviderRequestArguments} args Request arguments
+   * @param {string} args.method The method name
+   * @param {ProviderRequestArgumentsParams} args.params The method parameters
+   * @param {Function} callback The callback function
+   * @deprecated Use `request` method instead
+   * @since 0.5.4
+   * @returns {void} `void`
+   */
+  ;
+  _proto.sendAsync = function sendAsync(_ref12, callback) {
+    var _this$methods$method2, _this$methods3;
+    var method = _ref12.method,
+      params = _ref12.params;
+    (_this$methods$method2 = (_this$methods3 = this.methods)[method]) == null || _this$methods$method2.call(_this$methods3, params).then(function (res) {
+      callback(null, res);
+    })["catch"](function (error) {
+      callback(error);
+    });
+  };
   /**
    * @summary Restores the pairing process if pairing token is stored in the local storage
    * @private
