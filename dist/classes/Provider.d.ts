@@ -73,6 +73,18 @@ export declare class Provider extends EventEmitter {
      * @returns {T} The result of the request
      */
     request<T>({ method, params, }: ProviderRequestArguments): Promise<T>;
+    /**
+     * @summary Sends a request to the provider (legacy)
+     * @public
+     * @param {ProviderRequestArguments} args Request arguments
+     * @param {string} args.method The method name
+     * @param {ProviderRequestArgumentsParams} args.params The method parameters
+     * @param {Function} callback The callback function
+     * @deprecated Use `request` method instead
+     * @since 0.5.4
+     * @returns {void} `void`
+     */
+    sendAsync({ method, params }: ProviderRequestArguments, callback: Function): void;
     private storage;
     private rpc;
     /**

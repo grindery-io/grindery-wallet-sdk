@@ -117,6 +117,30 @@ export class Provider extends EventEmitter {
     return (await this.methods[method]?.(params)) as T;
   }
 
+  /**
+   * @summary Sends a request to the provider (legacy)
+   * @public
+   * @param {ProviderRequestArguments} args Request arguments
+   * @param {string} args.method The method name
+   * @param {ProviderRequestArgumentsParams} args.params The method parameters
+   * @param {Function} callback The callback function
+   * @deprecated Use `request` method instead
+   * @since 0.5.4
+   * @returns {void} `void`
+   */
+  public sendAsync(
+    { method, params }: ProviderRequestArguments,
+    callback: Function
+  ): void {
+    this.methods[method]?.(params)
+      .then((res) => {
+        callback(null, res);
+      })
+      .catch((error) => {
+        callback(error);
+      });
+  }
+
   private storage: SdkStorage = new SdkStorage();
 
   private rpc: Rpc;

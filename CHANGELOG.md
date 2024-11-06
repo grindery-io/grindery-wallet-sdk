@@ -1,5 +1,11 @@
 # Grindery Wallet SDK Changelog
 
+## v0.5.4 (2024-11-07)
+
+### Added
+
+- Support for provider legacy method `sendAsync`, as specified by [EIP-1193 - Appendix III: Legacy Provider API](https://eips.ethereum.org/EIPS/eip-1193#appendix-iii-legacy-provider-api)
+
 ## v0.5.3 (2024-11-06)
 
 ### Added
