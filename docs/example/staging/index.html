@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <title>Grindery Wallet SDK Example STAGING</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       window.Grindery = {
@@ -15,7 +15,6 @@
         appUrl: 'https://t.me/yrednirgdevtestbot/staging',
       };
     </script>
-    <script src="../dist/grindery-wallet-sdk.umd.production.min.js"></script>
   </head>
 
   <body class="bg-white dark:bg-black text-black dark:text-white">
@@ -47,6 +46,7 @@
     <div id="sdk-example" class="px-4 py-4 text-center">
       Waiting wallet provider...
     </div>
+    <script src="../dist/grindery-wallet-sdk.umd.production.min.js"></script>
     <script src="../main.js" type="text/javascript"></script>
   </body>
 </html>

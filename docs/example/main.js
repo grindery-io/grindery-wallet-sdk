@@ -1,4 +1,5 @@
 const WalletSDK = window.Grindery && window.Grindery.WalletSDK;
+const WebApp = window.Telegram && window.Telegram.WebApp;
 
 let newChainId = 'eip155:204';
 let newChainName = 'opBNB';
@@ -10,7 +11,6 @@ const shortenAddress = (address) => {
 };
 
 const showUsername = (target) => {
-  const WebApp = window && window.Telegram && window.Telegram.WebApp;
   if (WebApp) {
     const user = WebApp && WebApp.initDataUnsafe && WebApp.initDataUnsafe.user;
     if (user && target) {
@@ -23,11 +23,10 @@ const showUsername = (target) => {
 };
 
 const getAndShowWalletAddress = (target) => {
-  const WebApp = window && window.Telegram && window.Telegram.WebApp;
   if (WebApp) {
     const user = WebApp && WebApp.initDataUnsafe && WebApp.initDataUnsafe.user;
-    if (user && user.id && target) {
-      window.Grindery.WalletSDK.getUserWalletAddress(user.id)
+    if (user && user.id && target && WalletSDK) {
+      WalletSDK.getUserWalletAddress(user.id)
         .then((address) => {
           if (address) {
             target.innerHTML = `<p class="py-2 px-4 text-text text-center">Auto-detected wallet address: ${shortenAddress(
@@ -110,74 +109,82 @@ const showReloadButton = (target) => {
 };
 
 const onConnectButtonClick = (e, button, target) => {
-  button.innerHTML = 'Connecting...';
-  button.disabled = true;
-
-  WalletSDK.connect().catch((error) => {
-    console.error('connect', error);
-    showReloadButton(target);
-  });
+  if (WalletSDK) {
+    button.innerHTML = 'Connecting...';
+    button.disabled = true;
+    WalletSDK.connect().catch((error) => {
+      console.error('connect', error);
+      showReloadButton(target);
+    });
+  }
 };
 
 const onDisconnectButtonClick = (e, button, target) => {
-  button.innerHTML = 'Connecting...';
-  button.disabled = true;
-
-  WalletSDK.disconnect()
-    .then(() => {
-      showConnectButton(target);
-    })
-    .catch((error) => {
-      console.error('disconnect', error);
-    });
+  if (WalletSDK) {
+    button.innerHTML = 'Connecting...';
+    button.disabled = true;
+    WalletSDK.disconnect()
+      .then(() => {
+        showConnectButton(target);
+      })
+      .catch((error) => {
+        console.error('disconnect', error);
+      });
+  }
 };
 
 const onSignButtonClick = (e, button, address) => {
-  button.disabled = true;
-  button.innerHTML = 'Approve request in Grindery Bot...';
-  WalletSDK.signMessage('Hello, Grindery!')
-    .then((signature) => {
-      console.log('signMessage', signature);
-      button.parentElement.innerHTML = `<p class="text-center max-w-full overflow-hidden text-ellipsis">Signature: <em>${signature}</em></p>`;
-    })
-    .catch((error) => {
-      console.error('signMessage', error);
-      button.disabled = false;
-      button.innerHTML = 'Personal sign';
-      alert('Error: ' + error.message);
-    });
+  if (WalletSDK) {
+    button.disabled = true;
+    button.innerHTML = 'Approve request in Grindery Bot...';
+    WalletSDK.signMessage('Hello, Grindery!')
+      .then((signature) => {
+        console.log('signMessage', signature);
+        button.parentElement.innerHTML = `<p class="text-center max-w-full overflow-hidden text-ellipsis">Signature: <em>${signature}</em></p>`;
+      })
+      .catch((error) => {
+        console.error('signMessage', error);
+        button.disabled = false;
+        button.innerHTML = 'Personal sign';
+        alert('Error: ' + error.message);
+      });
+  }
 };
 
 const onSendTxButtonClick = (e, button, address) => {
-  button.disabled = true;
-  button.innerHTML = 'Approve request in Grindery Bot...';
+  if (WalletSDK) {
+    button.disabled = true;
+    button.innerHTML = 'Approve request in Grindery Bot...';
 
-  // send 0.001 native tokens
-  WalletSDK.sendTransaction({ to: address, value: '0x38d7ea4c68000' })
-    .then((txHash) => {
-      console.log('sendTransaction', txHash);
-      button.parentElement.innerHTML = `<p class="text-center max-w-full overflow-hidden text-ellipsis">Transaction: <em>${txHash}</em></p>`;
-    })
-    .catch((error) => {
-      console.error('sendTransaction', error);
-      button.disabled = false;
-      button.innerHTML = 'Send transaction';
-      alert('Error: ' + error.message);
-    });
+    // send 0.001 native tokens
+    WalletSDK.sendTransaction({ to: address, value: '0x38d7ea4c68000' })
+      .then((txHash) => {
+        console.log('sendTransaction', txHash);
+        button.parentElement.innerHTML = `<p class="text-center max-w-full overflow-hidden text-ellipsis">Transaction: <em>${txHash}</em></p>`;
+      })
+      .catch((error) => {
+        console.error('sendTransaction', error);
+        button.disabled = false;
+        button.innerHTML = 'Send transaction';
+        alert('Error: ' + error.message);
+      });
+  }
 };
 
 const onSwitchChainButtonclick = (e, button) => {
-  button.disabled = true;
-  WalletSDK.switchChain(newChainId)
-    .then(() => {
-      button.disabled = false;
-      button.innerHTML = `Switch chain to ${newChainName}`;
-    })
-    .catch((error) => {
-      console.error('switchChain', error);
-      button.disabled = false;
-      alert('Error: ' + error.message);
-    });
+  if (WalletSDK) {
+    button.disabled = true;
+    WalletSDK.switchChain(newChainId)
+      .then(() => {
+        button.disabled = false;
+        button.innerHTML = `Switch chain to ${newChainName}`;
+      })
+      .catch((error) => {
+        console.error('switchChain', error);
+        button.disabled = false;
+        alert('Error: ' + error.message);
+      });
+  }
 };
 
 const listenWalletButtonsClicks = (address, target) => {
@@ -207,16 +214,18 @@ const listenWalletButtonsClicks = (address, target) => {
   if (getUserButton) {
     getUserButton.addEventListener('click', (event) => {
       getUserButton.disabled = true;
-      WalletSDK.getUser()
-        .then((user) => {
-          alert(JSON.stringify(user));
-          getUserButton.disabled = false;
-        })
-        .catch((error) => {
-          console.error('getUser', error);
-          alert('Error: ' + error.message);
-          getUserButton.disabled = false;
-        });
+      if (WalletSDK) {
+        WalletSDK.getUser()
+          .then((user) => {
+            alert(JSON.stringify(user));
+            getUserButton.disabled = false;
+          })
+          .catch((error) => {
+            console.error('getUser', error);
+            alert('Error: ' + error.message);
+            getUserButton.disabled = false;
+          });
+      }
     });
   }
   if (disconnectButton) {
@@ -283,10 +292,12 @@ const onChainChanged = ({ chainId }) => {
 };
 
 const listenProviderEvents = (target) => {
-  WalletSDK.on('pair', (data) => onPairing(data, target));
-  WalletSDK.on('accountsChanged', (data) => onAccountsChanged(data, target));
-  WalletSDK.on('disconnect', (data) => onDisconnect(data, target));
-  WalletSDK.on('chainChanged', (data) => onChainChanged(data));
+  if (WalletSDK) {
+    WalletSDK.on('pair', (data) => onPairing(data, target));
+    WalletSDK.on('accountsChanged', (data) => onAccountsChanged(data, target));
+    WalletSDK.on('disconnect', (data) => onDisconnect(data, target));
+    WalletSDK.on('chainChanged', (data) => onChainChanged(data));
+  }
 };
 
 const onProviderConnect = ({ chainId }) => {
