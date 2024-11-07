@@ -132,7 +132,7 @@ export class Provider extends EventEmitter {
     { method, params }: ProviderRequestArguments,
     callback: Function
   ): void {
-    this.methods[method]?.(params)
+    this.request({ method, params })
       .then((res) => {
         callback(null, res);
       })
@@ -282,10 +282,21 @@ export class Provider extends EventEmitter {
       params?: ProviderRequestArgumentsParams
     ): Promise<ProviderRequestResults.eth_accounts> => {
       try {
-        const result = (await this.rpc.sendAndWaitRpcRequest<string[]>(
-          ProviderMethodNames.eth_accounts,
-          params ? (Array.isArray(params) ? params : [params]) : []
-        )) as ProviderRequestResults.eth_accounts;
+        let result;
+        if (!this.storage.getValue(SdkStorageKeys.sessionId)) {
+          result =
+            await this.request<ProviderRequestResults.eth_requestAccounts>({
+              method: 'eth_requestAccounts',
+              params,
+            });
+        } else {
+          result =
+            await this.rpc.sendAndWaitRpcRequest<ProviderRequestResults.eth_accounts>(
+              ProviderMethodNames.eth_accounts,
+              params ? (Array.isArray(params) ? params : [params]) : []
+            );
+        }
+
         this.storage.setValue(SdkStorageKeys.address, result[0] || '');
         this.emit(ProviderEvents.accountsChanged, result);
         return result;

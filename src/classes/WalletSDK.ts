@@ -342,14 +342,18 @@ export class WalletSDK {
       connectUrlBrowser ||
       `https://www.grindery.com/connect/wc?uri=${shortToken}`;
     const miniAppUrl = miniAppPairingToken
-      ? `https://t.me/GrinderyConnectTestBot/confirm?startapp=${miniAppPairingToken.replaceAll(
-          '.',
-          '___'
-        )}`
+      ? `https://t.me/GrinderyConnectTestBot/confirm?startapp=${miniAppPairingToken}`
       : '';
-    if (miniAppUrl && config?.redirectMode === 'tg') {
+    if (
+      miniAppUrl &&
+      (config?.redirectMode === 'tg' || config?.redirectMode === 'url')
+    ) {
       try {
-        window.Telegram?.WebApp?.openTelegramLink?.(miniAppUrl);
+        if (WebApp && WebApp.openTelegramLink) {
+          WebApp.openTelegramLink(miniAppUrl);
+        } else {
+          window.open(miniAppUrl, '_blank');
+        }
       } catch (e) {
         window.open(miniAppUrl, '_blank');
       }

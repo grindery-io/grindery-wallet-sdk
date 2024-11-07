@@ -1,0 +1,152 @@
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.2.3/milligram.min.css"
+    />
+    <script
+      data-pairing-api-url="https://walletconnect-api-staging.grindery.com"
+      data-wallet-api-url="https://wallet-api-staging.grindery.com/v3"
+      data-redirect-mode="url"
+      data-app-id="3dc6575f-3644-46ce-87eb-f861d27e1985"
+      data-app-url="https://grindery-io.github.io/grindery-wallet-sdk/example/ballot"
+      data-chain-id="eip155:80002"
+      src="../dist/grindery-wallet-sdk.umd.production.min.js"
+    ></script>
+  </head>
+  <body class="container" style="padding-top: 3%">
+    <h2><a href="index.html">Grindery Wallet SDK</a></h2>
+
+    <h4>Ballot</h4>
+
+    <hr />
+
+    <div id="connectWallet">
+      <button id="launch-app">Connect Grindery Wallet</button>
+    </div>
+
+    <div id="ballotSelection" style="display: none;"">
+      <label>
+        Select ballot contract
+        <select name="contract">
+          <option value="0">Select contract</option>
+          <option value="1">0x1</option>
+          <option value="2">0x2</option>
+          <option value="3">0x3</option>
+        </select>
+      </label>
+      <label>
+        Or enter contract address
+        <input name="address" type="text" />
+      </label>
+      <button id="viewBallot">View Ballot</button>
+    </div>
+
+    <div id="ballotActive" style="display: none">
+      <div class="row">
+        <div class="column">
+          <label>Chairperson</label>
+          <p><span id="chairpersonAddress">0x</span>...</p>
+        </div>
+        <div class="column">
+          <label>Winning Proposal</label>
+          <p id="winningProposal">None</p>
+        </div>
+        <div class="column">
+          <label>Your Address</label>
+          <p><span id="accountAddress">0x</span>...</p>
+        </div>
+        <div class="column">
+          <label>Balance</label>
+          <p><span id="accountBalance">0</span> ether</p>
+        </div>
+      </div>
+
+      <hr />
+
+      <div class="row">
+        <div class="column column-50">
+          <h4>Proposals</h4>
+
+          <br />
+
+          <div id="proposals"></div>
+        </div>
+        <div class="column column-40 column-offset-10">
+          <h4>Manager</h4>
+
+          <br />
+
+          <label>Add Voter</label>
+
+          <input
+            type="text"
+            id="voterAddress"
+            placeholder="0xcc136826fbd5192c10bba496af42906a7e3b91f8"
+          />
+
+          <button id="giveRightToVote">Give Right to Vote</button>
+
+          <hr />
+
+          <label>Delegate</label>
+          <input
+            type="text"
+            id="delegateAddress"
+            placeholder="0xcc136826fbd5192c10bba496af42906a7e3b91f8"
+          />
+
+          <button id="delegateVote">Delegate My Vote</button>
+        </div>
+      </div>
+
+      <br />
+
+      <div
+        id="ballotActiveResponse"
+        style="padding: 20px; border: 1px solid #9b4dca"
+      ></div>
+    </div>
+
+    <br /><br />
+
+    <script type="text/javascript">
+      var el = (id) => {
+        return document.querySelector(id);
+      };
+
+      const sdk = window.Grindery && window.Grindery.WalletSDK;
+      if (sdk) {
+        document
+          .getElementById("launch-app")
+          .addEventListener("click", () => {
+            sdk.connect();
+          });
+
+        document.getElementById("viewBallot")
+        .addEventListener("click", () => {
+            var contractAddress = document.querySelector("input[name=address]").value || document.querySelector("select[name=contract]").value;
+            if(!contractAddress || contractAddress === "0" || contractAddress === "0x0") {
+                alert("Please select a contract or enter a contract address");
+                return;
+            }
+            el("#connectWallet").style.display = "none";
+            el("#ballotSelection").style.display = "none";
+            el("#ballotActive").style.display = "block";
+
+            // TODO: get proposals and chairperson
+            // TODO: handle voting and delegation
+            // TODO: handle balance and account address
+          });
+
+        sdk.on("accountsChanged", (accounts) => {
+          if (accounts && accounts.length) {
+            el("#connectWallet").style.display = "none";
+            el("#ballotSelection").style.display = "block";
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

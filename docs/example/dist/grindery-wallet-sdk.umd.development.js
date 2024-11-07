@@ -1053,22 +1053,37 @@
             while (1) switch (_context3.prev = _context3.next) {
               case 0:
                 _context3.prev = 0;
-                _context3.next = 3;
-                return _this.rpc.sendAndWaitRpcRequest(ProviderMethodNames.eth_accounts, params ? Array.isArray(params) ? params : [params] : []);
-              case 3:
+                if (_this.storage.getValue(SdkStorageKeys.sessionId)) {
+                  _context3.next = 7;
+                  break;
+                }
+                _context3.next = 4;
+                return _this.request({
+                  method: 'eth_requestAccounts',
+                  params: params
+                });
+              case 4:
                 result = _context3.sent;
+                _context3.next = 10;
+                break;
+              case 7:
+                _context3.next = 9;
+                return _this.rpc.sendAndWaitRpcRequest(ProviderMethodNames.eth_accounts, params ? Array.isArray(params) ? params : [params] : []);
+              case 9:
+                result = _context3.sent;
+              case 10:
                 _this.storage.setValue(SdkStorageKeys.address, result[0] || '');
                 _this.emit(ProviderEvents.accountsChanged, result);
                 return _context3.abrupt("return", result);
-              case 9:
-                _context3.prev = 9;
+              case 15:
+                _context3.prev = 15;
                 _context3.t0 = _context3["catch"](0);
                 throw newProviderError(_context3.t0);
-              case 12:
+              case 18:
               case "end":
                 return _context3.stop();
             }
-          }, _callee3, null, [[0, 9]]);
+          }, _callee3, null, [[0, 15]]);
         }));
         return function (_x3) {
           return _ref4.apply(this, arguments);
@@ -1251,10 +1266,12 @@
      */
     ;
     _proto.sendAsync = function sendAsync(_ref12, callback) {
-      var _this$methods$method2, _this$methods3;
       var method = _ref12.method,
         params = _ref12.params;
-      (_this$methods$method2 = (_this$methods3 = this.methods)[method]) == null || _this$methods$method2.call(_this$methods3, params).then(function (res) {
+      this.request({
+        method: method,
+        params: params
+      }).then(function (res) {
         callback(null, res);
       })["catch"](function (error) {
         callback(error);
@@ -1931,11 +1948,14 @@
         miniAppPairingToken = _ref.miniAppPairingToken;
       var WebApp = (_window$Telegram = window.Telegram) == null ? void 0 : _window$Telegram.WebApp;
       var redirectUrl = connectUrlBrowser || "https://www.grindery.com/connect/wc?uri=" + shortToken;
-      var miniAppUrl = miniAppPairingToken ? "https://t.me/GrinderyConnectTestBot/confirm?startapp=" + miniAppPairingToken.replaceAll('.', '___') : '';
-      if (miniAppUrl && (config == null ? void 0 : config.redirectMode) === 'tg') {
+      var miniAppUrl = miniAppPairingToken ? "https://t.me/GrinderyConnectTestBot/confirm?startapp=" + miniAppPairingToken : '';
+      if (miniAppUrl && ((config == null ? void 0 : config.redirectMode) === 'tg' || (config == null ? void 0 : config.redirectMode) === 'url')) {
         try {
-          var _window$Telegram2;
-          (_window$Telegram2 = window.Telegram) == null || (_window$Telegram2 = _window$Telegram2.WebApp) == null || _window$Telegram2.openTelegramLink == null || _window$Telegram2.openTelegramLink(miniAppUrl);
+          if (WebApp && WebApp.openTelegramLink) {
+            WebApp.openTelegramLink(miniAppUrl);
+          } else {
+            window.open(miniAppUrl, '_blank');
+          }
         } catch (e) {
           window.open(miniAppUrl, '_blank');
         }
@@ -1958,14 +1978,14 @@
     /*#__PURE__*/
     function () {
       var _trackClientEvent = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8(name, data) {
-        var _window$Telegram3;
-        var appUrl, appId, userTelegramId, _window$Telegram4, _window$Telegram5, _window$Telegram6, rpc;
+        var _window$Telegram2;
+        var appUrl, appId, userTelegramId, _window$Telegram3, _window$Telegram4, _window$Telegram5, rpc;
         return _regeneratorRuntime().wrap(function _callee8$(_context8) {
           while (1) switch (_context8.prev = _context8.next) {
             case 0:
               appUrl = this.config.appUrl;
               appId = this.config.appId;
-              userTelegramId = String(((_window$Telegram3 = window.Telegram) == null || (_window$Telegram3 = _window$Telegram3.WebApp) == null || (_window$Telegram3 = _window$Telegram3.initDataUnsafe) == null || (_window$Telegram3 = _window$Telegram3.user) == null ? void 0 : _window$Telegram3.id) || '');
+              userTelegramId = String(((_window$Telegram2 = window.Telegram) == null || (_window$Telegram2 = _window$Telegram2.WebApp) == null || (_window$Telegram2 = _window$Telegram2.initDataUnsafe) == null || (_window$Telegram2 = _window$Telegram2.user) == null ? void 0 : _window$Telegram2.id) || '');
               _context8.prev = 3;
               rpc = new Rpc(this.config);
               _context8.next = 7;
@@ -1978,9 +1998,9 @@
                   appId: appId,
                   sessionId: this.storage.getValue(SdkStorageKeys.sessionId),
                   clientId: this.storage.getValue(SdkStorageKeys.clientId),
-                  isMiniApp: Boolean((_window$Telegram4 = window.Telegram) == null ? void 0 : _window$Telegram4.initDataUnsafe),
-                  miniAppPlatform: (_window$Telegram5 = window.Telegram) == null || (_window$Telegram5 = _window$Telegram5.WebApp) == null ? void 0 : _window$Telegram5.platform,
-                  miniAppSdkVersion: (_window$Telegram6 = window.Telegram) == null || (_window$Telegram6 = _window$Telegram6.WebApp) == null ? void 0 : _window$Telegram6.version,
+                  isMiniApp: Boolean((_window$Telegram3 = window.Telegram) == null ? void 0 : _window$Telegram3.initDataUnsafe),
+                  miniAppPlatform: (_window$Telegram4 = window.Telegram) == null || (_window$Telegram4 = _window$Telegram4.WebApp) == null ? void 0 : _window$Telegram4.platform,
+                  miniAppSdkVersion: (_window$Telegram5 = window.Telegram) == null || (_window$Telegram5 = _window$Telegram5.WebApp) == null ? void 0 : _window$Telegram5.version,
                   userAgent: window.navigator.userAgent
                 })
               });

@@ -1,5 +1,15 @@
 # Grindery Wallet SDK Changelog
 
+## v0.5.5 (UNRELEASED)
+
+### Added
+
+- [Ballot dApp](https://github.com/ethjs/examples/blob/master/ballot.html) example: https://grindery-io.github.io/grindery-wallet-sdk/example/ballot
+
+### Updated
+
+- Wallet connection flow, to use mini-app for connection approval
+
 ## v0.5.4 (2024-11-07)
 
 ### Added
