@@ -929,73 +929,79 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
         return _regeneratorRuntime().wrap(function _callee2$(_context2) {
           while (1) switch (_context2.prev = _context2.next) {
             case 0:
-              if (!_this.storage.getValue('sessionId')) {
-                _context2.next = 10;
+              if (_this.config.appId) {
+                _context2.next = 2;
                 break;
               }
-              _context2.prev = 1;
-              _context2.next = 4;
+              throw newProviderError(ProviderErrors.NoAppId);
+            case 2:
+              if (!_this.storage.getValue('sessionId')) {
+                _context2.next = 12;
+                break;
+              }
+              _context2.prev = 3;
+              _context2.next = 6;
               return _this.request({
                 method: ProviderMethodNames.eth_accounts,
                 params: []
               });
-            case 4:
+            case 6:
               return _context2.abrupt("return", _context2.sent);
-            case 7:
-              _context2.prev = 7;
-              _context2.t0 = _context2["catch"](1);
+            case 9:
+              _context2.prev = 9;
+              _context2.t0 = _context2["catch"](3);
               _this.storage.setValue(SdkStorageKeys.sessionId, '');
               // skip failed request and continue with pairing
-            case 10:
+            case 12:
               if (!_this.storage.getValue('pairingToken')) {
-                _context2.next = 27;
+                _context2.next = 29;
                 break;
               }
-              _context2.prev = 11;
-              _context2.next = 14;
+              _context2.prev = 13;
+              _context2.next = 16;
               return _this.rpc.sendRpcApiRequest(RpcMethodNames.waitForPairingResult, {
                 pairingToken: _this.storage.getValue(SdkStorageKeys.pairingToken)
               });
-            case 14:
+            case 16:
               pairResult = _context2.sent;
               _this.storage.clear();
               _this.storage.setValue(SdkStorageKeys.sessionId, pairResult.session.sessionId);
               if (pairResult.session.sessionId) {
-                _context2.next = 19;
+                _context2.next = 21;
                 break;
               }
               throw ProviderErrors.PairingFailed;
-            case 19:
-              _context2.next = 21;
+            case 21:
+              _context2.next = 23;
               return _this.request({
                 method: ProviderMethodNames.eth_accounts,
                 params: params || []
               });
-            case 21:
+            case 23:
               return _context2.abrupt("return", _context2.sent);
-            case 24:
-              _context2.prev = 24;
-              _context2.t1 = _context2["catch"](11);
+            case 26:
+              _context2.prev = 26;
+              _context2.t1 = _context2["catch"](13);
               _this.storage.clear();
               // skip failed request and continue with pairing
-            case 27:
-              _context2.prev = 27;
+            case 29:
+              _context2.prev = 29;
               _this.storage.clear();
-              _context2.next = 31;
+              _context2.next = 33;
               return _this.rpc.sendRpcApiRequest(RpcMethodNames.requestPairing, {
                 appId: _this.config.appId || '',
                 clientId: _this.storage.getValue(SdkStorageKeys.clientId),
                 redirectMode: _this.config.redirectMode,
                 redirectUrl: _this.config.appUrl
               });
-            case 31:
+            case 33:
               result = _context2.sent;
               if (!(!result.pairingToken || !result.connectUrl)) {
-                _context2.next = 34;
+                _context2.next = 36;
                 break;
               }
               throw ProviderErrors.PairingFailed;
-            case 34:
+            case 36:
               _this.storage.setValue(SdkStorageKeys.pairingToken, result.pairingToken);
               _this.storage.setValue(SdkStorageKeys.connectUrl, result.connectUrl);
               _this.storage.setValue(SdkStorageKeys.connectUrlBrowser, result.connectUrlBrowser);
@@ -1007,39 +1013,39 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
                 connectUrlBrowser: result.connectUrlBrowser,
                 miniAppPairingToken: result.miniAppPairingToken
               });
-              _context2.next = 41;
+              _context2.next = 43;
               return _this.rpc.sendRpcApiRequest(RpcMethodNames.waitForPairingResult, {
                 pairingToken: result.pairingToken
               });
-            case 41:
+            case 43:
               _pairResult = _context2.sent;
               _this.storage.setValue(SdkStorageKeys.sessionId, _pairResult.session.sessionId);
               if (_pairResult.session.sessionId) {
-                _context2.next = 45;
+                _context2.next = 47;
                 break;
               }
               throw ProviderErrors.PairingFailed;
-            case 45:
+            case 47:
               _this.storage.setValue(SdkStorageKeys.pairingToken, '');
               _this.storage.setValue(SdkStorageKeys.connectUrl, '');
               _this.storage.setValue(SdkStorageKeys.connectUrlBrowser, '');
               _this.storage.setValue(SdkStorageKeys.shortToken, '');
-              _context2.next = 51;
+              _context2.next = 53;
               return _this.request({
                 method: ProviderMethodNames.eth_accounts,
                 params: params || []
               });
-            case 51:
+            case 53:
               return _context2.abrupt("return", _context2.sent);
-            case 54:
-              _context2.prev = 54;
-              _context2.t2 = _context2["catch"](27);
+            case 56:
+              _context2.prev = 56;
+              _context2.t2 = _context2["catch"](29);
               throw _context2.t2;
-            case 57:
+            case 59:
             case "end":
               return _context2.stop();
           }
-        }, _callee2, null, [[1, 7], [11, 24], [27, 54]]);
+        }, _callee2, null, [[3, 9], [13, 26], [29, 56]]);
       }));
       return function (_x2) {
         return _ref3.apply(this, arguments);
@@ -1181,15 +1187,19 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
     }(), _this$methods);
     _this.config = config;
     _this.rpc = new Rpc(_this.config);
-    _this.injectProvider();
-    _this.listenForRequestProviderEvents();
-    _this.announceProvider();
+    if (_this.config.appId) {
+      _this.injectProvider();
+      _this.listenForRequestProviderEvents();
+      _this.announceProvider();
+    }
     window.addEventListener('load', function () {
-      _this.emit(ProviderEvents.connect, {
-        chainId: hexChainId(_this.storage.getValue(SdkStorageKeys.chainId) || _this.config.chainId || CHAINS[0])
-      });
-      _this.restorePairing();
-      _this.restoreSession();
+      if (_this.config.appId) {
+        _this.emit(ProviderEvents.connect, {
+          chainId: hexChainId(_this.storage.getValue(SdkStorageKeys.chainId) || _this.config.chainId || CHAINS[0])
+        });
+        _this.restorePairing();
+        _this.restoreSession();
+      }
     });
     return _this;
   }
@@ -1364,11 +1374,23 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
    */
   ;
   _proto.injectProvider = function injectProvider() {
+    var _this2 = this;
     if (!window.ethereum) {
       window.ethereum = this;
     } else {
       if (window.ethereum.providers && Array.isArray(window.ethereum.providers)) {
-        window.ethereum.providers.push(this);
+        if (window.ethereum.providers.filter(function (p) {
+          return p.isGrinderyWallet;
+        }).length > 0) {
+          window.ethereum.providers = window.ethereum.providers.map(function (p) {
+            if (p.isGrinderyWallet) {
+              return _this2;
+            }
+            return p;
+          });
+        } else {
+          window.ethereum.providers.push(this);
+        }
       } else {
         window.ethereum.providers = [window.ethereum, this];
       }
@@ -1397,9 +1419,9 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
    * @returns {void}
    */;
   _proto.listenForRequestProviderEvents = function listenForRequestProviderEvents() {
-    var _this2 = this;
+    var _this3 = this;
     window.addEventListener('eip6963:requestProvider', function () {
-      _this2.announceProvider();
+      _this3.announceProvider();
     });
   };
   return Provider;
@@ -1561,18 +1583,14 @@ var WalletSDK = /*#__PURE__*/function () {
      */
     this.user = null;
     this.config = _extends({}, this.config, config || getConfigFromDataAttributes() || {});
-    if (!this.config.appId) {
-      throw new Error('App ID is required');
-    }
-    if (!this.config.appUrl) {
-      throw new Error('App URL is required');
-    }
     window.Grindery = _extends({}, window.Grindery, this.config);
     this.storage.setValue(SdkStorageKeys.chainId, this.storage.getValue(SdkStorageKeys.chainId) || this.config.chainId || CHAINS[0]);
     this.detectPairingToken();
     this.provider = this.getWeb3Provider();
     this.initTracking();
-    this.provider.on(ProviderEvents.pair, this.handlePairing);
+    if (this.config.appId) {
+      this.provider.on(ProviderEvents.pair, this.handlePairing);
+    }
   }
   /**
    * @summary Checks if the provider is connected to the server
@@ -1788,14 +1806,20 @@ var WalletSDK = /*#__PURE__*/function () {
             this.trackClientEvent(ClientEventNames.walletAddressRequested, {
               userId: userId
             });
-            _context6.next = 4;
+            if (this.config.appId) {
+              _context6.next = 4;
+              break;
+            }
+            throw new Error('App ID is required');
+          case 4:
+            _context6.next = 6;
             return rpc.sendRpcApiRequest(RpcMethodNames.getUserWalletAddress, {
               appId: this.config.appId,
               userId: userId
             });
-          case 4:
+          case 6:
             return _context6.abrupt("return", _context6.sent);
-          case 5:
+          case 7:
           case "end":
             return _context6.stop();
         }
@@ -1881,10 +1905,23 @@ var WalletSDK = /*#__PURE__*/function () {
    */
   ;
   _proto.setAppId = function setAppId(appId) {
+    var _this = this;
+    var appIdUpdated = false;
+    if (appId !== this.config.appId) {
+      appIdUpdated = true;
+    }
     this.config.appId = appId;
     window.Grindery = _extends({}, window.Grindery, {
       appId: appId
     });
+    if (appIdUpdated) {
+      this.provider = this.getWeb3Provider();
+      this.initTracking();
+      this.provider.removeListener(ProviderEvents.pair, this.handlePairing);
+      setTimeout(function () {
+        _this.provider.on(ProviderEvents.pair, _this.handlePairing);
+      }, 0);
+    }
   }
   /**
    * @summary Sets the SDK config
@@ -1894,25 +1931,28 @@ var WalletSDK = /*#__PURE__*/function () {
    * @returns {void}
    */;
   _proto.setConfig = function setConfig(config) {
+    var _this2 = this;
+    var appIdUpdated = false;
+    if (config.appId !== this.config.appId) {
+      appIdUpdated = true;
+    }
     this.config = _extends({}, this.config, config);
     window.Grindery = _extends({}, window.Grindery, this.config);
+    if (appIdUpdated) {
+      this.provider = this.getWeb3Provider();
+      this.initTracking();
+      this.provider.removeListener(ProviderEvents.pair, this.handlePairing);
+      setTimeout(function () {
+        _this2.provider.on(ProviderEvents.pair, _this2.handlePairing);
+      }, 0);
+    }
   };
   /**
    * @summary Gets the Grindery Wallet ethereum provider
    * @returns {Provider} The Grindery Wallet ethereum provider
    */
   _proto.getWeb3Provider = function getWeb3Provider() {
-    var _window$ethereum;
-    var provider = (_window$ethereum = window.ethereum) == null || (_window$ethereum = _window$ethereum.providers) == null ? void 0 : _window$ethereum.find(function (provider) {
-      return provider instanceof Provider && provider.isGrinderyWallet;
-    });
-    if (!provider && window.ethereum instanceof Provider && window.ethereum.isGrinderyWallet) {
-      provider = window.ethereum;
-    }
-    if (!provider) {
-      provider = new Provider(this.config);
-    }
-    return provider;
+    return new Provider(this.config);
   }
   /**
    * @summary Handles the pairing request, by opening the Grindery Wallet
@@ -1965,8 +2005,20 @@ var WalletSDK = /*#__PURE__*/function () {
             appId = this.config.appId;
             userTelegramId = String(((_window$Telegram3 = window.Telegram) == null || (_window$Telegram3 = _window$Telegram3.WebApp) == null || (_window$Telegram3 = _window$Telegram3.initDataUnsafe) == null || (_window$Telegram3 = _window$Telegram3.user) == null ? void 0 : _window$Telegram3.id) || '');
             _context8.prev = 3;
+            if (appId) {
+              _context8.next = 6;
+              break;
+            }
+            throw new Error('App ID is required');
+          case 6:
+            if (userTelegramId) {
+              _context8.next = 8;
+              break;
+            }
+            throw new Error('User Telegram ID is required');
+          case 8:
             rpc = new Rpc(this.config);
-            _context8.next = 7;
+            _context8.next = 11;
             return rpc.sendRpcApiRequest(RpcMethodNames.trackClientEvent, {
               name: name,
               appUrl: appUrl,
@@ -1982,17 +2034,17 @@ var WalletSDK = /*#__PURE__*/function () {
                 userAgent: window.navigator.userAgent
               })
             });
-          case 7:
-            _context8.next = 11;
-            break;
-          case 9:
-            _context8.prev = 9;
-            _context8.t0 = _context8["catch"](3);
           case 11:
+            _context8.next = 15;
+            break;
+          case 13:
+            _context8.prev = 13;
+            _context8.t0 = _context8["catch"](3);
+          case 15:
           case "end":
             return _context8.stop();
         }
-      }, _callee8, this, [[3, 9]]);
+      }, _callee8, this, [[3, 13]]);
     }));
     function trackClientEvent(_x5, _x6) {
       return _trackClientEvent.apply(this, arguments);
@@ -2007,16 +2059,16 @@ var WalletSDK = /*#__PURE__*/function () {
    */
   ;
   _proto.initTracking = function initTracking() {
-    var _this = this;
+    var _this3 = this;
     var onWalletConnect = function onWalletConnect(wallets) {
       if (wallets.length > 0) {
-        _this.trackClientEvent(ClientEventNames.walletConnected, {
+        _this3.trackClientEvent(ClientEventNames.walletConnected, {
           wallets: wallets
         });
       }
     };
     var onWalletDisconnect = function onWalletDisconnect() {
-      _this.trackClientEvent(ClientEventNames.walletDisconnected);
+      _this3.trackClientEvent(ClientEventNames.walletDisconnected);
     };
     this.on(ProviderEvents.accountsChanged, onWalletConnect);
     this.on(ProviderEvents.disconnect, onWalletDisconnect);

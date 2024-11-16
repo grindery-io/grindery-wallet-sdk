@@ -62,13 +62,6 @@ export class WalletSDK {
       ...(config || getConfigFromDataAttributes() || {}),
     };
 
-    if (!this.config.appId) {
-      throw new Error('App ID is required');
-    }
-    if (!this.config.appUrl) {
-      throw new Error('App URL is required');
-    }
-
     window.Grindery = {
       ...window.Grindery,
       ...this.config,
@@ -83,7 +76,9 @@ export class WalletSDK {
     this.detectPairingToken();
     this.provider = this.getWeb3Provider();
     this.initTracking();
-    this.provider.on(ProviderEvents.pair, this.handlePairing);
+    if (this.config.appId) {
+      this.provider.on(ProviderEvents.pair, this.handlePairing);
+    }
   }
 
   /**
@@ -210,6 +205,9 @@ export class WalletSDK {
   ): Promise<RpcRequestResults.getUserWalletAddress> {
     const rpc = new Rpc(this.config);
     this.trackClientEvent(ClientEventNames.walletAddressRequested, { userId });
+    if (!this.config.appId) {
+      throw new Error('App ID is required');
+    }
     return await rpc.sendRpcApiRequest<RpcRequestResults.getUserWalletAddress>(
       RpcMethodNames.getUserWalletAddress,
       { appId: this.config.appId, userId }
@@ -268,11 +266,23 @@ export class WalletSDK {
    * @returns {void}
    */
   public setAppId(appId: string): void {
+    let appIdUpdated = false;
+    if (appId !== this.config.appId) {
+      appIdUpdated = true;
+    }
     this.config.appId = appId;
     window.Grindery = {
       ...window.Grindery,
       appId,
     };
+    if (appIdUpdated) {
+      this.provider = this.getWeb3Provider();
+      this.initTracking();
+      this.provider.removeListener(ProviderEvents.pair, this.handlePairing);
+      setTimeout(() => {
+        this.provider.on(ProviderEvents.pair, this.handlePairing);
+      }, 0);
+    }
   }
 
   /**
@@ -283,11 +293,23 @@ export class WalletSDK {
    * @returns {void}
    */
   public setConfig(config: Partial<WalletSDKConfig>): void {
+    let appIdUpdated = false;
+    if (config.appId !== this.config.appId) {
+      appIdUpdated = true;
+    }
     this.config = { ...this.config, ...config };
     window.Grindery = {
       ...window.Grindery,
       ...this.config,
     };
+    if (appIdUpdated) {
+      this.provider = this.getWeb3Provider();
+      this.initTracking();
+      this.provider.removeListener(ProviderEvents.pair, this.handlePairing);
+      setTimeout(() => {
+        this.provider.on(ProviderEvents.pair, this.handlePairing);
+      }, 0);
+    }
   }
 
   /**
@@ -307,21 +329,7 @@ export class WalletSDK {
    * @returns {Provider} The Grindery Wallet ethereum provider
    */
   private getWeb3Provider(): Provider {
-    let provider = window.ethereum?.providers?.find(
-      (provider: Provider | unknown) =>
-        provider instanceof Provider && provider.isGrinderyWallet
-    );
-    if (
-      !provider &&
-      window.ethereum instanceof Provider &&
-      window.ethereum.isGrinderyWallet
-    ) {
-      provider = window.ethereum;
-    }
-    if (!provider) {
-      provider = new Provider(this.config);
-    }
-    return provider;
+    return new Provider(this.config);
   }
 
   /**
@@ -386,6 +394,12 @@ export class WalletSDK {
     );
 
     try {
+      if (!appId) {
+        throw new Error('App ID is required');
+      }
+      if (!userTelegramId) {
+        throw new Error('User Telegram ID is required');
+      }
       const rpc = new Rpc(this.config);
       await rpc.sendRpcApiRequest<RpcRequestResults.trackClientEvent>(
         RpcMethodNames.trackClientEvent,

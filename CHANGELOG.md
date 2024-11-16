@@ -1,5 +1,11 @@
 # Grindery Wallet SDK Changelog
 
+## v0.5.5 (2024-11-16)
+
+### Fixed
+
+- `setAppId` method not working as expected [issue](https://github.com/grindery-io/grindery-wallet-sdk/issues/11)
+
 ## v0.5.4 (2024-11-07)
 
 ### Added
