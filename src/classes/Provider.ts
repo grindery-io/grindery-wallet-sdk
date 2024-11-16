@@ -77,19 +77,23 @@ export class Provider extends EventEmitter {
     super();
     this.config = config;
     this.rpc = new Rpc(this.config);
-    this.injectProvider();
-    this.listenForRequestProviderEvents();
-    this.announceProvider();
+    if (this.config.appId) {
+      this.injectProvider();
+      this.listenForRequestProviderEvents();
+      this.announceProvider();
+    }
     window.addEventListener('load', () => {
-      this.emit(ProviderEvents.connect, {
-        chainId: hexChainId(
-          this.storage.getValue(SdkStorageKeys.chainId) ||
-            this.config.chainId ||
-            CHAINS[0]
-        ),
-      });
-      this.restorePairing();
-      this.restoreSession();
+      if (this.config.appId) {
+        this.emit(ProviderEvents.connect, {
+          chainId: hexChainId(
+            this.storage.getValue(SdkStorageKeys.chainId) ||
+              this.config.chainId ||
+              CHAINS[0]
+          ),
+        });
+        this.restorePairing();
+        this.restoreSession();
+      }
     });
   }
 
@@ -172,6 +176,9 @@ export class Provider extends EventEmitter {
     [ProviderMethodNames.eth_requestAccounts]: async (
       params?: ProviderRequestArgumentsParams
     ): Promise<ProviderRequestResults.eth_requestAccounts> => {
+      if (!this.config.appId) {
+        throw newProviderError(ProviderErrors.NoAppId);
+      }
       if (this.storage.getValue('sessionId')) {
         try {
           return await this.request<ProviderRequestResults.eth_accounts>({
@@ -447,7 +454,21 @@ export class Provider extends EventEmitter {
         window.ethereum.providers &&
         Array.isArray(window.ethereum.providers)
       ) {
-        window.ethereum.providers.push(this);
+        if (
+          window.ethereum.providers.filter((p: any) => p.isGrinderyWallet)
+            .length > 0
+        ) {
+          window.ethereum.providers = window.ethereum.providers.map(
+            (p: any) => {
+              if (p.isGrinderyWallet) {
+                return this;
+              }
+              return p;
+            }
+          );
+        } else {
+          window.ethereum.providers.push(this);
+        }
       } else {
         window.ethereum.providers = [window.ethereum, this];
       }
