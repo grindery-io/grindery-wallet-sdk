@@ -1588,8 +1588,8 @@
       }
       window.Grindery = _extends({}, window.Grindery, this.config);
       this.storage.setValue(SdkStorageKeys.chainId, this.storage.getValue(SdkStorageKeys.chainId) || this.config.chainId || CHAINS[0]);
-      this.detectPairingToken();
       this.provider = this.getWeb3Provider();
+      this.detectPairingToken();
       this.initTracking();
       this.provider.on(ProviderEvents.pair, this.handlePairing);
     }
@@ -2048,6 +2048,7 @@
       var token = urlParams.get('_grinderyPairingToken') || urlParams.get('tgWebAppStartParam');
       if (token) {
         this.storage.setValue(SdkStorageKeys.pairingToken, token);
+        this.connect();
       }
     };
     return WalletSDK;
