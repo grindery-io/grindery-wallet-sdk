@@ -148,15 +148,22 @@ WalletSDK.on('connect', (chainId: string) => {
 
 ## Wallet connection
 
-To initiate connection to the Grindery Wallet use [`connect()`](https://grindery-io.github.io/grindery-wallet-sdk/classes/classes_WalletSDK.WalletSDK.html#connect) method:
+To initiate connection to the Grindery Wallet use [`connect()`](https://grindery-io.github.io/grindery-wallet-sdk/classes/classes_WalletSDK.WalletSDK.html#connect) method, in response to user's action:
 
 ```typescript
-WalletSDK.on('connect', async () => {
+// Get your "connect" button element
+const button = document.getElementById('your-connect-button-id');
+
+// Add event listener to handle button clicks
+button.addEventListener('click', async () => {
+  // Call `connect` method in response to user's click
   const [address]: string[] = await WalletSDK.connect();
 });
 ```
 
-You can listen for SDK [`accountsChanged`](https://grindery-io.github.io/grindery-wallet-sdk/enums/classes_EventEmitter.ProviderEvents.html#accountsChanged) event, to catch when user's wallet is connected:
+> It is important to use `connect()` method only in response to user's action, to avoid connection approval popup being blocked by the browser.
+
+Listen for SDK [`accountsChanged`](https://grindery-io.github.io/grindery-wallet-sdk/enums/classes_EventEmitter.ProviderEvents.html#accountsChanged) event, to catch when user's wallet is connected:
 
 ```typescript
 WalletSDK.on('accountsChanged', (addresses: string[]) => {

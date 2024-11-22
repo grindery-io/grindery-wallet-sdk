@@ -1978,7 +1978,10 @@ var WalletSDK = /*#__PURE__*/function () {
     if (WebApp && WebApp.openTelegramLink && WebApp.platform && WebApp.platform !== 'unknown' && connectUrl) {
       WebApp.openTelegramLink(connectUrl);
     } else {
-      window.open(redirectUrl, '_blank');
+      var connectPage = window.open(redirectUrl, '_blank');
+      if (!connectPage) {
+        alert('Please allow popups for this website and try again.');
+      }
     }
   }
   /**
@@ -2074,6 +2077,7 @@ var WalletSDK = /*#__PURE__*/function () {
     var token = urlParams.get('_grinderyPairingToken') || urlParams.get('tgWebAppStartParam');
     if (token) {
       this.storage.setValue(SdkStorageKeys.pairingToken, token);
+      this.connect();
     }
   };
   return WalletSDK;

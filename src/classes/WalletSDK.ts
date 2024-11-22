@@ -372,7 +372,10 @@ export class WalletSDK {
     ) {
       WebApp.openTelegramLink(connectUrl);
     } else {
-      window.open(redirectUrl, '_blank');
+      const connectPage = window.open(redirectUrl, '_blank');
+      if (!connectPage) {
+        alert('Please allow popups for this website and try again.');
+      }
     }
   }
 
@@ -455,6 +458,7 @@ export class WalletSDK {
       urlParams.get('tgWebAppStartParam');
     if (token) {
       this.storage.setValue(SdkStorageKeys.pairingToken, token);
+      this.connect();
     }
   }
 }

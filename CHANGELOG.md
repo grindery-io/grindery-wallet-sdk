@@ -1,5 +1,15 @@
 # Grindery Wallet SDK Changelog
 
+## v0.5.6 (2024-11-21)
+
+### Fixed
+
+- Automatic `pairingToken` detection for click-less app pairing
+
+### Added
+
+- An alert if wallet connection pop-up has been blocked by the browser
+
 ## v0.5.5 (2024-11-16)
 
 ### Fixed
