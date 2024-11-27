@@ -1587,8 +1587,8 @@
       this.config = _extends({}, this.config, config || getConfigFromDataAttributes() || {});
       window.Grindery = _extends({}, window.Grindery, this.config);
       this.storage.setValue(SdkStorageKeys.chainId, this.storage.getValue(SdkStorageKeys.chainId) || this.config.chainId || CHAINS[0]);
-      this.detectPairingToken();
       this.provider = this.getWeb3Provider();
+      this.detectPairingToken();
       this.initTracking();
       if (this.config.appId) {
         this.provider.on(ProviderEvents.pair, this.handlePairing);
@@ -2079,11 +2079,14 @@
       this.on(ProviderEvents.disconnect, onWalletDisconnect);
     };
     _proto.detectPairingToken = function detectPairingToken() {
+      var _this4 = this;
       var urlParams = new URLSearchParams(window.location.search);
       var token = urlParams.get('_grinderyPairingToken') || urlParams.get('tgWebAppStartParam');
       if (token) {
         this.storage.setValue(SdkStorageKeys.pairingToken, token);
-        this.connect();
+        setTimeout(function () {
+          _this4.connect();
+        }, 500);
       }
     };
     return WalletSDK;

@@ -1,5 +1,11 @@
 # Grindery Wallet SDK Changelog
 
+## v0.5.7 (2024-11-27)
+
+### Fixed
+
+- Undefined provider when pairing token detected
+
 ## v0.5.6 (2024-11-21)
 
 ### Fixed
