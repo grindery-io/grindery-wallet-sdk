@@ -10,9 +10,24 @@
       window.Grindery = {
         pairingApiUrl: 'https://walletconnect-api-staging.grindery.com',
         walletApiUrl: 'https://wallet-api-staging.grindery.com/v3',
-        redirectMode: 'tg',
-        appId: 'fec480b7-ac17-44f3-a485-4d8d6ef5947f',
-        appUrl: 'https://t.me/yrednirgdevtestbot/staging',
+        redirectMode:
+          window.Telegram &&
+          window.Telegram.WebApp &&
+          window.Telegram.WebApp.initData
+            ? 'tg'
+            : 'url',
+        appId:
+          window.Telegram &&
+          window.Telegram.WebApp &&
+          window.Telegram.WebApp.initData
+            ? 'fec480b7-ac17-44f3-a485-4d8d6ef5947f'
+            : '1500d3ee-fc88-447f-926e-ac12fb6b0fbc',
+        appUrl:
+          window.Telegram &&
+          window.Telegram.WebApp &&
+          window.Telegram.WebApp.initData
+            ? 'https://t.me/yrednirgdevtestbot/staging'
+            : 'https://grindery-io.github.io/grindery-wallet-sdk/example/staging',
         chainId: 'eip155:80002',
       };
     </script>

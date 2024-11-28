@@ -8,7 +8,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       window.Grindery = {
-        appId: '763d2695-d237-45fe-bfe8-2e4e26ff707b',
+        appId:
+          window.Telegram &&
+          window.Telegram.WebApp &&
+          window.Telegram.WebApp.initData
+            ? '763d2695-d237-45fe-bfe8-2e4e26ff707b'
+            : '98372462-e034-4ab2-a00c-3fcd8e82da60',
         appUrl:
           window.Telegram &&
           window.Telegram.WebApp &&

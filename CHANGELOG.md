@@ -1,5 +1,11 @@
 # Grindery Wallet SDK Changelog
 
+## v0.5.8 (2024-11-28)
+
+### Fixed
+
+- Minor issues with auto-detected pairing token
+
 ## v0.5.7 (2024-11-27)
 
 ### Fixed

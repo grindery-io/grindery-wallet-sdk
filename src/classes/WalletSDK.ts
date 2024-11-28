@@ -73,8 +73,8 @@ export class WalletSDK {
         this.config.chainId ||
         CHAINS[0]
     );
-    this.provider = this.getWeb3Provider();
     this.detectPairingToken();
+    this.provider = this.getWeb3Provider();
     this.initTracking();
     if (this.config.appId) {
       this.provider.on(ProviderEvents.pair, this.handlePairing);
@@ -458,9 +458,7 @@ export class WalletSDK {
       urlParams.get('tgWebAppStartParam');
     if (token) {
       this.storage.setValue(SdkStorageKeys.pairingToken, token);
-      setTimeout(() => {
-        this.connect();
-      }, 500);
+      this.storage.setValue(SdkStorageKeys.sessionId, '');
     }
   }
 }
