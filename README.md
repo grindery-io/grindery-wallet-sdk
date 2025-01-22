@@ -10,7 +10,7 @@
 [![Website](https://img.shields.io/website?url=https%3A%2F%2Fgrindery-io.github.io%2Fgrindery-wallet-sdk%2Fexample%2F&label=Example%20website&link=https%3A%2F%2Fgrindery-io.github.io%2Fgrindery-wallet-sdk%2Fexample%2F)](https://grindery-io.github.io/grindery-wallet-sdk/example)
 [![GitHub License](https://img.shields.io/github/license/grindery-io/grindery-wallet-sdk)](https://github.com/grindery-io/grindery-wallet-sdk/blob/main/LICENSE)
 
-The SDK enables your dapp to provide a seamless user experience for Grindery users, without relying on third-party libraries. By integrating your dapp using the SDK, millions of Telegram users can connect the dapp to their Grindery Smart-Wallet.
+The SDK enables your dapp to provide a seamless user experience for Grindery users, without relying on third-party libraries. By integrating your dapp using the SDK, millions of users can connect the dapp to their Grindery Smart-Wallet.
 
 ## Table of Contents:
 
@@ -43,7 +43,7 @@ See an example implementation here: [https://grindery-io.github.io/grindery-wall
 
 To interact with Grindery Wallet your app needs to be registered first.
 
-Go to the [Grindery Bot](https://t.me/GrinderyAIBot) and use `/checkout_registerapp` command to register an app obtain an App Id.
+Go to the [Grindery Wallet](https://t.me/GrinderyAIBot) and use `/checkout_registerapp` command to register an app obtain an App Id.
 
 App Id is required, as it allows Grindery Wallet users to recognize reqests made from your app.
 
@@ -76,8 +76,6 @@ Place the script tag before the closing `</head>` tag, using this code:
   src="grindery-wallet-sdk.umd.production.min.js"
 ></script>
 ```
-
-> If you are building a [Telegram Mini App](https://core.telegram.org/bots/webapps) - make sure to put Grindery script tag AFTER Telegram script.
 
 ## Node
 
@@ -183,24 +181,14 @@ WalletSDK.disconnect();
 
 ## Silently getting wallet address
 
-The SDK allows dApps to exchange Telegram user ID to user's EVM wallet address.
+The SDK allows dApps to exchange user ID to user's EVM wallet address.
 
 The method doesn't require user to go through the [wallet connection process](#wallet-connection), and can be executed silently in the background. However, without fully connected wallet a dApp has read-only access, and can't request message signing or transactions sending. To do this ask user to connect the wallet first.
 
 ```typescript
 WalletSDK.on('connect', async () => {
   const userId = '123456';
-  const telegramUserWallet = await WalletSDK.getUserWalletAddress(userId);
-});
-```
-
-This can be especially usefull for [Telegram mini-apps](https://core.telegram.org/bots/webapps), where user ID can be detected automatically. For example:
-
-```typescript
-WalletSDK.on('connect', async () => {
-  const telegramUserWallet = await WalletSDK.getUserWalletAddress(
-    window.Telegram?.WebApp?.initDataUnsafe?.user?.id
-  );
+  const userWallet = await WalletSDK.getUserWalletAddress(userId);
 });
 ```
 

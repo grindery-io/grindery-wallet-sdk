@@ -1,5 +1,5 @@
 export type User = {
-    userTelegramID: string;
+    userTelegramId: string;
     userName: string;
     userHandle: string;
     patchwallet: string;

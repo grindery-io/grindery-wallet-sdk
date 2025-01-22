@@ -1,7 +1,6 @@
 import { WalletSDK } from './classes/WalletSDK';
 declare global {
     interface Window {
-        Telegram?: any;
         ethereum?: any;
         Grindery?: {
             appId?: string;

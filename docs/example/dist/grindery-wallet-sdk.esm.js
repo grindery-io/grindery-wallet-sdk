@@ -1423,26 +1423,6 @@ var Provider = /*#__PURE__*/function (_EventEmitter) {
   return Provider;
 }(EventEmitter);
 
-var ClientEventNames;
-(function (ClientEventNames) {
-  /**
-   * @summary The event is triggered every time the app page is opened
-   */
-  ClientEventNames["appOpened"] = "appOpened";
-  /**
-   * @summary The event is triggered when the user wallet is connected
-   */
-  ClientEventNames["walletConnected"] = "walletConnected";
-  /**
-   * @summary The event is triggered when the user wallet is disconnected
-   */
-  ClientEventNames["walletDisconnected"] = "walletDisconnected";
-  /**
-   * @summary The event is triggered when the app requests user wallet address
-   */
-  ClientEventNames["walletAddressRequested"] = "walletAddressRequested";
-})(ClientEventNames || (ClientEventNames = {}));
-
 /**
  * @summary The Grindery Wallet API wrapper class
  * @since 0.5.0
@@ -1583,7 +1563,6 @@ var WalletSDK = /*#__PURE__*/function () {
     this.storage.setValue(SdkStorageKeys.chainId, this.storage.getValue(SdkStorageKeys.chainId) || this.config.chainId || CHAINS[0]);
     this.detectPairingToken();
     this.provider = this.getWeb3Provider();
-    this.initTracking();
     if (this.config.appId) {
       this.provider.on(ProviderEvents.pair, this.handlePairing);
     }
@@ -1784,10 +1763,10 @@ var WalletSDK = /*#__PURE__*/function () {
     return this.storage.getValue(SdkStorageKeys.chainId) || this.config.chainId || CHAINS[0];
   }
   /**
-   * @summary Exchange Telegram user ID to Grindery Wallet address
+   * @summary Exchange user ID to wallet address
    * @public
    * @since 0.4.0
-   * @param {string} userId Telegram user ID
+   * @param {string} userId User ID
    * @returns {Promise<string>} Grindery Wallet address
    */;
   _proto.getUserWalletAddress =
@@ -1799,23 +1778,20 @@ var WalletSDK = /*#__PURE__*/function () {
         while (1) switch (_context6.prev = _context6.next) {
           case 0:
             rpc = new Rpc(this.config);
-            this.trackClientEvent(ClientEventNames.walletAddressRequested, {
-              userId: userId
-            });
             if (this.config.appId) {
-              _context6.next = 4;
+              _context6.next = 3;
               break;
             }
             throw new Error('App ID is required');
-          case 4:
-            _context6.next = 6;
+          case 3:
+            _context6.next = 5;
             return rpc.sendRpcApiRequest(RpcMethodNames.getUserWalletAddress, {
               appId: this.config.appId,
               userId: userId
             });
-          case 6:
+          case 5:
             return _context6.abrupt("return", _context6.sent);
-          case 7:
+          case 6:
           case "end":
             return _context6.stop();
         }
@@ -1912,7 +1888,6 @@ var WalletSDK = /*#__PURE__*/function () {
     });
     if (appIdUpdated) {
       this.provider = this.getWeb3Provider();
-      this.initTracking();
       this.provider.removeListener(ProviderEvents.pair, this.handlePairing);
       setTimeout(function () {
         _this.provider.on(ProviderEvents.pair, _this.handlePairing);
@@ -1936,7 +1911,6 @@ var WalletSDK = /*#__PURE__*/function () {
     window.Grindery = _extends({}, window.Grindery, this.config);
     if (appIdUpdated) {
       this.provider = this.getWeb3Provider();
-      this.initTracking();
       this.provider.removeListener(ProviderEvents.pair, this.handlePairing);
       setTimeout(function () {
         _this2.provider.on(ProviderEvents.pair, _this2.handlePairing);
@@ -1957,120 +1931,20 @@ var WalletSDK = /*#__PURE__*/function () {
    * @returns {void}
    */;
   _proto.handlePairing = function handlePairing(_ref) {
-    var _window$Telegram;
     var config = _ref.config,
       shortToken = _ref.shortToken,
-      connectUrl = _ref.connectUrl,
       connectUrlBrowser = _ref.connectUrlBrowser,
       miniAppPairingToken = _ref.miniAppPairingToken;
-    var WebApp = (_window$Telegram = window.Telegram) == null ? void 0 : _window$Telegram.WebApp;
     var redirectUrl = connectUrlBrowser || "https://www.grindery.com/connect/wc?uri=" + shortToken;
     var miniAppUrl = miniAppPairingToken ? "https://t.me/GrinderyConnectTestBot/confirm?startapp=" + miniAppPairingToken.replaceAll('.', '___') : '';
     if (miniAppUrl && (config == null ? void 0 : config.redirectMode) === 'tg') {
-      try {
-        var _window$Telegram2;
-        (_window$Telegram2 = window.Telegram) == null || (_window$Telegram2 = _window$Telegram2.WebApp) == null || _window$Telegram2.openTelegramLink == null || _window$Telegram2.openTelegramLink(miniAppUrl);
-      } catch (e) {
-        window.open(miniAppUrl, '_blank');
-      }
+      window.open(miniAppUrl, '_blank');
       return;
     }
-    if (WebApp && WebApp.openTelegramLink && WebApp.platform && WebApp.platform !== 'unknown' && connectUrl) {
-      WebApp.openTelegramLink(connectUrl);
-    } else {
-      var connectPage = window.open(redirectUrl, '_blank');
-      if (!connectPage) {
-        alert('Please allow popups for this website and try again.');
-      }
+    var connectPage = window.open(redirectUrl, '_blank');
+    if (!connectPage) {
+      alert('Please allow popups for this website and try again.');
     }
-  }
-  /**
-   * @summary Tracks client side event
-   * @since 0.4.2
-   * @private
-   * @param AppEvent
-   * @returns {Promise<void>}
-   */;
-  _proto.trackClientEvent =
-  /*#__PURE__*/
-  function () {
-    var _trackClientEvent = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8(name, data) {
-      var _window$Telegram3;
-      var appUrl, appId, userTelegramId, _window$Telegram4, _window$Telegram5, _window$Telegram6, rpc;
-      return _regeneratorRuntime().wrap(function _callee8$(_context8) {
-        while (1) switch (_context8.prev = _context8.next) {
-          case 0:
-            appUrl = this.config.appUrl;
-            appId = this.config.appId;
-            userTelegramId = String(((_window$Telegram3 = window.Telegram) == null || (_window$Telegram3 = _window$Telegram3.WebApp) == null || (_window$Telegram3 = _window$Telegram3.initDataUnsafe) == null || (_window$Telegram3 = _window$Telegram3.user) == null ? void 0 : _window$Telegram3.id) || '');
-            _context8.prev = 3;
-            if (appId) {
-              _context8.next = 6;
-              break;
-            }
-            throw new Error('App ID is required');
-          case 6:
-            if (userTelegramId) {
-              _context8.next = 8;
-              break;
-            }
-            throw new Error('User Telegram ID is required');
-          case 8:
-            rpc = new Rpc(this.config);
-            _context8.next = 11;
-            return rpc.sendRpcApiRequest(RpcMethodNames.trackClientEvent, {
-              name: name,
-              appUrl: appUrl,
-              userTelegramId: userTelegramId,
-              data: _extends({}, data || {}, {
-                pageUrl: window.location.href,
-                appId: appId,
-                sessionId: this.storage.getValue(SdkStorageKeys.sessionId),
-                clientId: this.storage.getValue(SdkStorageKeys.clientId),
-                isMiniApp: Boolean((_window$Telegram4 = window.Telegram) == null ? void 0 : _window$Telegram4.initDataUnsafe),
-                miniAppPlatform: (_window$Telegram5 = window.Telegram) == null || (_window$Telegram5 = _window$Telegram5.WebApp) == null ? void 0 : _window$Telegram5.platform,
-                miniAppSdkVersion: (_window$Telegram6 = window.Telegram) == null || (_window$Telegram6 = _window$Telegram6.WebApp) == null ? void 0 : _window$Telegram6.version,
-                userAgent: window.navigator.userAgent
-              })
-            });
-          case 11:
-            _context8.next = 15;
-            break;
-          case 13:
-            _context8.prev = 13;
-            _context8.t0 = _context8["catch"](3);
-          case 15:
-          case "end":
-            return _context8.stop();
-        }
-      }, _callee8, this, [[3, 13]]);
-    }));
-    function trackClientEvent(_x5, _x6) {
-      return _trackClientEvent.apply(this, arguments);
-    }
-    return trackClientEvent;
-  }()
-  /**
-   * @summary Initializes the tracking
-   * @since 0.4.2
-   * @private
-   * @returns {void}
-   */
-  ;
-  _proto.initTracking = function initTracking() {
-    var _this3 = this;
-    var onWalletConnect = function onWalletConnect(wallets) {
-      if (wallets.length > 0) {
-        _this3.trackClientEvent(ClientEventNames.walletConnected, {
-          wallets: wallets
-        });
-      }
-    };
-    var onWalletDisconnect = function onWalletDisconnect() {
-      _this3.trackClientEvent(ClientEventNames.walletDisconnected);
-    };
-    this.on(ProviderEvents.accountsChanged, onWalletConnect);
-    this.on(ProviderEvents.disconnect, onWalletDisconnect);
   };
   _proto.detectPairingToken = function detectPairingToken() {
     var urlParams = new URLSearchParams(window.location.search);

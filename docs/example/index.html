@@ -4,22 +4,11 @@
     <title>Grindery Wallet SDK Example</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       window.Grindery = {
-        appId:
-          window.Telegram &&
-          window.Telegram.WebApp &&
-          window.Telegram.WebApp.initData
-            ? '763d2695-d237-45fe-bfe8-2e4e26ff707b'
-            : '98372462-e034-4ab2-a00c-3fcd8e82da60',
-        appUrl:
-          window.Telegram &&
-          window.Telegram.WebApp &&
-          window.Telegram.WebApp.initData
-            ? 'https://t.me/yrednirgdevtestbot/walletsdk'
-            : 'https://grindery-io.github.io/grindery-wallet-sdk/example',
+        appId: '98372462-e034-4ab2-a00c-3fcd8e82da60',
+        appUrl: 'https://grindery-io.github.io/grindery-wallet-sdk/example',
       };
     </script>
     <script src="dist/grindery-wallet-sdk.umd.production.min.js"></script>
@@ -31,15 +20,7 @@
         Hello<span class="username"></span>!
       </p>
       <p class="m-0 mb-6 text-center">
-        Welcome to Example
-        <a
-          href="https://core.telegram.org/bots/webapps"
-          rel="noopener"
-          target="_blank"
-          class="text-blue-500"
-          >Telegram Mini App</a
-        >
-        powered by
+        Welcome to Example dApp powered by
         <a
           href="https://grindery-io.github.io/grindery-wallet-sdk"
           rel="noopener"

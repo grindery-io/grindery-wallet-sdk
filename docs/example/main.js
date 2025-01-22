@@ -1,5 +1,4 @@
 const WalletSDK = window.Grindery && window.Grindery.WalletSDK;
-const WebApp = window.Telegram && window.Telegram.WebApp;
 
 let newChainId = 'eip155:204';
 let newChainName = 'opBNB';
@@ -8,37 +7,6 @@ const shortenAddress = (address) => {
   return address.length > 10
     ? address.substring(0, 6) + '...' + address.substring(address.length - 4)
     : address;
-};
-
-const showUsername = (target) => {
-  if (WebApp) {
-    const user = WebApp && WebApp.initDataUnsafe && WebApp.initDataUnsafe.user;
-    if (user && target) {
-      var userNamePlaceholder = target.querySelector('.username');
-      if (userNamePlaceholder) {
-        userNamePlaceholder.innerHTML = ' @' + user.username;
-      }
-    }
-  }
-};
-
-const getAndShowWalletAddress = (target) => {
-  if (WebApp) {
-    const user = WebApp && WebApp.initDataUnsafe && WebApp.initDataUnsafe.user;
-    if (user && user.id && target && WalletSDK) {
-      WalletSDK.getUserWalletAddress(user.id)
-        .then((address) => {
-          if (address) {
-            target.innerHTML = `<p class="py-2 px-4 text-text text-center">Auto-detected wallet address: ${shortenAddress(
-              address
-            )}</p>`;
-          }
-        })
-        .catch((error) => {
-          console.error('getUserWalletAddress', error);
-        });
-    }
-  }
 };
 
 const showConnectButton = (target) => {
@@ -308,10 +276,6 @@ const onProviderConnect = ({ chainId }) => {
   newChainName = chainId === '0xcc' ? 'Polygon' : 'opBNB';
 
   listenProviderEvents(targetEl);
-
-  showUsername(targetEl);
-
-  getAndShowWalletAddress(document.getElementById('wallet'));
 
   showConnectButton(targetEl);
 };

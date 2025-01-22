@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <title>Grindery Wallet SDK Example STAGING</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,24 +9,10 @@
       window.Grindery = {
         pairingApiUrl: 'https://walletconnect-api-staging.grindery.com',
         walletApiUrl: 'https://wallet-api-staging.grindery.com/v3',
-        redirectMode:
-          window.Telegram &&
-          window.Telegram.WebApp &&
-          window.Telegram.WebApp.initData
-            ? 'tg'
-            : 'url',
-        appId:
-          window.Telegram &&
-          window.Telegram.WebApp &&
-          window.Telegram.WebApp.initData
-            ? 'fec480b7-ac17-44f3-a485-4d8d6ef5947f'
-            : '1500d3ee-fc88-447f-926e-ac12fb6b0fbc',
+        redirectMode: 'url',
+        appId: '1500d3ee-fc88-447f-926e-ac12fb6b0fbc',
         appUrl:
-          window.Telegram &&
-          window.Telegram.WebApp &&
-          window.Telegram.WebApp.initData
-            ? 'https://t.me/yrednirgdevtestbot/staging'
-            : 'https://grindery-io.github.io/grindery-wallet-sdk/example/staging',
+          'https://grindery-io.github.io/grindery-wallet-sdk/example/staging',
         chainId: 'eip155:80002',
       };
     </script>
@@ -39,15 +24,7 @@
         Hello<span class="username"></span>!
       </p>
       <p class="m-0 mb-6 text-center">
-        Welcome to Example
-        <a
-          href="https://core.telegram.org/bots/webapps"
-          rel="noopener"
-          target="_blank"
-          class="text-blue-500"
-          >Telegram Mini App</a
-        >
-        powered by
+        Welcome to Example dApp powered by
         <a
           href="https://grindery-io.github.io/grindery-wallet-sdk"
           rel="noopener"

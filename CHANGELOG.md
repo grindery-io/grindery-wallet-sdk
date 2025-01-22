@@ -1,5 +1,12 @@
 # Grindery Wallet SDK Changelog
 
+## v0.6.0 (2025-01-21)
+
+### Updated
+
+- Documentation and example
+- Removed external dependencies
+
 ## v0.5.8 (2024-11-28)
 
 ### Fixed
@@ -61,7 +68,7 @@
 
 ### Fixed
 
-- Pairing redirect [issue](https://github.com/grindery-io/grindery-wallet-sdk/issues/8) when SDK used in the Telegram Mini App
+- Pairing redirect [issue](https://github.com/grindery-io/grindery-wallet-sdk/issues/8)
 
 ## v0.4.2 (2024-08-03)
 
@@ -71,13 +78,13 @@
 
 ### Fixed
 
-- Fixed Telegram Mini App auto-closing [issue](https://github.com/grindery-io/grindery-wallet-sdk/issues/4) on wallet connection.
+- Fixed app auto-closing [issue](https://github.com/grindery-io/grindery-wallet-sdk/issues/4) on wallet connection.
 
 ## v0.4.0 (2024-07-05)
 
 ### Features
 
-- Added `getUserWalletAddress` SDK method, allowing to silently exchange Telegram user ID to EVM wallet address
+- Added `getUserWalletAddress` SDK method, allowing to silently exchange user ID to EVM wallet address
 
 ## v0.3.0 (2024-06-18)
 

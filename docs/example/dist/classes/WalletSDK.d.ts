@@ -109,10 +109,10 @@ export declare class WalletSDK {
      */
     getChain(): string;
     /**
-     * @summary Exchange Telegram user ID to Grindery Wallet address
+     * @summary Exchange user ID to wallet address
      * @public
      * @since 0.4.0
-     * @param {string} userId Telegram user ID
+     * @param {string} userId User ID
      * @returns {Promise<string>} Grindery Wallet address
      */
     getUserWalletAddress(userId: string): Promise<RpcRequestResults.getUserWalletAddress>;
@@ -177,20 +177,5 @@ export declare class WalletSDK {
      * @returns {void}
      */
     private handlePairing;
-    /**
-     * @summary Tracks client side event
-     * @since 0.4.2
-     * @private
-     * @param AppEvent
-     * @returns {Promise<void>}
-     */
-    private trackClientEvent;
-    /**
-     * @summary Initializes the tracking
-     * @since 0.4.2
-     * @private
-     * @returns {void}
-     */
-    private initTracking;
     private detectPairingToken;
 }
