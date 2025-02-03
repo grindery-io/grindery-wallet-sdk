@@ -22,8 +22,9 @@ export const GrinderyWalletSDK = WalletSDK;
 
 function init() {
   if (
-    !window.Grindery?.WalletSDK ||
-    !(window.Grindery.WalletSDK instanceof WalletSDK)
+    typeof window !== 'undefined' &&
+    (!window.Grindery?.WalletSDK ||
+      !(window.Grindery.WalletSDK instanceof WalletSDK))
   ) {
     window.Grindery = {
       ...(window.Grindery || {}),

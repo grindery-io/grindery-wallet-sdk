@@ -153,6 +153,31 @@ button.addEventListener('click', async () => {
 
 > It is important to use `connect()` method only in response to user's action, to avoid connection approval popup being blocked by the browser.
 
+In case the popup has been blocked, it is recommended to listen for `pairing` event and show a connection link to the user. For example:
+
+```typescript
+WalletSDK.on(
+  'pair',
+  ({
+    config,
+    shortToken,
+    connectUrl,
+    connectUrlBrowser,
+    miniAppPairingToken,
+  }: {
+    config: WalletSDKConfig;
+    shortToken: string;
+    connectUrl: string;
+    connectUrlBrowser: string;
+    miniAppPairingToken: string;
+  }) => {
+    document.getElementById(
+      'connect-link'
+    ).innerHTML = `<a href="${connectUrlBrowser}" target="_blank">Click here if you weren't redirected automatically</a>`;
+  }
+);
+```
+
 Listen for SDK [`accountsChanged`](https://grindery-io.github.io/grindery-wallet-sdk/enums/classes_EventEmitter.ProviderEvents.html#accountsChanged) event, to catch when user's wallet is connected:
 
 ```typescript

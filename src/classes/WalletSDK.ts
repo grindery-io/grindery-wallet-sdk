@@ -46,14 +46,20 @@ export class WalletSDK {
    */
   public provider: Provider;
 
-  public config: WalletSDKConfig = {
-    appId: window.Grindery?.appId || '',
-    appUrl: window.Grindery?.appUrl || window.location.origin,
-    redirectMode: window.Grindery?.redirectMode,
-    pairingApiUrl: window.Grindery?.pairingApiUrl,
-    walletApiUrl: window.Grindery?.walletApiUrl,
-    chainId: window.Grindery?.chainId,
-  };
+  public config: WalletSDKConfig =
+    typeof window !== 'undefined'
+      ? {
+          appId: window.Grindery?.appId || '',
+          appUrl: window.Grindery?.appUrl || window.location.origin,
+          redirectMode: window.Grindery?.redirectMode,
+          pairingApiUrl: window.Grindery?.pairingApiUrl,
+          walletApiUrl: window.Grindery?.walletApiUrl,
+          chainId: window.Grindery?.chainId,
+        }
+      : {
+          appId: '',
+          appUrl: '',
+        };
 
   constructor(config?: Partial<WalletSDKConfig>) {
     this.config = {
@@ -61,10 +67,11 @@ export class WalletSDK {
       ...(config || getConfigFromDataAttributes() || {}),
     };
 
-    window.Grindery = {
-      ...window.Grindery,
-      ...this.config,
-    };
+    if (typeof window !== 'undefined') {
+      window.Grindery = {
+        ...this.config,
+      };
+    }
 
     this.storage.setValue(
       SdkStorageKeys.chainId,
@@ -268,10 +275,12 @@ export class WalletSDK {
       appIdUpdated = true;
     }
     this.config.appId = appId;
-    window.Grindery = {
-      ...window.Grindery,
-      appId,
-    };
+    if (typeof window !== 'undefined') {
+      window.Grindery = {
+        ...window.Grindery,
+        appId,
+      };
+    }
     if (appIdUpdated) {
       this.provider = this.getWeb3Provider();
       this.provider.removeListener(ProviderEvents.pair, this.handlePairing);
@@ -294,10 +303,12 @@ export class WalletSDK {
       appIdUpdated = true;
     }
     this.config = { ...this.config, ...config };
-    window.Grindery = {
-      ...window.Grindery,
-      ...this.config,
-    };
+    if (typeof window !== 'undefined') {
+      window.Grindery = {
+        ...window.Grindery,
+        ...this.config,
+      };
+    }
     if (appIdUpdated) {
       this.provider = this.getWeb3Provider();
       this.provider.removeListener(ProviderEvents.pair, this.handlePairing);
@@ -339,6 +350,10 @@ export class WalletSDK {
     connectUrlBrowser,
     miniAppPairingToken,
   }: RpcRequestResults.requestPairing): void {
+    if (typeof window === 'undefined') {
+      alert('Please allow popups for this website and try again.');
+      return;
+    }
     const redirectUrl =
       connectUrlBrowser ||
       `https://www.grindery.com/connect/wc?uri=${shortToken}`;
@@ -359,13 +374,15 @@ export class WalletSDK {
   }
 
   private detectPairingToken(): void {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token =
-      urlParams.get('_grinderyPairingToken') ||
-      urlParams.get('tgWebAppStartParam');
-    if (token) {
-      this.storage.setValue(SdkStorageKeys.pairingToken, token);
-      this.storage.setValue(SdkStorageKeys.sessionId, '');
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token =
+        urlParams.get('_grinderyPairingToken') ||
+        urlParams.get('tgWebAppStartParam');
+      if (token) {
+        this.storage.setValue(SdkStorageKeys.pairingToken, token);
+        this.storage.setValue(SdkStorageKeys.sessionId, '');
+      }
     }
   }
 }

@@ -59,6 +59,7 @@ export declare class Provider extends EventEmitter {
     isGrinderyWallet: boolean;
     private config;
     constructor(config: WalletSDKConfig);
+    restoreConnection(): void;
     /**
      * @public
      * @returns {boolean} True if the provider is connected to the server.

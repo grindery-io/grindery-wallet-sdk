@@ -5,6 +5,9 @@ import { WalletSDKConfig } from '../classes/WalletSDK';
  * @returns {object} The SDK config object
  */
 export const getConfigFromDataAttributes = (): Partial<WalletSDKConfig> => {
+  if (typeof document === 'undefined' || typeof window === 'undefined') {
+    return {};
+  }
   let config: Partial<WalletSDKConfig> = {};
   const attributesMap = {
     'data-app-id': 'appId',

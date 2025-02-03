@@ -1,5 +1,12 @@
 # Grindery Wallet SDK Changelog
 
+## v0.6.1 (2025-02-03)
+
+### Updated
+
+- Removed `window` global object dependency
+- Updated documentation
+
 ## v0.6.0 (2025-01-21)
 
 ### Updated

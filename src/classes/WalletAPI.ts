@@ -19,9 +19,13 @@ export class WalletAPI {
     if (!sessionId || !address) {
       throw new Error('Not connected to the wallet');
     }
+    const customUrl =
+      typeof window !== 'undefined' &&
+      window.Grindery?.WalletSDK?.config.walletApiUrl
+        ? window.Grindery.WalletSDK.config.walletApiUrl
+        : '';
     const response = await fetch(
-      window.Grindery?.WalletSDK?.config.walletApiUrl ||
-        'https://wallet-api.grindery.com/v3',
+      customUrl || 'https://wallet-api.grindery.com/v3',
       {
         method: 'POST',
         headers: {

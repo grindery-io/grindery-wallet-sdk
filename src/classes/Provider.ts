@@ -77,24 +77,30 @@ export class Provider extends EventEmitter {
     super();
     this.config = config;
     this.rpc = new Rpc(this.config);
-    if (this.config.appId) {
+    if (this.config?.appId) {
       this.injectProvider();
       this.listenForRequestProviderEvents();
       this.announceProvider();
     }
-    window.addEventListener('load', () => {
-      if (this.config.appId) {
-        this.emit(ProviderEvents.connect, {
-          chainId: hexChainId(
-            this.storage.getValue(SdkStorageKeys.chainId) ||
-              this.config.chainId ||
-              CHAINS[0]
-          ),
-        });
-        this.restorePairing();
-        this.restoreSession();
-      }
-    });
+    if (typeof window !== 'undefined') {
+      window.addEventListener('load', () => {
+        this.restoreConnection();
+      });
+    }
+  }
+
+  public restoreConnection(): void {
+    if (this.config?.appId) {
+      this.emit(ProviderEvents.connect, {
+        chainId: hexChainId(
+          this.storage.getValue(SdkStorageKeys.chainId) ||
+            this.config?.chainId ||
+            CHAINS[0]
+        ),
+      });
+      this.restorePairing();
+      this.restoreSession();
+    }
   }
 
   /**
@@ -227,10 +233,10 @@ export class Provider extends EventEmitter {
           await this.rpc.sendRpcApiRequest<RpcRequestResults.requestPairing>(
             RpcMethodNames.requestPairing,
             {
-              appId: this.config.appId || '',
+              appId: this.config?.appId || '',
               clientId: this.storage.getValue(SdkStorageKeys.clientId),
-              redirectMode: this.config.redirectMode,
-              redirectUrl: this.config.appUrl,
+              redirectMode: this.config?.redirectMode,
+              redirectUrl: this.config?.appUrl,
             }
           );
 
@@ -356,7 +362,7 @@ export class Provider extends EventEmitter {
     ): Promise<ProviderRequestResults.eth_chainId> => {
       return hexChainId(
         this.storage.getValue(SdkStorageKeys.chainId) ||
-          this.config.chainId ||
+          this.config?.chainId ||
           CHAINS[0]
       );
     },
@@ -447,30 +453,32 @@ export class Provider extends EventEmitter {
    * @returns {void}
    */
   private injectProvider(): void {
-    if (!window.ethereum) {
-      window.ethereum = this;
-    } else {
-      if (
-        window.ethereum.providers &&
-        Array.isArray(window.ethereum.providers)
-      ) {
-        if (
-          window.ethereum.providers.filter((p: any) => p.isGrinderyWallet)
-            .length > 0
-        ) {
-          window.ethereum.providers = window.ethereum.providers.map(
-            (p: any) => {
-              if (p.isGrinderyWallet) {
-                return this;
-              }
-              return p;
-            }
-          );
-        } else {
-          window.ethereum.providers.push(this);
-        }
+    if (typeof window !== 'undefined') {
+      if (!window.ethereum) {
+        window.ethereum = this;
       } else {
-        window.ethereum.providers = [window.ethereum, this];
+        if (
+          window.ethereum.providers &&
+          Array.isArray(window.ethereum.providers)
+        ) {
+          if (
+            window.ethereum.providers.filter((p: any) => p.isGrinderyWallet)
+              .length > 0
+          ) {
+            window.ethereum.providers = window.ethereum.providers.map(
+              (p: any) => {
+                if (p.isGrinderyWallet) {
+                  return this;
+                }
+                return p;
+              }
+            );
+          } else {
+            window.ethereum.providers.push(this);
+          }
+        } else {
+          window.ethereum.providers = [window.ethereum, this];
+        }
       }
     }
   }
@@ -483,11 +491,13 @@ export class Provider extends EventEmitter {
    * @returns {void}
    */
   private announceProvider(): void {
-    window.dispatchEvent(
-      new CustomEvent('eip6963:announceProvider', {
-        detail: Object.freeze({ info: providerInfo, provider: this }),
-      })
-    );
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('eip6963:announceProvider', {
+          detail: Object.freeze({ info: providerInfo, provider: this }),
+        })
+      );
+    }
   }
 
   /**
@@ -498,8 +508,10 @@ export class Provider extends EventEmitter {
    * @returns {void}
    */
   private listenForRequestProviderEvents(): void {
-    window.addEventListener('eip6963:requestProvider', () => {
-      this.announceProvider();
-    });
+    if (typeof window !== 'undefined') {
+      window.addEventListener('eip6963:requestProvider', () => {
+        this.announceProvider();
+      });
+    }
   }
 }

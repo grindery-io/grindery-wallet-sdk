@@ -879,7 +879,7 @@
    */
   var Provider = /*#__PURE__*/function (_EventEmitter) {
     function Provider(config) {
-      var _this$methods;
+      var _this$methods, _this$config5;
       var _this;
       _this = _EventEmitter.call(this) || this;
       _this.isGrinderyWallet = true;
@@ -927,7 +927,7 @@
        */
       _this.methods = (_this$methods = {}, _this$methods[ProviderMethodNames.eth_requestAccounts] = function () {
         var _ref3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(params) {
-          var pairResult, result, _pairResult;
+          var pairResult, _this$config, _this$config2, _this$config3, result, _pairResult;
           return _regeneratorRuntime().wrap(function _callee2$(_context2) {
             while (1) switch (_context2.prev = _context2.next) {
               case 0:
@@ -991,10 +991,10 @@
                 _this.storage.clear();
                 _context2.next = 33;
                 return _this.rpc.sendRpcApiRequest(RpcMethodNames.requestPairing, {
-                  appId: _this.config.appId || '',
+                  appId: ((_this$config = _this.config) == null ? void 0 : _this$config.appId) || '',
                   clientId: _this.storage.getValue(SdkStorageKeys.clientId),
-                  redirectMode: _this.config.redirectMode,
-                  redirectUrl: _this.config.appUrl
+                  redirectMode: (_this$config2 = _this.config) == null ? void 0 : _this$config2.redirectMode,
+                  redirectUrl: (_this$config3 = _this.config) == null ? void 0 : _this$config3.appUrl
                 });
               case 33:
                 result = _context2.sent;
@@ -1140,10 +1140,11 @@
         }, _callee6, null, [[0, 8]]);
       })), _this$methods[ProviderMethodNames.eth_chainId] = function () {
         var _ref8 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee7(_) {
+          var _this$config4;
           return _regeneratorRuntime().wrap(function _callee7$(_context7) {
             while (1) switch (_context7.prev = _context7.next) {
               case 0:
-                return _context7.abrupt("return", hexChainId(_this.storage.getValue(SdkStorageKeys.chainId) || _this.config.chainId || CHAINS[0]));
+                return _context7.abrupt("return", hexChainId(_this.storage.getValue(SdkStorageKeys.chainId) || ((_this$config4 = _this.config) == null ? void 0 : _this$config4.chainId) || CHAINS[0]));
               case 1:
               case "end":
                 return _context7.stop();
@@ -1189,28 +1190,35 @@
       }(), _this$methods);
       _this.config = config;
       _this.rpc = new Rpc(_this.config);
-      if (_this.config.appId) {
+      if ((_this$config5 = _this.config) != null && _this$config5.appId) {
         _this.injectProvider();
         _this.listenForRequestProviderEvents();
         _this.announceProvider();
       }
-      window.addEventListener('load', function () {
-        if (_this.config.appId) {
-          _this.emit(ProviderEvents.connect, {
-            chainId: hexChainId(_this.storage.getValue(SdkStorageKeys.chainId) || _this.config.chainId || CHAINS[0])
-          });
-          _this.restorePairing();
-          _this.restoreSession();
-        }
-      });
+      if (typeof window !== 'undefined') {
+        window.addEventListener('load', function () {
+          _this.restoreConnection();
+        });
+      }
       return _this;
+    }
+    _inheritsLoose(Provider, _EventEmitter);
+    var _proto = Provider.prototype;
+    _proto.restoreConnection = function restoreConnection() {
+      var _this$config6;
+      if ((_this$config6 = this.config) != null && _this$config6.appId) {
+        var _this$config7;
+        this.emit(ProviderEvents.connect, {
+          chainId: hexChainId(this.storage.getValue(SdkStorageKeys.chainId) || ((_this$config7 = this.config) == null ? void 0 : _this$config7.chainId) || CHAINS[0])
+        });
+        this.restorePairing();
+        this.restoreSession();
+      }
     }
     /**
      * @public
      * @returns {boolean} True if the provider is connected to the server.
-     */
-    _inheritsLoose(Provider, _EventEmitter);
-    var _proto = Provider.prototype;
+     */;
     _proto.isConnected = function isConnected() {
       // Always true
       return true;
@@ -1377,24 +1385,26 @@
     ;
     _proto.injectProvider = function injectProvider() {
       var _this2 = this;
-      if (!window.ethereum) {
-        window.ethereum = this;
-      } else {
-        if (window.ethereum.providers && Array.isArray(window.ethereum.providers)) {
-          if (window.ethereum.providers.filter(function (p) {
-            return p.isGrinderyWallet;
-          }).length > 0) {
-            window.ethereum.providers = window.ethereum.providers.map(function (p) {
-              if (p.isGrinderyWallet) {
-                return _this2;
-              }
-              return p;
-            });
-          } else {
-            window.ethereum.providers.push(this);
-          }
+      if (typeof window !== 'undefined') {
+        if (!window.ethereum) {
+          window.ethereum = this;
         } else {
-          window.ethereum.providers = [window.ethereum, this];
+          if (window.ethereum.providers && Array.isArray(window.ethereum.providers)) {
+            if (window.ethereum.providers.filter(function (p) {
+              return p.isGrinderyWallet;
+            }).length > 0) {
+              window.ethereum.providers = window.ethereum.providers.map(function (p) {
+                if (p.isGrinderyWallet) {
+                  return _this2;
+                }
+                return p;
+              });
+            } else {
+              window.ethereum.providers.push(this);
+            }
+          } else {
+            window.ethereum.providers = [window.ethereum, this];
+          }
         }
       }
     }
@@ -1406,12 +1416,14 @@
      * @returns {void}
      */;
     _proto.announceProvider = function announceProvider() {
-      window.dispatchEvent(new CustomEvent('eip6963:announceProvider', {
-        detail: Object.freeze({
-          info: providerInfo,
-          provider: this
-        })
-      }));
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('eip6963:announceProvider', {
+          detail: Object.freeze({
+            info: providerInfo,
+            provider: this
+          })
+        }));
+      }
     }
     /**
      * @summary Listens for the request provider events
@@ -1422,9 +1434,11 @@
      */;
     _proto.listenForRequestProviderEvents = function listenForRequestProviderEvents() {
       var _this3 = this;
-      window.addEventListener('eip6963:requestProvider', function () {
-        _this3.announceProvider();
-      });
+      if (typeof window !== 'undefined') {
+        window.addEventListener('eip6963:requestProvider', function () {
+          _this3.announceProvider();
+        });
+      }
     };
     return Provider;
   }(EventEmitter);
@@ -1448,7 +1462,7 @@
     function () {
       var _sendApiRequest = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(method, params) {
         var _window$Grindery;
-        var storage, sessionId, address, response, json;
+        var storage, sessionId, address, customUrl, response, json;
         return _regeneratorRuntime().wrap(function _callee$(_context) {
           while (1) switch (_context.prev = _context.next) {
             case 0:
@@ -1461,8 +1475,9 @@
               }
               throw new Error('Not connected to the wallet');
             case 5:
-              _context.next = 7;
-              return fetch(((_window$Grindery = window.Grindery) == null || (_window$Grindery = _window$Grindery.WalletSDK) == null ? void 0 : _window$Grindery.config.walletApiUrl) || 'https://wallet-api.grindery.com/v3', {
+              customUrl = typeof window !== 'undefined' && (_window$Grindery = window.Grindery) != null && (_window$Grindery = _window$Grindery.WalletSDK) != null && _window$Grindery.config.walletApiUrl ? window.Grindery.WalletSDK.config.walletApiUrl : '';
+              _context.next = 8;
+              return fetch(customUrl || 'https://wallet-api.grindery.com/v3', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -1475,20 +1490,20 @@
                   params: params || {}
                 })
               });
-            case 7:
+            case 8:
               response = _context.sent;
               if (response.ok) {
-                _context.next = 10;
+                _context.next = 11;
                 break;
               }
               throw new Error("Failed to call " + method);
-            case 10:
-              _context.next = 12;
+            case 11:
+              _context.next = 13;
               return response.json();
-            case 12:
+            case 13:
               json = _context.sent;
               return _context.abrupt("return", json.result);
-            case 14:
+            case 15:
             case "end":
               return _context.stop();
           }
@@ -1507,6 +1522,9 @@
    * @returns {object} The SDK config object
    */
   var getConfigFromDataAttributes = function getConfigFromDataAttributes() {
+    if (typeof document === 'undefined' || typeof window === 'undefined') {
+      return {};
+    }
     var config = {};
     var attributesMap = {
       'data-app-id': 'appId',
@@ -1546,13 +1564,16 @@
        * @public
        */
       this.provider = void 0;
-      this.config = {
+      this.config = typeof window !== 'undefined' ? {
         appId: ((_window$Grindery = window.Grindery) == null ? void 0 : _window$Grindery.appId) || '',
         appUrl: ((_window$Grindery2 = window.Grindery) == null ? void 0 : _window$Grindery2.appUrl) || window.location.origin,
         redirectMode: (_window$Grindery3 = window.Grindery) == null ? void 0 : _window$Grindery3.redirectMode,
         pairingApiUrl: (_window$Grindery4 = window.Grindery) == null ? void 0 : _window$Grindery4.pairingApiUrl,
         walletApiUrl: (_window$Grindery5 = window.Grindery) == null ? void 0 : _window$Grindery5.walletApiUrl,
         chainId: (_window$Grindery6 = window.Grindery) == null ? void 0 : _window$Grindery6.chainId
+      } : {
+        appId: '',
+        appUrl: ''
       };
       /**
        * @summary SdkStorage class instance
@@ -1565,7 +1586,9 @@
        */
       this.user = null;
       this.config = _extends({}, this.config, config || getConfigFromDataAttributes() || {});
-      window.Grindery = _extends({}, window.Grindery, this.config);
+      if (typeof window !== 'undefined') {
+        window.Grindery = _extends({}, this.config);
+      }
       this.storage.setValue(SdkStorageKeys.chainId, this.storage.getValue(SdkStorageKeys.chainId) || this.config.chainId || CHAINS[0]);
       this.detectPairingToken();
       this.provider = this.getWeb3Provider();
@@ -1889,9 +1912,11 @@
         appIdUpdated = true;
       }
       this.config.appId = appId;
-      window.Grindery = _extends({}, window.Grindery, {
-        appId: appId
-      });
+      if (typeof window !== 'undefined') {
+        window.Grindery = _extends({}, window.Grindery, {
+          appId: appId
+        });
+      }
       if (appIdUpdated) {
         this.provider = this.getWeb3Provider();
         this.provider.removeListener(ProviderEvents.pair, this.handlePairing);
@@ -1914,7 +1939,9 @@
         appIdUpdated = true;
       }
       this.config = _extends({}, this.config, config);
-      window.Grindery = _extends({}, window.Grindery, this.config);
+      if (typeof window !== 'undefined') {
+        window.Grindery = _extends({}, window.Grindery, this.config);
+      }
       if (appIdUpdated) {
         this.provider = this.getWeb3Provider();
         this.provider.removeListener(ProviderEvents.pair, this.handlePairing);
@@ -1941,6 +1968,10 @@
         shortToken = _ref.shortToken,
         connectUrlBrowser = _ref.connectUrlBrowser,
         miniAppPairingToken = _ref.miniAppPairingToken;
+      if (typeof window === 'undefined') {
+        alert('Please allow popups for this website and try again.');
+        return;
+      }
       var redirectUrl = connectUrlBrowser || "https://www.grindery.com/connect/wc?uri=" + shortToken;
       var miniAppUrl = miniAppPairingToken ? "https://t.me/GrinderyConnectTestBot/confirm?startapp=" + miniAppPairingToken.replaceAll('.', '___') : '';
       if (miniAppUrl && (config == null ? void 0 : config.redirectMode) === 'tg') {
@@ -1953,11 +1984,13 @@
       }
     };
     _proto.detectPairingToken = function detectPairingToken() {
-      var urlParams = new URLSearchParams(window.location.search);
-      var token = urlParams.get('_grinderyPairingToken') || urlParams.get('tgWebAppStartParam');
-      if (token) {
-        this.storage.setValue(SdkStorageKeys.pairingToken, token);
-        this.storage.setValue(SdkStorageKeys.sessionId, '');
+      if (typeof window !== 'undefined') {
+        var urlParams = new URLSearchParams(window.location.search);
+        var token = urlParams.get('_grinderyPairingToken') || urlParams.get('tgWebAppStartParam');
+        if (token) {
+          this.storage.setValue(SdkStorageKeys.pairingToken, token);
+          this.storage.setValue(SdkStorageKeys.sessionId, '');
+        }
       }
     };
     return WalletSDK;
@@ -1969,7 +2002,7 @@
   var GrinderyWalletSDK = WalletSDK;
   function init() {
     var _window$Grindery;
-    if (!((_window$Grindery = window.Grindery) != null && _window$Grindery.WalletSDK) || !(window.Grindery.WalletSDK instanceof WalletSDK)) {
+    if (typeof window !== 'undefined' && (!((_window$Grindery = window.Grindery) != null && _window$Grindery.WalletSDK) || !(window.Grindery.WalletSDK instanceof WalletSDK))) {
       window.Grindery = _extends({}, window.Grindery || {}, {
         WalletSDK: new WalletSDK()
       });
