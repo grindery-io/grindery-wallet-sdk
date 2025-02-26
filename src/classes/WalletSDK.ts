@@ -6,6 +6,7 @@ import { CHAINS, hexChainId } from '../utils/chains';
 import { User } from '../utils/user';
 import { WalletAPI } from './WalletAPI';
 import { getConfigFromDataAttributes } from '../utils/getConfigFromDataAttributes';
+import { TelegramLoginInfo } from '../utils/telegram';
 
 export type WalletSDKConfig = {
   /**
@@ -315,6 +316,71 @@ export class WalletSDK {
       setTimeout(() => {
         this.provider.on(ProviderEvents.pair, this.handlePairing);
       }, 0);
+    }
+  }
+
+  /**
+   * @summary Requests pairing by telegram login info
+   * @public
+   * @since 0.7.0
+   * @param {string} appSecret The application secret. Obtained in the Grindery bot by the dApp developer. Required. Must be kept secret.
+   * @param {TelegramLoginInfo} telegramLoginInfo The user's Telegram login info. Required.
+   * @param {string} [clientId] The client ID. Optional. Unique identifier of the client device.
+   */
+  public async requestPairingByTelegramLogin(
+    appSecret: string,
+    telegramLoginInfo: TelegramLoginInfo,
+    clientId?: string
+  ): Promise<void> {
+    try {
+      const rpc = new Rpc(this.config);
+      if (!this.config.appId) {
+        throw new Error('App ID is required');
+      }
+      const pairingRequest =
+        await rpc.sendRpcApiRequest<RpcRequestResults.requestPairingByTelegramLogin>(
+          RpcMethodNames.requestPairingByTelegramLogin,
+          {
+            appId: this.config.appId,
+            clientId:
+              clientId || this.storage.getValue(SdkStorageKeys.clientId),
+            appSecret,
+            telegramLoginInfo,
+          }
+        );
+      this.storage.setValue(
+        SdkStorageKeys.pairingToken,
+        pairingRequest.pairingToken
+      );
+      this.provider.restoreConnection();
+    } catch (e) {
+      throw new Error(
+        e instanceof Error
+          ? e.message
+          : 'Failed to request pairing by telegram login'
+      );
+    }
+  }
+
+  /**
+   * @summary Sends a request to the Grindery Wallet JSON-RPC API
+   * @public
+   * @since 0.7.0
+   * @param {string} method Wallet API method name
+   * @param {object} params Wallet API method params
+   * @returns {T} The result field of the JSON-RPC API request
+   */
+  public async sendWalletApiRequest<T>(
+    method: string,
+    params?: object
+  ): Promise<T> {
+    const api = new WalletAPI();
+    try {
+      return await api.sendApiRequest<T>(method, params);
+    } catch (e) {
+      throw new Error(
+        e instanceof Error ? e.message : 'Failed to send wallet API request'
+      );
     }
   }
 

@@ -1,5 +1,12 @@
 # Grindery Wallet SDK Changelog
 
+## v0.7.0 (2025-02-26)
+
+### Added
+
+- `requestPairingByTelegramLogin` method
+- `sendWalletApiRequest` method
+
 ## v0.6.1 (2025-02-03)
 
 ### Updated

@@ -21,6 +21,7 @@ The SDK enables your dapp to provide a seamless user experience for Grindery use
 - [Advanced usage](#advanced-usage)
   - [Full documentation](#full-documentation)
   - [Injected Ethereum Provider](#injected-ethereum-provider)
+  - [Using Wallet API](#using-wallet-api)
 - [Changelog](#changelog)
 - [SDK development and building](#sdk-development-and-building)
 - [License](#license)
@@ -345,6 +346,19 @@ Get connected user's wallet addresses.
 - `chainId` String. Required. Integer ID of the chain as a hexadecimal string, per the `eth_chainId` Ethereum RPC method.
 
 **Response result:** `null` on success.
+
+## Using Wallet API
+
+You can use the SDK to make requests to the Grindery Wallet JSON-RPC API. Use [`sendWalletApiRequest()`](https://grindery-io.github.io/grindery-wallet-sdk/classes/classes_WalletSDK.WalletSDK.html#sendWalletApiRequest) method, once the wallet is connected:
+
+```typescript
+WalletSDK.on('accountsChanged', async () => {
+  // send `gw_getMe` method request
+  console.log('result', await WalletSDK.sendWalletApiRequest('gw_getMe', {}));
+});
+```
+
+> The full list of available JSON-RPC API methods and parameters are coming soon.
 
 # Changelog
 

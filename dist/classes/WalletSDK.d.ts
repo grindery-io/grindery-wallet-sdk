@@ -2,6 +2,7 @@ import { ProviderEventName } from './EventEmitter';
 import { Provider } from './Provider';
 import { RpcRequestResults } from './Rpc';
 import { User } from '../utils/user';
+import { TelegramLoginInfo } from '../utils/telegram';
 export type WalletSDKConfig = {
     /**
      * @summary The application ID, obtained in the Grindery bot by the dApp developer.
@@ -155,6 +156,24 @@ export declare class WalletSDK {
      * @returns {void}
      */
     setConfig(config: Partial<WalletSDKConfig>): void;
+    /**
+     * @summary Requests pairing by telegram login info
+     * @public
+     * @since 0.7.0
+     * @param {string} appSecret The application secret. Obtained in the Grindery bot by the dApp developer. Required. Must be kept secret.
+     * @param {TelegramLoginInfo} telegramLoginInfo The user's Telegram login info. Required.
+     * @param {string} [clientId] The client ID. Optional. Unique identifier of the client device.
+     */
+    requestPairingByTelegramLogin(appSecret: string, telegramLoginInfo: TelegramLoginInfo, clientId?: string): Promise<void>;
+    /**
+     * @summary Sends a request to the Grindery Wallet JSON-RPC API
+     * @public
+     * @since 0.7.0
+     * @param {string} method Wallet API method name
+     * @param {object} params Wallet API method params
+     * @returns {T} The result field of the JSON-RPC API request
+     */
+    sendWalletApiRequest<T>(method: string, params?: object): Promise<T>;
     /**
      * @summary SdkStorage class instance
      * @private

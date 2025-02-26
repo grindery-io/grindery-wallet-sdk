@@ -1,6 +1,7 @@
 import { WalletSDKConfig } from './WalletSDK';
 /**
  * @summary The Grindery RPC API method names
+ * @updated 0.7.0 Added `requestPairingByUserId` and `requestPairingByTelegramLogin` methods
  */
 export declare enum RpcMethodNames {
     requestPairing = "requestPairing",
@@ -9,7 +10,17 @@ export declare enum RpcMethodNames {
     waitForRequestResult = "waitForRequestResult",
     'disconnect' = "disconnect",
     getUserWalletAddress = "getUserWalletAddress",
-    trackClientEvent = "trackClientEvent"
+    trackClientEvent = "trackClientEvent",
+    /**
+     * Server side method
+     * @since 0.7.0
+     */
+    requestPairingByUserId = "requestPairingByUserId",
+    /**
+     * Server side method
+     * @since 0.7.0
+     */
+    requestPairingByTelegramLogin = "requestPairingByTelegramLogin"
 }
 /**
  * @summary The Grindery RPC API request results
@@ -66,6 +77,20 @@ export declare namespace RpcRequestResults {
      * @summary `trackClientEvent` method result
      */
     type trackClientEvent = true;
+    /**
+     * @summary `requestPairingByUserId` method result
+     * @since 0.7.0
+     */
+    type requestPairingByUserId = {
+        pairingToken: string;
+    };
+    /**
+     * @summary `requestPairingByTelegramLogin` method result
+     * @since 0.7.0
+     */
+    type requestPairingByTelegramLogin = {
+        pairingToken: string;
+    };
 }
 /**
  * @summary The Grindery RPC API wrapper class

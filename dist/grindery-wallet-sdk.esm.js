@@ -649,6 +649,7 @@ var SdkStorage = /*#__PURE__*/function () {
 
 /**
  * @summary The Grindery RPC API method names
+ * @updated 0.7.0 Added `requestPairingByUserId` and `requestPairingByTelegramLogin` methods
  */
 var RpcMethodNames;
 (function (RpcMethodNames) {
@@ -659,6 +660,16 @@ var RpcMethodNames;
   RpcMethodNames["disconnect"] = "disconnect";
   RpcMethodNames["getUserWalletAddress"] = "getUserWalletAddress";
   RpcMethodNames["trackClientEvent"] = "trackClientEvent";
+  /**
+   * Server side method
+   * @since 0.7.0
+   */
+  RpcMethodNames["requestPairingByUserId"] = "requestPairingByUserId";
+  /**
+   * Server side method
+   * @since 0.7.0
+   */
+  RpcMethodNames["requestPairingByTelegramLogin"] = "requestPairingByTelegramLogin";
 })(RpcMethodNames || (RpcMethodNames = {}));
 /**
  * @summary The Grindery RPC API wrapper class
@@ -1943,7 +1954,97 @@ var WalletSDK = /*#__PURE__*/function () {
         _this2.provider.on(ProviderEvents.pair, _this2.handlePairing);
       }, 0);
     }
-  };
+  }
+  /**
+   * @summary Requests pairing by telegram login info
+   * @public
+   * @since 0.7.0
+   * @param {string} appSecret The application secret. Obtained in the Grindery bot by the dApp developer. Required. Must be kept secret.
+   * @param {TelegramLoginInfo} telegramLoginInfo The user's Telegram login info. Required.
+   * @param {string} [clientId] The client ID. Optional. Unique identifier of the client device.
+   */;
+  _proto.requestPairingByTelegramLogin =
+  /*#__PURE__*/
+  function () {
+    var _requestPairingByTelegramLogin = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8(appSecret, telegramLoginInfo, clientId) {
+      var rpc, pairingRequest;
+      return _regeneratorRuntime().wrap(function _callee8$(_context8) {
+        while (1) switch (_context8.prev = _context8.next) {
+          case 0:
+            _context8.prev = 0;
+            rpc = new Rpc(this.config);
+            if (this.config.appId) {
+              _context8.next = 4;
+              break;
+            }
+            throw new Error('App ID is required');
+          case 4:
+            _context8.next = 6;
+            return rpc.sendRpcApiRequest(RpcMethodNames.requestPairingByTelegramLogin, {
+              appId: this.config.appId,
+              clientId: clientId || this.storage.getValue(SdkStorageKeys.clientId),
+              appSecret: appSecret,
+              telegramLoginInfo: telegramLoginInfo
+            });
+          case 6:
+            pairingRequest = _context8.sent;
+            this.storage.setValue(SdkStorageKeys.pairingToken, pairingRequest.pairingToken);
+            this.provider.restoreConnection();
+            _context8.next = 14;
+            break;
+          case 11:
+            _context8.prev = 11;
+            _context8.t0 = _context8["catch"](0);
+            throw new Error(_context8.t0 instanceof Error ? _context8.t0.message : 'Failed to request pairing by telegram login');
+          case 14:
+          case "end":
+            return _context8.stop();
+        }
+      }, _callee8, this, [[0, 11]]);
+    }));
+    function requestPairingByTelegramLogin(_x5, _x6, _x7) {
+      return _requestPairingByTelegramLogin.apply(this, arguments);
+    }
+    return requestPairingByTelegramLogin;
+  }()
+  /**
+   * @summary Sends a request to the Grindery Wallet JSON-RPC API
+   * @public
+   * @since 0.7.0
+   * @param {string} method Wallet API method name
+   * @param {object} params Wallet API method params
+   * @returns {T} The result field of the JSON-RPC API request
+   */
+  ;
+  _proto.sendWalletApiRequest =
+  /*#__PURE__*/
+  function () {
+    var _sendWalletApiRequest = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee9(method, params) {
+      var api;
+      return _regeneratorRuntime().wrap(function _callee9$(_context9) {
+        while (1) switch (_context9.prev = _context9.next) {
+          case 0:
+            api = new WalletAPI();
+            _context9.prev = 1;
+            _context9.next = 4;
+            return api.sendApiRequest(method, params);
+          case 4:
+            return _context9.abrupt("return", _context9.sent);
+          case 7:
+            _context9.prev = 7;
+            _context9.t0 = _context9["catch"](1);
+            throw new Error(_context9.t0 instanceof Error ? _context9.t0.message : 'Failed to send wallet API request');
+          case 10:
+          case "end":
+            return _context9.stop();
+        }
+      }, _callee9, null, [[1, 7]]);
+    }));
+    function sendWalletApiRequest(_x8, _x9) {
+      return _sendWalletApiRequest.apply(this, arguments);
+    }
+    return sendWalletApiRequest;
+  }();
   /**
    * @summary Gets the Grindery Wallet ethereum provider
    * @returns {Provider} The Grindery Wallet ethereum provider
